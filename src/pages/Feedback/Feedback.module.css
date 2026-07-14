@@ -1,0 +1,50 @@
+.page {
+  min-height: 100vh;
+  background: var(--white);
+}
+
+.content {
+  padding: 16px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--dark);
+  line-height: 1.4;
+}
+
+.descSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.descLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.descField {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--dark);
+  resize: none;
+  font-family: inherit;
+  outline: none;
+}
+
+.descField::placeholder {
+  color: var(--text-muted);
+}
+
+.descField:focus {
+  border-color: var(--primary);
+}

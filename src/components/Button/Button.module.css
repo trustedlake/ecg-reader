@@ -1,0 +1,37 @@
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  padding: 0 24px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.button:active {
+  opacity: 0.85;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.primary {
+  background: var(--secondary);
+  color: var(--white);
+}
+
+.outline {
+  background: var(--white);
+  color: var(--dark);
+  border: 1px solid var(--border);
+}
+
+.text {
+  background: none;
+  color: var(--primary);
+  height: auto;
+  padding: 0;
+}

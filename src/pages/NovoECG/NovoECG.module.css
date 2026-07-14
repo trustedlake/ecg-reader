@@ -1,0 +1,63 @@
+.page {
+  min-height: 100vh;
+  background: var(--white);
+}
+
+.content {
+  padding: 16px 24px 32px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--dark);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.cameraArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 320px;
+  border: 2px dashed var(--text-muted);
+  border-radius: 12px;
+  background: #e8e8e8;
+  margin-bottom: 24px;
+}
+
+.cameraButton {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.cameraIcon {
+  color: var(--white);
+  font-size: 34px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.cameraLabel {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.cameraSub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.actions {
+  margin-top: 16px;
+}

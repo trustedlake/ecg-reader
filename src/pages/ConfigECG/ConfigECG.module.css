@@ -1,0 +1,32 @@
+.page {
+  min-height: 100vh;
+  background: var(--white);
+}
+
+.content {
+  padding: 16px 24px 32px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--dark);
+  line-height: 1.4;
+  margin-bottom: 24px;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.chipSection {
+  margin-bottom: 32px;
+}
+
+.actions {
+  margin-top: 32px;
+}
