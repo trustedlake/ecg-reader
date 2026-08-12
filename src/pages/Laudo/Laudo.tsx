@@ -1,19 +1,172 @@
-import { useNavigate } from 'react-router-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import ParamCard from '../../components/ParamCard/ParamCard'
 import Button from '../../components/Button/Button'
+import { useAuth } from '../../context/AuthContext'
+import { useExamDraft } from '../../context/ExamDraftContext'
+import { apiFetch } from '../../lib/api'
 import styles from './Laudo.module.css'
 
-const params = [
-  { label: 'Frequência Cardíaca', value: '76 bpm' },
-  { label: 'Intervalo PR', value: '152 ms' },
-  { label: 'Duração QRS', value: '98 ms' },
-  { label: 'Intervalo QT', value: '386 ms' },
-  { label: 'QTc (Bazett)', value: '412 ms', color: '#4caf50' },
-  { label: 'Eixo Cardíaco', value: '+62°' },
-]
+interface Ritmo {
+  ritmo: string
+  fc_bpm: number
+}
+
+interface ReportResponse {
+  id: string
+  attempt_id: string
+  ritmo: Ritmo | null
+  eixo_graus: number | null
+  sokolow_mm: number | null
+  achados: unknown
+  conclusao: string | null
+  confiabilidade: string | null
+  versao_codigo: string
+  created_at: string
+  imagem_original_url: string | null
+  overlay_trace_url: string | null
+  overlay_signal_url: string | null
+}
+
+interface Attempt {
+  id: string
+  exam_id: string
+  status: string
+  image_type: string
+  fidelidade: string
+  created_at: string
+  updated_at: string
+  original_url: string | null
+  overlay_trace_url: string | null
+  overlay_signal_url: string | null
+  report: {
+    id: string
+    attempt_id: string
+    ritmo: Ritmo | null
+    eixo_graus: number | null
+    sokolow_mm: number | null
+    achados: unknown
+    conclusao: string | null
+    confiabilidade: string | null
+    versao_codigo: string
+    created_at: string
+  } | null
+}
+
+interface ExamDetail {
+  id: string
+  status: string
+  attempts: Attempt[]
+}
 
 export default function Laudo() {
   const navigate = useNavigate()
+  const { examId: examIdParam } = useParams<{ examId: string }>()
+  const { token } = useAuth()
+  const { examId, attemptId, reset } = useExamDraft()
+
+  const isViewMode = examIdParam !== undefined
+
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useState<ReportResponse | null>(null)
+  const [notConcluded, setNotConcluded] = useState<string | null>(null)
+  const startedRef = useRef(false)
+
+  const runApprove = useCallback(async () => {
+    if (!examId || !attemptId || !token) return
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await apiFetch<ReportResponse>(
+        `/api/exams/${examId}/attempts/${attemptId}/aprovar/`,
+        { method: 'POST', token },
+      )
+      setResult(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Falha ao gerar o laudo.')
+    } finally {
+      setLoading(false)
+    }
+  }, [examId, attemptId, token])
+
+  const runFetchExisting = useCallback(async () => {
+    if (!examIdParam || !token) return
+    setLoading(true)
+    setError(null)
+    setNotConcluded(null)
+    try {
+      const exam = await apiFetch<ExamDetail>(`/api/exams/${examIdParam}`, { token })
+      const concluded = exam.attempts
+        .filter((a) => a.report !== null)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      if (concluded.length === 0) {
+        setNotConcluded(`Status atual: ${exam.status}`)
+        return
+      }
+      const attempt = concluded[0]
+      if (!attempt.report) return
+      const report = attempt.report
+      setResult({
+        id: report.id,
+        attempt_id: report.attempt_id,
+        ritmo: report.ritmo,
+        eixo_graus: report.eixo_graus,
+        sokolow_mm: report.sokolow_mm,
+        achados: report.achados,
+        conclusao: report.conclusao,
+        confiabilidade: report.confiabilidade,
+        versao_codigo: report.versao_codigo,
+        created_at: report.created_at,
+        imagem_original_url: attempt.original_url,
+        overlay_trace_url: attempt.overlay_trace_url,
+        overlay_signal_url: attempt.overlay_signal_url,
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Falha ao carregar o laudo.')
+    } finally {
+      setLoading(false)
+    }
+  }, [examIdParam, token])
+
+  const run = isViewMode ? runFetchExisting : runApprove
+
+  useEffect(() => {
+    if (startedRef.current) return
+    startedRef.current = true
+    void run()
+  }, [run])
+
+  function handleRetry() {
+    startedRef.current = true
+    void run()
+  }
+
+  function handleSave() {
+    if (!isViewMode) {
+      reset()
+    }
+    navigate('/dashboard')
+  }
+
+  if (!isViewMode && (!examId || !attemptId)) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.headerRow}>
+          <h1 className={styles.title}>Laudo</h1>
+          <button className={styles.close} onClick={() => navigate('/dashboard')}>
+            ✕
+          </button>
+        </div>
+        <div className={styles.content}>
+          <p className={styles.statusText}>Nenhum exame em andamento.</p>
+          <Button fullWidth onClick={() => navigate('/novo-ecg')}>
+            Iniciar novo ECG
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.page}>
@@ -25,52 +178,95 @@ export default function Laudo() {
       </div>
 
       <div className={styles.content}>
-        <div className={styles.patientCard}>
-          <span className={styles.patientName}>Carlos Oliveira</span>
-          <span className={styles.patientInfo}>68 anos • Masculino • 08 Jun 2026 09:23</span>
-        </div>
-
-        <div className={styles.imageArea}>
-          <div className={styles.imageBox}>
-            <span className={styles.detectedLabel}>Imagem Detectada</span>
-            <span className={styles.checkIcon}>✓</span>
-          </div>
-          <span className={styles.imageHint}>Clique na imagem para ampliá-la</span>
-        </div>
-
-        <h2 className={styles.sectionTitle}>Parâmetros</h2>
-
-        <div className={styles.paramsGrid}>
-          {params.slice(0, 2).map((p) => (
-            <div key={p.label} className={styles.paramCard}>
-              <ParamCard label={p.label} value={p.value} color={p.color} />
+        {loading && (
+          <>
+            <div className={styles.imageArea}>
+              <div className={styles.imageBox}>
+                <span className={styles.detectedLabel}>Gerando laudo...</span>
+              </div>
             </div>
-          ))}
-          {params.slice(2, 4).map((p) => (
-            <div key={p.label} className={styles.paramCard}>
-              <ParamCard label={p.label} value={p.value} color={p.color} />
+            <Button fullWidth disabled>
+              Confirmar e Continuar
+            </Button>
+          </>
+        )}
+
+        {error && !loading && (
+          <>
+            <div className={styles.imageArea}>
+              <div className={styles.imageBox}>
+                <span className={styles.detectedLabel}>{error}</span>
+              </div>
             </div>
-          ))}
-          {params.slice(4).map((p) => (
-            <div key={p.label} className={styles.paramCard}>
-              <ParamCard label={p.label} value={p.value} color={p.color} />
+            <Button fullWidth onClick={handleRetry}>
+              Tentar novamente
+            </Button>
+          </>
+        )}
+
+        {notConcluded && !loading && (
+          <p className={styles.statusText}>{notConcluded}</p>
+        )}
+
+        {result && !loading && (
+          <>
+            <div className={styles.imageArea}>
+              <div className={styles.imageBox}>
+                {result.imagem_original_url ? (
+                  <img
+                    className={styles.originalImg}
+                    src={result.imagem_original_url}
+                    alt="Imagem original do ECG"
+                  />
+                ) : (
+                  <span className={styles.detectedLabel}>Imagem indisponível</span>
+                )}
+              </div>
+              <span className={styles.imageHint}>Clique na imagem para ampliá-la</span>
             </div>
-          ))}
-        </div>
 
-        <h2 className={styles.sectionTitle}>Interpretação</h2>
+            <h2 className={styles.sectionTitle}>Parâmetros</h2>
 
-        <div className={styles.interpretCard}>
-          <p className={styles.interpretText}>
-            Ritmo sinusal regular. FC 76 bpm. PR 152 ms, QRS 98 ms, QT 386 ms (QTc 412 ms).
-            Eixo cardíaco +62° (normal). Sem alterações isquêmicas evidentes.
-            Segmento ST e onda T dentro da normalidade.
-          </p>
-        </div>
+            <div className={styles.paramsGrid}>
+              <div className={styles.paramCard}>
+                <ParamCard label="Ritmo" value={result.ritmo?.ritmo ?? '—'} />
+              </div>
+              <div className={styles.paramCard}>
+                <ParamCard label="FC" value={result.ritmo?.fc_bpm != null ? `${result.ritmo.fc_bpm} bpm` : '—'} />
+              </div>
+              <div className={styles.paramCard}>
+                <ParamCard label="Eixo" value={result.eixo_graus != null ? `${result.eixo_graus}°` : '—'} />
+              </div>
+              <div className={styles.paramCard}>
+                <ParamCard label="Sokolow" value={result.sokolow_mm != null ? `${result.sokolow_mm} mm` : '—'} />
+              </div>
+              <div className={styles.paramCard}>
+                <ParamCard label="Confiabilidade" value={result.confiabilidade ?? '—'} />
+              </div>
+            </div>
 
-        <Button fullWidth onClick={() => navigate('/dashboard')}>
-          Salvar Laudo
-        </Button>
+            <h2 className={styles.sectionTitle}>Interpretação</h2>
+
+            <div className={styles.interpretCard}>
+              <p className={styles.interpretText}>
+                {result.conclusao ?? 'Sem conclusão disponível'}
+              </p>
+              {Array.isArray(result.achados) && result.achados.length > 0 && (
+                <ul className={styles.achadosList}>
+                  {result.achados.map((achado, index) => (
+                    <li key={index} className={styles.achadoItem}>
+                      {typeof achado === 'string' ? achado : JSON.stringify(achado)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <Button fullWidth onClick={handleSave}>
+              Salvar Laudo
+            </Button>
+          </>
+        )}
       </div>
     </div>
   )

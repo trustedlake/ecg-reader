@@ -8,11 +8,11 @@ import PosicionarDerivacoes from './pages/PosicionarDerivacoes/PosicionarDerivac
 import AjustesImagem from './pages/AjustesImagem/AjustesImagem'
 import DadosPaciente from './pages/DadosPaciente/DadosPaciente'
 import ECGViewer from './pages/ECGViewer/ECGViewer'
-import ECGViewer2 from './pages/ECGViewer2/ECGViewer2'
 import Laudo from './pages/Laudo/Laudo'
 import PlanosPagamento from './pages/PlanosPagamento/PlanosPagamento'
 import Feedback from './pages/Feedback/Feedback'
 import NotFound from './pages/NotFound/NotFound'
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 
 export default function AppRoutes() {
   return (
@@ -20,17 +20,17 @@ export default function AppRoutes() {
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/dados-cadastrais" element={<DadosCadastrais />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/novo-ecg" element={<NovoECG />} />
-      <Route path="/config-ecg" element={<ConfigECG />} />
-      <Route path="/posicionar-derivacoes" element={<PosicionarDerivacoes />} />
-      <Route path="/ajustes-imagem" element={<AjustesImagem />} />
-      <Route path="/dados-paciente" element={<DadosPaciente />} />
-      <Route path="/ecg-viewer" element={<ECGViewer />} />
-      <Route path="/ecg-viewer-2" element={<ECGViewer2 />} />
-      <Route path="/laudo" element={<Laudo />} />
-      <Route path="/planos" element={<PlanosPagamento />} />
-      <Route path="/feedback" element={<Feedback />} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/novo-ecg" element={<ProtectedRoute><NovoECG /></ProtectedRoute>} />
+      <Route path="/config-ecg" element={<ProtectedRoute><ConfigECG /></ProtectedRoute>} />
+      <Route path="/posicionar-derivacoes" element={<ProtectedRoute><PosicionarDerivacoes /></ProtectedRoute>} />
+      <Route path="/ajustes-imagem" element={<ProtectedRoute><AjustesImagem /></ProtectedRoute>} />
+      <Route path="/dados-paciente" element={<ProtectedRoute><DadosPaciente /></ProtectedRoute>} />
+      <Route path="/ecg-viewer" element={<ProtectedRoute><ECGViewer /></ProtectedRoute>} />
+      <Route path="/laudo" element={<ProtectedRoute><Laudo /></ProtectedRoute>} />
+      <Route path="/laudo/:examId" element={<ProtectedRoute><Laudo /></ProtectedRoute>} />
+      <Route path="/planos" element={<ProtectedRoute><PlanosPagamento /></ProtectedRoute>} />
+      <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )

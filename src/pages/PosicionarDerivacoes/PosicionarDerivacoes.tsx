@@ -8,13 +8,14 @@ interface FormatOption {
   value: string
   label: string
   id: string
+  disabled?: boolean
 }
 
 const options: FormatOption[] = [
   { value: '3x4', label: '3×4 Derivações', id: 'A' },
-  { value: '3x4+dii', label: '3×4 Derivações + DII Longo', id: 'B' },
-  { value: '6x2', label: '6×2 Derivações', id: 'C' },
-  { value: '12x1', label: '12×1 Derivações', id: 'D' },
+  { value: '3x4+dii', label: '3×4 Derivações + DII Longo', id: 'B', disabled: true },
+  { value: '6x2', label: '6×2 Derivações', id: 'C', disabled: true },
+  { value: '12x1', label: '12×1 Derivações', id: 'D', disabled: true },
 ]
 
 export default function PosicionarDerivacoes() {
@@ -29,7 +30,8 @@ export default function PosicionarDerivacoes() {
         {options.map((opt) => (
           <button
             key={opt.value}
-            className={`${styles.card} ${selected === opt.value ? styles.cardSelected : ''}`}
+            disabled={opt.disabled}
+            className={`${styles.card} ${selected === opt.value ? styles.cardSelected : ''} ${opt.disabled ? styles.cardDisabled : ''}`}
             onClick={() => setSelected(opt.value)}
           >
             <div className={styles.paperPreview}>

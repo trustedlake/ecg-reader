@@ -31,6 +31,16 @@
   margin-bottom: 24px;
 }
 
+.chipSection {
+  margin-bottom: 8px;
+}
+
+.error {
+  font-size: 14px;
+  color: #d32f2f;
+  margin-top: 16px;
+}
+
 .actions {
   margin-top: 40px;
 }

@@ -27,6 +27,12 @@
   border-color: var(--neutral);
 }
 
+.cardDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .paperPreview {
   width: 108px;
   height: 90px;

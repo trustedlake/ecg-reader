@@ -1,10 +1,32 @@
+import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Input from '../../components/Input/Input'
 import Button from '../../components/Button/Button'
+import { useAuth } from '../../context/AuthContext'
 import styles from './Login.module.css'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { login } = useAuth()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+    setError(null)
+    setLoading(true)
+    try {
+      await login(email, password)
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Não foi possível entrar. Tente novamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -17,14 +39,30 @@ export default function Login() {
       <h1 className={styles.title}>ECG Reader</h1>
       <p className={styles.subtitle}>Leitura e análise de ECG</p>
 
-      <div className={styles.form}>
-        <Input label="CRM ou Email da Faculdade" />
-        <Input label="Senha" type="password" />
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <Input
+          label="CRM ou Email da Faculdade"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          autoComplete="email"
+        />
+        <Input
+          label="Senha"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="current-password"
+        />
 
-        <Button fullWidth onClick={() => navigate('/dashboard')}>
-          Entrar
+        {error && <p className={styles.error}>{error}</p>}
+
+        <Button fullWidth type="submit" disabled={loading}>
+          {loading ? 'Entrando...' : 'Entrar'}
         </Button>
-      </div>
+      </form>
 
       <button className={styles.signupLink} onClick={() => navigate('/dados-cadastrais')}>
         Criar nova conta

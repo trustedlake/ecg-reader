@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
 import CheckboxGroup from '../../components/CheckboxGroup/CheckboxGroup'
 import Button from '../../components/Button/Button'
+import { useAuth } from '../../context/AuthContext'
+import { useExamDraft } from '../../context/ExamDraftContext'
+import { apiFetch } from '../../lib/api'
 import styles from './Feedback.module.css'
 
 const options = [
@@ -15,7 +18,33 @@ const options = [
 
 export default function Feedback() {
   const navigate = useNavigate()
+  const { token } = useAuth()
+  const { attemptId } = useExamDraft()
   const [selected, setSelected] = useState<string[]>([])
+  const [description, setDescription] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSend() {
+    setError(null)
+    if (!attemptId) {
+      setError('Nenhuma tentativa associada')
+      return
+    }
+    setLoading(true)
+    try {
+      await apiFetch(`/api/attempts/${attemptId}/feedback/`, {
+        method: 'POST',
+        token: token ?? undefined,
+        body: JSON.stringify({ issues: selected, description }),
+      })
+      navigate(-1)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Falha ao enviar o feedback.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -28,11 +57,19 @@ export default function Feedback() {
 
         <div className={styles.descSection}>
           <span className={styles.descLabel}>Descreva o problema (opcional)</span>
-          <textarea className={styles.descField} placeholder="Descreva aqui..." rows={4} />
+          <textarea
+            className={styles.descField}
+            placeholder="Descreva aqui..."
+            rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </div>
 
-        <Button fullWidth onClick={() => navigate(-1)}>
-          Enviar
+        {error && <p className={styles.error}>{error}</p>}
+
+        <Button fullWidth disabled={loading} onClick={handleSend}>
+          {loading ? 'Enviando...' : 'Enviar'}
         </Button>
       </div>
     </div>

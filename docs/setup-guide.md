@@ -5,7 +5,6 @@
 - Node.js >= 20
 - npm >= 9
 - Docker (optional, for PostgreSQL)
-- GCP SDK (optional, for infrastructure)
 
 ## Clone & Install
 
@@ -52,10 +51,6 @@ Open [http://localhost:5173](http://localhost:5173).
 ```
 leitor-ecg/
 ├── apps/                  # Application builds
-├── infrastructure/
-│   ├── terraform/         # GCP Infrastructure as Code
-│   ├── database/          # Migrations and schemas
-│   └── scripts/           # Deploy and utility scripts
 ├── docs/                  # Documentation
 ├── src/                   # React application
 ├── public/                # Static assets
