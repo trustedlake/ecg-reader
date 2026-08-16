@@ -11,6 +11,7 @@ import ECGViewer from './pages/ECGViewer/ECGViewer'
 import Laudo from './pages/Laudo/Laudo'
 import PlanosPagamento from './pages/PlanosPagamento/PlanosPagamento'
 import Feedback from './pages/Feedback/Feedback'
+import UploadECG from './pages/UploadECG/UploadECG'
 import NotFound from './pages/NotFound/NotFound'
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 
@@ -31,6 +32,7 @@ export default function AppRoutes() {
       <Route path="/laudo/:examId" element={<ProtectedRoute><Laudo /></ProtectedRoute>} />
       <Route path="/planos" element={<ProtectedRoute><PlanosPagamento /></ProtectedRoute>} />
       <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
+      <Route path="/upload" element={<ProtectedRoute><UploadECG /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
