@@ -319,15 +319,6 @@ export default function UploadECG() {
         <Modal open={cameraOpen} onClose={closeCamera}>
           <button
             type="button"
-            className={styles.cameraSwitch}
-            onClick={switchCamera}
-            disabled={!!cameraError}
-            aria-label="Trocar câmera"
-          >
-            ⇄
-          </button>
-          <button
-            type="button"
             className={styles.cameraClose}
             onClick={closeCamera}
             aria-label="Fechar câmera"
@@ -339,7 +330,18 @@ export default function UploadECG() {
             <p className={styles.error}>{cameraError}</p>
           ) : (
             <>
-              <video ref={videoRef} className={styles.cameraVideo} autoPlay playsInline muted />
+              <div className={styles.cameraVideoWrap}>
+                <video ref={videoRef} className={styles.cameraVideo} autoPlay playsInline muted />
+                <button
+                  type="button"
+                  className={styles.cameraSwitch}
+                  onClick={switchCamera}
+                  disabled={!!cameraError}
+                  aria-label="Trocar câmera"
+                >
+                  ⇄
+                </button>
+              </div>
               <p className={styles.cameraHint}>Posicione o ECG no enquadramento e toque em Capturar.</p>
             </>
           )}

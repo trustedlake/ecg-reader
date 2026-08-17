@@ -101,10 +101,14 @@
   margin-bottom: 8px;
 }
 
+.cameraVideoWrap {
+  position: relative;
+}
+
 .cameraSwitch {
   position: absolute;
   top: 12px;
-  left: 12px;
+  right: 12px;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -151,6 +155,7 @@
 }
 
 .cameraVideo {
+  display: block;
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
