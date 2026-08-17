@@ -88,7 +88,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <p className={styles.greeting}>Olá, Dr. Silva</p>
+      <p className={styles.greeting}>Olá, {user?.name}</p>
 
       {hasExams && (
         <div className={styles.searchBar}>
