@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PatientCard from '../../components/PatientCard/PatientCard'
 import SideMenu from '../../components/SideMenu/SideMenu'
 import PopupEmBreve from '../../modals/PopupEmBreve/PopupEmBreve'
@@ -40,6 +40,7 @@ const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { token, user } = useAuth()
   const profileInitial = user?.name?.trim()?.[0]?.toUpperCase() ?? ''
   const [exams, setExams] = useState<Exam[] | null>(null)
@@ -47,6 +48,14 @@ export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [emBreveOpen, setEmBreveOpen] = useState(false)
   const hasExams = exams !== null && exams.length > 0
+  const [successMessage, setSuccessMessage] = useState<string | null>(
+    (location.state as { savedMessage?: string } | null)?.savedMessage ?? null,
+  )
+
+  function dismissSuccessMessage() {
+    setSuccessMessage(null)
+    navigate('.', { replace: true, state: {} })
+  }
 
   function handleNovoExame() {
     if (user?.is_admin) {
@@ -55,6 +64,12 @@ export default function Dashboard() {
       setEmBreveOpen(true)
     }
   }
+
+  useEffect(() => {
+    if (!successMessage) return
+    const timer = setTimeout(dismissSuccessMessage, 3500)
+    return () => clearTimeout(timer)
+  }, [successMessage])
 
   useEffect(() => {
     let cancelled = false
@@ -74,6 +89,14 @@ export default function Dashboard() {
 
   return (
     <div className={styles.page}>
+      {successMessage && (
+        <div className={styles.successBanner}>
+          <span>{successMessage}</span>
+          <button className={styles.successBannerClose} onClick={dismissSuccessMessage}>
+            ✕
+          </button>
+        </div>
+      )}
       <div className={styles.topMenu} onClick={() => setMenuOpen(true)}>
         <div className={styles.logoGroup}>
           <div className={styles.logoIcon}>

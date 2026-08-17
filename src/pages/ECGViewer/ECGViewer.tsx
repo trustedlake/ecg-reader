@@ -114,10 +114,6 @@ export default function ECGViewer() {
             </Button>
           </>
         )}
-
-        <button className={styles.feedbackLink} onClick={() => navigate('/feedback')}>
-          Informar problema na leitura
-        </button>
       </div>
     </div>
   )

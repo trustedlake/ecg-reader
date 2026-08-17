@@ -5,6 +5,7 @@ import Button from '../../components/Button/Button'
 import { useAuth } from '../../context/AuthContext'
 import { useExamDraft } from '../../context/ExamDraftContext'
 import { apiFetch } from '../../lib/api'
+import { formatNumber } from '../../lib/format'
 import styles from './Laudo.module.css'
 
 interface Ritmo {
@@ -146,8 +147,12 @@ export default function Laudo() {
     if (!isViewMode) {
       reset()
     }
-    navigate('/dashboard')
+    navigate('/dashboard', { state: { savedMessage: 'Seu exame foi salvo!' } })
   }
+
+  const fcBpm = formatNumber(result?.ritmo?.fc_bpm, 0)
+  const eixoGraus = formatNumber(result?.eixo_graus, 0)
+  const sokolowMm = formatNumber(result?.sokolow_mm, 1)
 
   if (!isViewMode && (!examId || !attemptId)) {
     return (
@@ -232,13 +237,13 @@ export default function Laudo() {
                 <ParamCard label="Ritmo" value={result.ritmo?.ritmo ?? '—'} />
               </div>
               <div className={styles.paramCard}>
-                <ParamCard label="FC" value={result.ritmo?.fc_bpm != null ? `${result.ritmo.fc_bpm} bpm` : '—'} />
+                <ParamCard label="FC" value={fcBpm != null ? `${fcBpm} bpm` : '—'} />
               </div>
               <div className={styles.paramCard}>
-                <ParamCard label="Eixo" value={result.eixo_graus != null ? `${result.eixo_graus}°` : '—'} />
+                <ParamCard label="Eixo" value={eixoGraus != null ? `${eixoGraus}°` : '—'} />
               </div>
               <div className={styles.paramCard}>
-                <ParamCard label="Sokolow" value={result.sokolow_mm != null ? `${result.sokolow_mm} mm` : '—'} />
+                <ParamCard label="Sokolow" value={sokolowMm != null ? `${sokolowMm} mm` : '—'} />
               </div>
               <div className={styles.paramCard}>
                 <ParamCard label="Confiabilidade" value={result.confiabilidade ?? '—'} />
@@ -263,7 +268,7 @@ export default function Laudo() {
             </div>
 
             <Button fullWidth onClick={handleSave}>
-              Salvar Laudo
+              Concluir
             </Button>
           </>
         )}
