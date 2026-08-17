@@ -64,3 +64,9 @@ leitor-ecg/
 | `npm run dev` | Start Vite dev server |
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build |
+
+> **Deploy pra prod (S3+CloudFront, `app.leitorecg.com.br`)**: `npm run build`
+> usa `.env` por padrão, então crie um `.env.production` local (gitignored)
+> com `VITE_API_BASE_URL=https://d1i155fprtk4at.cloudfront.net` (o proxy
+> HTTPS do ecg-backend — HTTP puro dá mixed-content block) antes de buildar
+> pra deploy, senão o build embarca a URL do seu `.env` de dev local.
