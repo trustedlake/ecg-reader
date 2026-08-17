@@ -8,6 +8,7 @@ import { apiFetch } from '../../lib/api'
 import styles from './UploadECG.module.css'
 
 type Status = 'idle' | 'uploading' | 'review' | 'confirming' | 'done' | 'error'
+type FacingMode = 'environment' | 'user'
 
 interface Selected {
   file: File
@@ -35,6 +36,7 @@ export default function UploadECG() {
   const [errorMsg, setErrorMsg] = useState('')
   const [cameraOpen, setCameraOpen] = useState(false)
   const [cameraError, setCameraError] = useState('')
+  const [facingMode, setFacingMode] = useState<FacingMode>('environment')
   const galleryInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -72,14 +74,25 @@ export default function UploadECG() {
     })
   }
 
-  async function openCamera() {
+  async function openCamera(mode: FacingMode = facingMode) {
     setCameraError('')
     setCameraOpen(true)
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
         throw new Error('unsupported')
       }
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      let stream: MediaStream
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: mode } },
+        })
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'OverconstrainedError') {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true })
+        } else {
+          throw err
+        }
+      }
       streamRef.current = stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
@@ -95,6 +108,14 @@ export default function UploadECG() {
         setCameraError('Não foi possível acessar a câmera. Tente novamente ou escolha da galeria.')
       }
     }
+  }
+
+  async function switchCamera() {
+    const next: FacingMode = facingMode === 'environment' ? 'user' : 'environment'
+    setFacingMode(next)
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+    await openCamera(next)
   }
 
   function closeCamera() {
@@ -244,7 +265,7 @@ export default function UploadECG() {
         <p className={styles.subtitle}>Tire uma foto ou escolha da galeria. Pode enviar várias de uma vez.</p>
 
         <div className={styles.actionsRow}>
-          <Button variant="outline" fullWidth onClick={openCamera}>
+          <Button variant="outline" fullWidth onClick={() => openCamera()}>
             Tirar foto
           </Button>
           <Button variant="outline" fullWidth onClick={() => galleryInputRef.current?.click()}>
@@ -296,6 +317,15 @@ export default function UploadECG() {
         <canvas ref={canvasRef} className={styles.hiddenInput} />
 
         <Modal open={cameraOpen} onClose={closeCamera}>
+          <button
+            type="button"
+            className={styles.cameraSwitch}
+            onClick={switchCamera}
+            disabled={!!cameraError}
+            aria-label="Trocar câmera"
+          >
+            ⇄
+          </button>
           <button
             type="button"
             className={styles.cameraClose}

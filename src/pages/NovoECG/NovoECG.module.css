@@ -31,6 +31,7 @@
   border-radius: 12px;
   background: #e8e8e8;
   margin-bottom: 24px;
+  cursor: pointer;
 }
 
 .cameraButton {
@@ -74,4 +75,14 @@
 
 .actions {
   margin-top: 16px;
+}
+
+.retakeButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
 }
