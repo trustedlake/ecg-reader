@@ -4,7 +4,7 @@
 
 - Node.js >= 20
 - npm >= 9
-- Docker (optional, for PostgreSQL)
+- Docker (optional, for PostgreSQL)p
 
 ## Clone & Install
 
