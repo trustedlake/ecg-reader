@@ -21,5 +21,8 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), driveUploadDevMiddleware()],
+    server: {
+      port: 47535,
+    },
   }
 })

@@ -24,6 +24,7 @@ env/
 .terraform/
 *.tfstate
 *.tfstate.*
+plan.out
 crash.log
 crash.*.log
 override.tf

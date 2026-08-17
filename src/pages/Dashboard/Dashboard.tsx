@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PatientCard from '../../components/PatientCard/PatientCard'
+import SideMenu from '../../components/SideMenu/SideMenu'
+import PopupEmBreve from '../../modals/PopupEmBreve/PopupEmBreve'
 import { useAuth } from '../../context/AuthContext'
 import { apiFetch } from '../../lib/api'
 import styles from './Dashboard.module.css'
@@ -38,9 +40,21 @@ const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { token } = useAuth()
+  const { token, user } = useAuth()
+  const profileInitial = user?.name?.trim()?.[0]?.toUpperCase() ?? ''
   const [exams, setExams] = useState<Exam[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [emBreveOpen, setEmBreveOpen] = useState(false)
+  const hasExams = exams !== null && exams.length > 0
+
+  function handleNovoExame() {
+    if (user?.is_admin) {
+      navigate('/novo-ecg')
+    } else {
+      setEmBreveOpen(true)
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -60,18 +74,27 @@ export default function Dashboard() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.headerRow}>
-        <h1 className={styles.brand}>ECG Reader</h1>
+      <div className={styles.topMenu} onClick={() => setMenuOpen(true)}>
+        <div className={styles.logoGroup}>
+          <div className={styles.logoIcon}>
+            <svg viewBox="-2 0 48 28" fill="none">
+              <path d="M0 18h8l4-12 4 20 4-24 4 16 4-8h8l4 8 4 0" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <span className={styles.logoText}>ECG Reader</span>
+        </div>
         <div className={styles.profile}>
-          <span className={styles.profileInitial}>D</span>
+          <span className={styles.profileInitial}>{profileInitial}</span>
         </div>
       </div>
 
       <p className={styles.greeting}>Olá, Dr. Silva</p>
 
-      <div className={styles.searchBar}>
-        <span className={styles.searchPlaceholder}>Buscar paciente ou exame...</span>
-      </div>
+      {hasExams && (
+        <div className={styles.searchBar}>
+          <span className={styles.searchPlaceholder}>Buscar paciente ou exame...</span>
+        </div>
+      )}
 
       <h2 className={styles.sectionTitle}>Exames Recentes</h2>
 
@@ -82,7 +105,9 @@ export default function Dashboard() {
           <p className={styles.emptyText}>Carregando exames...</p>
         ) : exams.length === 0 ? (
           <p className={styles.emptyText}>
-            Nenhum exame ainda — toque em + pra criar o primeiro.
+            Nenhum exame ainda
+            <br />
+            Toque em + pra criar o primeiro.
           </p>
         ) : (
           exams.map((exam) => (
@@ -95,11 +120,18 @@ export default function Dashboard() {
             />
           ))
         )}
+
+        <button className={styles.uploadTempButton} onClick={() => navigate('/upload')}>
+          Upload de arquivos
+        </button>
       </div>
 
-      <button className={styles.fab} onClick={() => navigate('/novo-ecg')}>
+      <button className={styles.fab} onClick={handleNovoExame}>
         +
       </button>
+
+      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <PopupEmBreve open={emBreveOpen} onClose={() => setEmBreveOpen(false)} />
     </div>
   )
 }

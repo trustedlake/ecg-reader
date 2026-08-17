@@ -30,7 +30,12 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     mergedHeaders.set('Authorization', `Token ${token}`)
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...rest, headers: mergedHeaders })
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, { ...rest, headers: mergedHeaders })
+  } catch {
+    throw new ApiError(0, 'Servidores estão com problema')
+  }
 
   if (!response.ok) {
     let message = response.statusText
