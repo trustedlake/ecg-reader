@@ -5,8 +5,10 @@ import { apiFetch } from '../lib/api'
 export interface AuthUser {
   id: string
   name: string
+  username: string
   email: string
   crm: string
+  is_admin: boolean
 }
 
 interface LoginResponse {
@@ -18,7 +20,7 @@ interface AuthContextValue {
   token: string | null
   user: AuthUser | null
   isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<void>
   logout: () => void
 }
 
@@ -40,10 +42,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY))
   const [user, setUser] = useState<AuthUser | null>(readStoredUser)
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (username: string, password: string) => {
     const data = await apiFetch<LoginResponse>('/api/auth/login/', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
     })
     setToken(data.token)
     setUser(data.user)

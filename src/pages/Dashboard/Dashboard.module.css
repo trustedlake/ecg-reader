@@ -1,22 +1,49 @@
 .page {
-  min-height: 100vh;
-  padding: 60px 24px 100px;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 24px 0;
   background: var(--white);
 }
 
-.headerRow {
+.topMenu {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  padding: 0 24px 16px;
+  margin: 0 -24px 20px;
+  border-bottom: 1px solid var(--grid-border);
+  cursor: pointer;
 }
 
-.brand {
-  font-size: 24px;
+.logoGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoIcon svg {
+  width: 18px;
+  height: 13px;
+}
+
+.logoText {
+  font-size: 18px;
   font-weight: 700;
   color: var(--dark);
   letter-spacing: -0.5px;
-  line-height: 1.2;
 }
 
 .profile {
@@ -41,6 +68,19 @@
   color: var(--text-muted);
   line-height: 1.4;
   margin-bottom: 16px;
+}
+
+.uploadTempButton {
+  align-self: center;
+  height: 40px;
+  padding: 0 18px;
+  margin-top: 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--secondary);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .searchBar {
@@ -68,9 +108,13 @@
 }
 
 .list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding-bottom: 100px;
 }
 
 .emptyText {

@@ -24,6 +24,7 @@ env/
 .terraform/
 *.tfstate
 *.tfstate.*
+plan.out
 crash.log
 crash.*.log
 override.tf
@@ -51,3 +52,6 @@ Thumbs.db
 .vercel
 .env*
 !.env.example
+
+# Secrets
+.secrets/

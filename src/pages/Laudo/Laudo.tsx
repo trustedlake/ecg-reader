@@ -105,7 +105,7 @@ export default function Laudo() {
         return
       }
       const attempt = concluded[0]
-      if (!attempt.report) return
+      if (!attempt || !attempt.report) return
       const report = attempt.report
       setResult({
         id: report.id,
