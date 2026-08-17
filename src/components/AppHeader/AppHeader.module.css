@@ -1,0 +1,56 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 55px;
+  padding: 0 16px;
+  background: var(--white);
+  border-bottom: 1px solid var(--grid-border);
+  cursor: pointer;
+}
+
+.logoGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoIcon svg {
+  width: 18px;
+  height: 13px;
+}
+
+.logoText {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark);
+  letter-spacing: -0.5px;
+}
+
+.profile {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profileInitial {
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+}

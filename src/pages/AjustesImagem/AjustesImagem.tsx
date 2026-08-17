@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import AppHeader from '../../components/AppHeader/AppHeader'
 import Header from '../../components/Header/Header'
 import Button from '../../components/Button/Button'
 import styles from './AjustesImagem.module.css'
@@ -8,6 +9,7 @@ export default function AjustesImagem() {
 
   return (
     <div className={styles.page}>
+      <AppHeader />
       <Header title="Ajustes da Imagem" />
       <div className={styles.content}>
         <div className={styles.imageArea}>

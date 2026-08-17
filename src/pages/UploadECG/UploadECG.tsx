@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AppHeader from '../../components/AppHeader/AppHeader'
 import Header from '../../components/Header/Header'
 import Button from '../../components/Button/Button'
 import Modal from '../../components/Modal/Modal'
@@ -218,6 +219,7 @@ export default function UploadECG() {
   if (status === 'done') {
     return (
       <div className={styles.page}>
+        <AppHeader />
         <Header title="Upload de arquivos" />
         <div className={styles.content}>
           <div className={styles.confirmCard}>
@@ -236,6 +238,7 @@ export default function UploadECG() {
   if (status === 'review' || status === 'confirming') {
     return (
       <div className={styles.page}>
+        <AppHeader />
         <Header title="Confirmar envio" />
         <div className={styles.content}>
           <p className={styles.subtitle}>Confira as fotos enviadas antes de confirmar.</p>
@@ -260,6 +263,7 @@ export default function UploadECG() {
 
   return (
     <div className={styles.page}>
+      <AppHeader />
       <Header title="Upload de arquivos" />
       <div className={styles.content}>
         <p className={styles.subtitle}>Tire uma foto ou escolha da galeria. Pode enviar várias de uma vez.</p>

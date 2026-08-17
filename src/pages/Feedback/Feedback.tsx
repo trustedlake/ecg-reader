@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AppHeader from '../../components/AppHeader/AppHeader'
 import Header from '../../components/Header/Header'
 import CheckboxGroup from '../../components/CheckboxGroup/CheckboxGroup'
 import Button from '../../components/Button/Button'
@@ -48,6 +49,7 @@ export default function Feedback() {
 
   return (
     <div className={styles.page}>
+      <AppHeader />
       <Header title="Feedback" />
 
       <div className={styles.content}>

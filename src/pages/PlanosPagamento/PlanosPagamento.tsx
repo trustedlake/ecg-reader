@@ -1,3 +1,4 @@
+import AppHeader from '../../components/AppHeader/AppHeader'
 import Header from '../../components/Header/Header'
 import Button from '../../components/Button/Button'
 import styles from './PlanosPagamento.module.css'
@@ -53,6 +54,7 @@ const plans = [
 export default function PlanosPagamento() {
   return (
     <div className={styles.page}>
+      <AppHeader />
       <Header title="Planos de Pagamento" />
 
       <div className={styles.content}>

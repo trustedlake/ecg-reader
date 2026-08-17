@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import AppHeader from '../../components/AppHeader/AppHeader'
 import ParamCard from '../../components/ParamCard/ParamCard'
 import Button from '../../components/Button/Button'
 import { useAuth } from '../../context/AuthContext'
@@ -175,6 +176,7 @@ export default function Laudo() {
 
   return (
     <div className={styles.page}>
+      <AppHeader />
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Laudo</h1>
         <button className={styles.close} onClick={() => navigate('/dashboard')}>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AppHeader from '../../components/AppHeader/AppHeader'
 import Header from '../../components/Header/Header'
 import Button from '../../components/Button/Button'
 import { useAuth } from '../../context/AuthContext'
@@ -69,6 +70,7 @@ export default function ECGViewer() {
 
   return (
     <div className={styles.page}>
+      <AppHeader />
       <Header title="Análise do ECG" showBack />
 
       <div className={styles.content}>

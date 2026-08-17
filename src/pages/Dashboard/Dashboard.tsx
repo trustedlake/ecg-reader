@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import PatientCard from '../../components/PatientCard/PatientCard'
-import SideMenu from '../../components/SideMenu/SideMenu'
+import AppHeader from '../../components/AppHeader/AppHeader'
 import PopupEmBreve from '../../modals/PopupEmBreve/PopupEmBreve'
 import { useAuth } from '../../context/AuthContext'
 import { apiFetch } from '../../lib/api'
@@ -42,10 +42,8 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const location = useLocation()
   const { token, user } = useAuth()
-  const profileInitial = user?.name?.trim()?.[0]?.toUpperCase() ?? ''
   const [exams, setExams] = useState<Exam[] | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [emBreveOpen, setEmBreveOpen] = useState(false)
   const hasExams = exams !== null && exams.length > 0
   const [successMessage, setSuccessMessage] = useState<string | null>(
@@ -97,18 +95,8 @@ export default function Dashboard() {
           </button>
         </div>
       )}
-      <div className={styles.topMenu} onClick={() => setMenuOpen(true)}>
-        <div className={styles.logoGroup}>
-          <div className={styles.logoIcon}>
-            <svg viewBox="-2 0 48 28" fill="none">
-              <path d="M0 18h8l4-12 4 20 4-24 4 16 4-8h8l4 8 4 0" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <span className={styles.logoText}>ECG Reader</span>
-        </div>
-        <div className={styles.profile}>
-          <span className={styles.profileInitial}>{profileInitial}</span>
-        </div>
+      <div className={styles.headerBleed}>
+        <AppHeader />
       </div>
 
       <p className={styles.greeting}>Olá, {user?.name}</p>
@@ -153,7 +141,6 @@ export default function Dashboard() {
         +
       </button>
 
-      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <PopupEmBreve open={emBreveOpen} onClose={() => setEmBreveOpen(false)} />
     </div>
   )

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AppHeader from '../../components/AppHeader/AppHeader'
 import Header from '../../components/Header/Header'
 import Button from '../../components/Button/Button'
 import { useExamDraft } from '../../context/ExamDraftContext'
@@ -23,6 +24,7 @@ export default function NovoECG() {
 
   return (
     <div className={styles.page}>
+      <AppHeader />
       <Header title="Novo ECG" onBack={handleBack} />
 
       <div className={styles.content}>

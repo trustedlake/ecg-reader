@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AppHeader from '../../components/AppHeader/AppHeader'
 import Header from '../../components/Header/Header'
 import Input from '../../components/Input/Input'
 import CheckboxGroup from '../../components/CheckboxGroup/CheckboxGroup'
@@ -110,6 +111,7 @@ export default function DadosPaciente() {
 
   return (
     <div className={styles.page}>
+      <AppHeader />
       <Header title="Dados do Paciente" />
 
       <div className={styles.content}>

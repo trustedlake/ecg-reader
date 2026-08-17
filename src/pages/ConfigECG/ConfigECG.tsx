@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AppHeader from '../../components/AppHeader/AppHeader'
 import Header from '../../components/Header/Header'
 import ChipSelect from '../../components/ChipSelect/ChipSelect'
 import Button from '../../components/Button/Button'
@@ -28,6 +29,7 @@ export default function ConfigECG() {
 
   return (
     <div className={styles.page}>
+      <AppHeader />
       <Header title="Configurações do ECG" />
 
       <div className={styles.content}>
