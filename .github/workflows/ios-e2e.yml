@@ -53,9 +53,13 @@ jobs:
       - name: Build app for iOS Simulator (no code signing)
         working-directory: apps/mobile/ios
         run: |
+          WORKSPACE=$(ls -d *.xcworkspace | head -1)
+          SCHEME=$(xcodebuild -list -workspace "$WORKSPACE" -json | python3 -c "import json,sys; print(json.load(sys.stdin)['workspace']['schemes'][0])")
+          echo "WORKSPACE=$WORKSPACE" >> "$GITHUB_ENV"
+          echo "SCHEME=$SCHEME" >> "$GITHUB_ENV"
           xcodebuild \
-            -workspace LeitorEcg.xcworkspace \
-            -scheme LeitorEcg \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
             -configuration Debug \
             -sdk iphonesimulator \
             -derivedDataPath build \
@@ -71,7 +75,9 @@ jobs:
         run: xcrun simctl addmedia booted apps/mobile/e2e/fixtures/sample-ecg.jpg
 
       - name: Install app on Simulator
-        run: xcrun simctl install booted apps/mobile/ios/build/Build/Products/Debug-iphonesimulator/LeitorEcg.app
+        run: |
+          APP_PATH=$(find apps/mobile/ios/build/Build/Products -name "*.app" -maxdepth 2 | head -1)
+          xcrun simctl install booted "$APP_PATH"
 
       - name: Launch app on Simulator
         run: xcrun simctl launch booted com.ecg.leitorecg
