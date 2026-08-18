@@ -2,28 +2,8 @@
   "name": "leitor-ecg",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "drive:auth": "node scripts/drive-oauth-setup.mjs"
-  },
-  "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
-    "dotenv": "^17.4.2",
-    "formidable": "^3.5.4",
-    "googleapis": "^174.0.1",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vercel/node": "^5.9.5",
-    "@vitejs/plugin-react": "^6.0.3",
-    "react-router-dom": "^7.18.1",
-    "typescript": "^5.7.3",
-    "vite": "^8.1.4"
-  }
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
