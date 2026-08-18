@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import Modal from '../../components/Modal/Modal'
-import { Button, useAuth } from 'shared'
+import { Button, Modal, useAuth } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './UploadECG.module.css'
 

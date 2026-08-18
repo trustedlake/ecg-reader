@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { PatientCard, useAuth } from 'shared'
+import { PatientCard, PopupEmBreve, useAuth } from 'shared'
 import SideMenu from '../../components/SideMenu/SideMenu'
-import PopupEmBreve from '../../modals/PopupEmBreve/PopupEmBreve'
 import { apiFetch } from '../../platform/api'
 import styles from './Dashboard.module.css'
 
