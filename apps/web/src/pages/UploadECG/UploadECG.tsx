@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../../components/nav/AppHeader'
-import { Button, Modal, useAuth } from 'shared'
-import { apiFetch } from '../../platform/api'
+import { Button, confirmUploadBatch, Modal, uploadECGBatch } from 'shared'
+import { apiClient } from '../../platform/api'
 import styles from './UploadECG.module.css'
 
 type Status = 'idle' | 'uploading' | 'review' | 'confirming' | 'done' | 'error'
@@ -12,20 +12,8 @@ interface Selected {
   previewUrl: string
 }
 
-interface UploadBatchFile {
-  file_id: string
-  s3_key: string
-  upload_url: string
-}
-
-interface UploadBatchResponse {
-  batch_id: string
-  files: UploadBatchFile[]
-}
-
 export default function UploadECG() {
   const navigate = useNavigate()
-  const { token } = useAuth()
   const [selected, setSelected] = useState<Selected[]>([])
   const [status, setStatus] = useState<Status>('idle')
   const [batchId, setBatchId] = useState<string | null>(null)
@@ -131,33 +119,16 @@ export default function UploadECG() {
     setErrorMsg('')
 
     try {
-      const batch = await apiFetch<UploadBatchResponse>('/api/uploads/', {
-        method: 'POST',
-        token: token ?? undefined,
-        body: JSON.stringify({
-          files: selected.map((item) => ({
-            filename: item.file.name,
-            content_type: item.file.type,
-          })),
-        }),
-      })
-
-      await Promise.all(
-        batch.files.map((entry, index) => {
-          const file = selected[index]!.file
-          return fetch(entry.upload_url, {
-            method: 'PUT',
-            headers: { 'Content-Type': file.type },
-            body: file,
-          }).then((res) => {
-            if (!res.ok) {
-              throw new Error(`Falha no upload de "${file.name}" (HTTP ${res.status}).`)
-            }
-          })
-        }),
+      const { batchId } = await uploadECGBatch(
+        apiClient,
+        selected.map((item) => ({
+          blob: item.file,
+          filename: item.file.name,
+          contentType: item.file.type,
+        })),
       )
 
-      setBatchId(batch.batch_id)
+      setBatchId(batchId)
       setSentCount(selected.length)
       setStatus('review')
     } catch (err) {
@@ -172,10 +143,7 @@ export default function UploadECG() {
     setErrorMsg('')
 
     try {
-      await apiFetch(`/api/uploads/${batchId}/confirmar/`, {
-        method: 'POST',
-        token: token ?? undefined,
-      })
+      await confirmUploadBatch(apiClient, batchId)
       selected.forEach((item) => URL.revokeObjectURL(item.previewUrl))
       setSelected([])
       setStatus('done')
