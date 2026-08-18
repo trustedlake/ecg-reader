@@ -1,22 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { formatNumber, colors } from 'shared';
+import { StatusBar } from 'expo-status-bar'
+import { NavigationContainer } from '@react-navigation/native'
+import { AuthProvider } from 'shared'
+import { mobileStorageAdapter } from './src/platform/storage'
+import RootNavigator from './src/navigation/RootNavigator'
+
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text style={{ color: colors.primary }}>Open up App.tsx to start working on your app!</Text>
-      <Text>Shared formatNumber test: {formatNumber(1234.567, 2)}</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+    <AuthProvider storage={mobileStorageAdapter} apiBaseUrl={apiBaseUrl!}>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+      <StatusBar style="dark" />
+    </AuthProvider>
+  )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
