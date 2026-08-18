@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
 import Button from '../../components/Button/Button'
-import { useExamDraft } from '../../context/ExamDraftContext'
+import { useExamDraft } from 'shared'
 import styles from './NovoECG.module.css'
 
 export default function NovoECG() {

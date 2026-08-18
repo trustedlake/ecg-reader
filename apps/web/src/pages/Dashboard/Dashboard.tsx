@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import PatientCard from '../../components/PatientCard/PatientCard'
 import SideMenu from '../../components/SideMenu/SideMenu'
 import PopupEmBreve from '../../modals/PopupEmBreve/PopupEmBreve'
-import { useAuth } from '../../context/AuthContext'
-import { apiFetch } from '../../lib/api'
+import { useAuth } from 'shared'
+import { apiFetch } from '../../platform/api'
 import styles from './Dashboard.module.css'
 
 interface Exam {

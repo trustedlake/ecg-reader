@@ -2,9 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
 import Button from '../../components/Button/Button'
-import { useAuth } from '../../context/AuthContext'
-import { useExamDraft } from '../../context/ExamDraftContext'
-import { apiFetch } from '../../lib/api'
+import { useAuth, useExamDraft } from 'shared'
+import { apiFetch } from '../../platform/api'
 import styles from './ECGViewer.module.css'
 
 interface ProcessResponse {

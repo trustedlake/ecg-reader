@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Input from '../../components/Input/Input'
 import Button from '../../components/Button/Button'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from 'shared'
 import styles from './Login.module.css'
 
 export default function Login() {

@@ -1,3 +1,4 @@
+// TODO(mobile): File is a DOM type, won't exist under React Native's tsconfig — revisit when building the mobile upload flow
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 

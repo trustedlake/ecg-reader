@@ -2,10 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import ParamCard from '../../components/ParamCard/ParamCard'
 import Button from '../../components/Button/Button'
-import { useAuth } from '../../context/AuthContext'
-import { useExamDraft } from '../../context/ExamDraftContext'
-import { apiFetch } from '../../lib/api'
-import { formatNumber } from '../../lib/format'
+import { useAuth, useExamDraft, formatNumber } from 'shared'
+import { apiFetch } from '../../platform/api'
 import styles from './Laudo.module.css'
 
 interface Ritmo {
