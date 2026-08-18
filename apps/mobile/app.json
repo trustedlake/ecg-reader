@@ -8,8 +8,26 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ecg.leitorecg"
+      "bundleIdentifier": "com.ecg.leitorecg",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSExceptionDomains": {
+            "15.229.231.147": {
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        }
+      }
     },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "O app precisa da câmera para fotografar o exame de ECG.",
+          "photosPermission": "O app precisa acessar suas fotos para enviar o exame de ECG."
+        }
+      ]
+    ],
     "android": {
       "package": "com.ecg.leitorecg",
       "adaptiveIcon": {
