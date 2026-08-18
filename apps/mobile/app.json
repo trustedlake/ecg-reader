@@ -8,16 +8,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ecg.leitorecg",
-      "infoPlist": {
-        "NSAppTransportSecurity": {
-          "NSExceptionDomains": {
-            "15.229.231.147": {
-              "NSExceptionAllowsInsecureHTTPLoads": true
-            }
-          }
-        }
-      }
+      "bundleIdentifier": "com.ecg.leitorecg"
     },
     "plugins": [
       [

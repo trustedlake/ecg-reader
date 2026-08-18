@@ -6,10 +6,9 @@ import type { StorageAdapter } from '../storage'
 export interface AuthUser {
   id: string
   name: string
-  username: string
   email: string
   crm: string
-  is_admin: boolean
+  is_admin?: boolean
 }
 
 interface LoginResponse {
@@ -22,7 +21,7 @@ interface AuthContextValue {
   user: AuthUser | null
   isAuthenticated: boolean
   isHydrated: boolean
-  login: (username: string, password: string) => Promise<void>
+  login: (identifier: string, password: string) => Promise<void>
   logout: () => void
 }
 
@@ -78,10 +77,10 @@ export function AuthProvider({ children, storage, apiBaseUrl }: AuthProviderProp
   }, [storage])
 
   const login = useCallback(
-    async (username: string, password: string) => {
+    async (identifier: string, password: string) => {
       const data = await client.apiFetch<LoginResponse>('/api/auth/login/', {
         method: 'POST',
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email: identifier, password }),
       })
       setToken(data.token)
       setUser(data.user)

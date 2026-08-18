@@ -6,7 +6,7 @@ import { Button, Input, colors, useAuth } from 'shared'
 
 export default function LoginScreen() {
   const { login } = useAuth()
-  const [username, setUsername] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -15,7 +15,7 @@ export default function LoginScreen() {
     setError(null)
     setLoading(true)
     try {
-      await login(username, password)
+      await login(identifier, password)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não foi possível entrar. Tente novamente.')
     } finally {
@@ -47,9 +47,9 @@ export default function LoginScreen() {
 
           <View style={styles.form}>
             <Input
-              label="Usuário"
-              value={username}
-              onChangeText={setUsername}
+              label="Usuário ou e-mail"
+              value={identifier}
+              onChangeText={setIdentifier}
               autoComplete="username"
             />
             <Input

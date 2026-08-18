@@ -6,7 +6,7 @@ import styles from './Login.module.css'
 export default function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
-  const [username, setUsername] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -15,7 +15,7 @@ export default function Login() {
     setError(null)
     setLoading(true)
     try {
-      await login(username, password)
+      await login(identifier, password)
       navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não foi possível entrar. Tente novamente.')
@@ -38,9 +38,9 @@ export default function Login() {
 
         <form className={styles.form} onSubmit={(e) => { e.preventDefault(); void handleSubmit() }}>
           <Input
-            label="Usuário"
-            value={username}
-            onChangeText={setUsername}
+            label="Usuário ou e-mail"
+            value={identifier}
+            onChangeText={setIdentifier}
             autoComplete="username"
           />
           <Input
