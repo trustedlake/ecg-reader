@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../../components/Header/Header'
+import AppHeader from '../../components/nav/AppHeader'
 import { Button, CheckboxGroup, useAuth, useExamDraft } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './Feedback.module.css'
@@ -45,7 +45,7 @@ export default function Feedback() {
 
   return (
     <div className={styles.page}>
-      <Header title="Feedback" />
+      <AppHeader title="Feedback" />
 
       <div className={styles.content}>
         <h2 className={styles.sectionTitle}>O que aconteceu?</h2>

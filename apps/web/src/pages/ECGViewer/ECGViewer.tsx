@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../../components/Header/Header'
+import AppHeader from '../../components/nav/AppHeader'
 import { Button, useAuth, useExamDraft } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './ECGViewer.module.css'
@@ -54,7 +54,7 @@ export default function ECGViewer() {
   if (!examId || !attemptId) {
     return (
       <div className={styles.page}>
-        <Header title="Análise do ECG" showBack />
+        <AppHeader title="Análise do ECG" showBack />
         <div className={styles.content}>
           <p className={styles.statusText}>Nenhum exame em andamento.</p>
           <Button fullWidth onPress={() => navigate('/novo-ecg')}>
@@ -67,7 +67,7 @@ export default function ECGViewer() {
 
   return (
     <div className={styles.page}>
-      <Header title="Análise do ECG" showBack />
+      <AppHeader title="Análise do ECG" showBack />
 
       <div className={styles.content}>
         {loading && (

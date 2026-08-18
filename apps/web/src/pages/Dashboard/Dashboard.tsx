@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { PatientCard, PopupEmBreve, useAuth } from 'shared'
-import SideMenu from '../../components/SideMenu/SideMenu'
+import AppSideMenu from '../../components/nav/AppSideMenu'
 import { apiFetch } from '../../platform/api'
 import styles from './Dashboard.module.css'
 
@@ -151,7 +151,7 @@ export default function Dashboard() {
         +
       </button>
 
-      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <AppSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <PopupEmBreve open={emBreveOpen} onClose={() => setEmBreveOpen(false)} />
     </div>
   )

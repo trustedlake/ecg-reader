@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../../components/Header/Header'
+import AppHeader from '../../components/nav/AppHeader'
 import { Button, Modal, useAuth } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './UploadECG.module.css'
@@ -195,7 +195,7 @@ export default function UploadECG() {
   if (status === 'done') {
     return (
       <div className={styles.page}>
-        <Header title="Upload de arquivos" />
+        <AppHeader title="Upload de arquivos" />
         <div className={styles.content}>
           <div className={styles.confirmCard}>
             <h1 className={styles.confirmTitle}>Obrigado!</h1>
@@ -213,7 +213,7 @@ export default function UploadECG() {
   if (status === 'review' || status === 'confirming') {
     return (
       <div className={styles.page}>
-        <Header title="Confirmar envio" />
+        <AppHeader title="Confirmar envio" />
         <div className={styles.content}>
           <p className={styles.subtitle}>Confira as fotos enviadas antes de confirmar.</p>
 
@@ -237,7 +237,7 @@ export default function UploadECG() {
 
   return (
     <div className={styles.page}>
-      <Header title="Upload de arquivos" />
+      <AppHeader title="Upload de arquivos" />
       <div className={styles.content}>
         <p className={styles.subtitle}>Tire uma foto ou escolha da galeria. Pode enviar várias de uma vez.</p>
 

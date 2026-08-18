@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../../components/Header/Header'
+import AppHeader from '../../components/nav/AppHeader'
 import { Button, useExamDraft } from 'shared'
 import styles from './NovoECG.module.css'
 
@@ -17,7 +17,7 @@ export default function NovoECG() {
 
   return (
     <div className={styles.page}>
-      <Header title="Novo ECG" />
+      <AppHeader title="Novo ECG" />
 
       <div className={styles.content}>
         <h2 className={styles.sectionTitle}>1. Capturar Imagem do ECG</h2>

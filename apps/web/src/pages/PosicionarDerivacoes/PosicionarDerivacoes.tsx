@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../../components/Header/Header'
+import AppHeader from '../../components/nav/AppHeader'
 import { Button } from 'shared'
 import styles from './PosicionarDerivacoes.module.css'
 
@@ -24,7 +24,7 @@ export default function PosicionarDerivacoes() {
 
   return (
     <div className={styles.page}>
-      <Header title="Formato do ECG" />
+      <AppHeader title="Formato do ECG" />
 
       <div className={styles.content}>
         {options.map((opt) => (

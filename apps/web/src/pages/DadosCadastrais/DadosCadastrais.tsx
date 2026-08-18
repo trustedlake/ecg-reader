@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import Header from '../../components/Header/Header'
+import AppHeader from '../../components/nav/AppHeader'
 import { Button } from 'shared'
 import styles from './DadosCadastrais.module.css'
 
@@ -22,7 +22,7 @@ export default function DadosCadastrais() {
 
   return (
     <div className={styles.page}>
-      <Header
+      <AppHeader
         title="Dados Cadastrais"
         rightAction={{ label: 'Editar', onClick: () => {} }}
       />

@@ -1,4 +1,4 @@
-import Header from '../../components/Header/Header'
+import AppHeader from '../../components/nav/AppHeader'
 import { Button } from 'shared'
 import styles from './PlanosPagamento.module.css'
 
@@ -53,7 +53,7 @@ const plans = [
 export default function PlanosPagamento() {
   return (
     <div className={styles.page}>
-      <Header title="Planos de Pagamento" />
+      <AppHeader title="Planos de Pagamento" />
 
       <div className={styles.content}>
         {plans.map((plan) => (

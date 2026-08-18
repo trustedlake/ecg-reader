@@ -27,11 +27,15 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: [
         { find: /^react-native$/, replacement: 'react-native-web' },
+        { find: /^react-native-svg$/, replacement: 'react-native-svg/src/index.ts' },
       ],
       extensions: ['.web.tsx', '.web.ts', '.web.js', '.tsx', '.ts', '.js', '.jsx'],
     },
     define: {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    },
+    optimizeDeps: {
+      exclude: ['react-native-svg'],
     },
   }
 })

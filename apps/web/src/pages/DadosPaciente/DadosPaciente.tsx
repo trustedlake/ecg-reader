@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../../components/Header/Header'
+import AppHeader from '../../components/nav/AppHeader'
 import { Button, CheckboxGroup, ChipSelect, Input, useAuth, useExamDraft } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './DadosPaciente.module.css'
@@ -105,7 +105,7 @@ export default function DadosPaciente() {
 
   return (
     <div className={styles.page}>
-      <Header title="Dados do Paciente" />
+      <AppHeader title="Dados do Paciente" />
 
       <div className={styles.content}>
         <h2 className={styles.sectionTitle}>Dados do Paciente</h2>

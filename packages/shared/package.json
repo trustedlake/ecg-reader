@@ -6,7 +6,8 @@
   "types": "src/index.ts",
   "peerDependencies": {
     "react": ">=19.2.0",
-    "react-native": ">=0.80.0"
+    "react-native": ">=0.80.0",
+    "react-native-svg": ">=15.0.0"
   },
   "devDependencies": {
     "react": "^19.2.7"
