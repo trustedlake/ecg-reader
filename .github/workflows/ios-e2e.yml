@@ -1,0 +1,94 @@
+# iOS E2E via Maestro (Simulador iOS, backend de produção)
+#
+# ATENÇÃO: antes da primeira execução, crie o secret no GitHub
+# (Settings -> Secrets and variables -> Actions -> New repository secret):
+#   Nome: QA_MOBILE_PASSWORD
+#   Valor: a senha da conta de teste qa-mobile@ecg.local (QA Mobile CI)
+# Sem esse secret, o login do fluxo Maestro falha.
+#
+# Rodar manualmente: Actions -> "iOS E2E (Maestro)" -> Run workflow.
+
+name: iOS E2E (Maestro)
+
+on:
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - "packages/shared/**"
+      - ".github/workflows/ios-e2e.yml"
+  workflow_dispatch:
+
+jobs:
+  ios-e2e:
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Java (Maestro)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Prebuild iOS project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform ios
+
+      - name: Build app for iOS Simulator (no code signing)
+        working-directory: apps/mobile/ios
+        run: |
+          xcodebuild \
+            -workspace LeitorEcg.xcworkspace \
+            -scheme LeitorEcg \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Boot iOS Simulator
+        run: |
+          xcrun simctl boot "iPhone 15" || true
+          xcrun simctl bootstatus "iPhone 15" -b
+
+      - name: Add fixture photo to Simulator library
+        run: xcrun simctl addmedia booted apps/mobile/e2e/fixtures/sample-ecg.jpg
+
+      - name: Install app on Simulator
+        run: xcrun simctl install booted apps/mobile/ios/build/Build/Products/Debug-iphonesimulator/LeitorEcg.app
+
+      - name: Launch app on Simulator
+        run: xcrun simctl launch booted com.ecg.leitorecg
+
+      - name: Run Maestro flow (login + upload)
+        run: maestro test apps/mobile/e2e/login_and_upload.yaml -e MAESTRO_QA_PASSWORD="${{ secrets.QA_MOBILE_PASSWORD }}"
+
+      - name: Collect Maestro artifacts (screenshots)
+        if: always()
+        run: |
+          mkdir -p e2e-artifacts
+          cp -R "$HOME/.maestro/tests" e2e-artifacts/ || true
+
+      - name: Upload screenshots artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-screenshots
+          path: e2e-artifacts/**
+          if-no-files-found: warn
