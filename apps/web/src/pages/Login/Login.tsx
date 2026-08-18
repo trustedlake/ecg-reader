@@ -1,9 +1,6 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Input from '../../components/Input/Input'
-import Button from '../../components/Button/Button'
-import { useAuth } from 'shared'
+import { Button, Input, useAuth } from 'shared'
 import styles from './Login.module.css'
 
 export default function Login() {
@@ -14,8 +11,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
+  async function handleSubmit() {
     setError(null)
     setLoading(true)
     try {
@@ -40,27 +36,24 @@ export default function Login() {
         <h1 className={styles.title}>Leitor ECG</h1>
         <p className={styles.subtitle}>Leitura e análise de ECG</p>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={(e) => { e.preventDefault(); void handleSubmit() }}>
           <Input
             label="Usuário"
-            type="string"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
+            onChangeText={setUsername}
             autoComplete="username"
           />
           <Input
             label="Senha"
-            type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChangeText={setPassword}
+            secureTextEntry
             autoComplete="current-password"
           />
 
           {error && <p className={styles.error}>{error}</p>}
 
-          <Button fullWidth type="submit" disabled={loading}>
+          <Button fullWidth disabled={loading} onPress={() => void handleSubmit()}>
             {loading ? 'Entrando...' : 'Entrar'}
           </Button>
         </form>

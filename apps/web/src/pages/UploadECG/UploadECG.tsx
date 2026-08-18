@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import Button from '../../components/Button/Button'
 import Modal from '../../components/Modal/Modal'
-import { useAuth } from 'shared'
+import { Button, useAuth } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './UploadECG.module.css'
 
@@ -202,8 +201,8 @@ export default function UploadECG() {
           <div className={styles.confirmCard}>
             <h1 className={styles.confirmTitle}>Obrigado!</h1>
             <p className={styles.subtitle}>Recebemos {sentCount} foto{sentCount === 1 ? '' : 's'}.</p>
-            <Button onClick={handleReset}>Enviar mais fotos</Button>
-            <Button variant="outline" onClick={() => navigate('/dashboard')}>
+            <Button onPress={handleReset}>Enviar mais fotos</Button>
+            <Button variant="outline" onPress={() => navigate('/dashboard')}>
               Concluir
             </Button>
           </div>
@@ -229,7 +228,7 @@ export default function UploadECG() {
 
           {errorMsg && <p className={styles.error}>{errorMsg}</p>}
 
-          <Button fullWidth disabled={status === 'confirming'} onClick={handleConfirm}>
+          <Button fullWidth disabled={status === 'confirming'} onPress={handleConfirm}>
             {status === 'confirming' ? 'Confirmando…' : 'Confirmar'}
           </Button>
         </div>
@@ -244,10 +243,10 @@ export default function UploadECG() {
         <p className={styles.subtitle}>Tire uma foto ou escolha da galeria. Pode enviar várias de uma vez.</p>
 
         <div className={styles.actionsRow}>
-          <Button variant="outline" fullWidth onClick={openCamera}>
+          <Button variant="outline" fullWidth onPress={openCamera}>
             Tirar foto
           </Button>
-          <Button variant="outline" fullWidth onClick={() => galleryInputRef.current?.click()}>
+          <Button variant="outline" fullWidth onPress={() => galleryInputRef.current?.click()}>
             Escolher da galeria
           </Button>
         </div>
@@ -288,7 +287,7 @@ export default function UploadECG() {
         <Button
           fullWidth
           disabled={selected.length === 0 || status === 'uploading'}
-          onClick={handleSend}
+          onPress={handleSend}
         >
           {status === 'uploading' ? 'Enviando…' : `Enviar${selected.length > 0 ? ` (${selected.length})` : ''}`}
         </Button>
@@ -314,10 +313,10 @@ export default function UploadECG() {
             </>
           )}
           <div className={styles.cameraActions}>
-            <Button variant="outline" fullWidth onClick={closeCamera}>
+            <Button variant="outline" fullWidth onPress={closeCamera}>
               Cancelar
             </Button>
-            <Button fullWidth onClick={capturePhoto} disabled={!!cameraError}>
+            <Button fullWidth onPress={capturePhoto} disabled={!!cameraError}>
               Capturar
             </Button>
           </div>

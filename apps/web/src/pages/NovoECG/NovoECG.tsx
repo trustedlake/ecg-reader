@@ -1,8 +1,7 @@
 import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import Button from '../../components/Button/Button'
-import { useExamDraft } from 'shared'
+import { Button, useExamDraft } from 'shared'
 import styles from './NovoECG.module.css'
 
 export default function NovoECG() {
@@ -64,7 +63,7 @@ export default function NovoECG() {
         </div>
 
         <div className={styles.actions}>
-          <Button fullWidth disabled={!imageFile} onClick={() => navigate('/config-ecg')}>
+          <Button fullWidth disabled={!imageFile} onPress={() => navigate('/config-ecg')}>
             Continuar
           </Button>
         </div>

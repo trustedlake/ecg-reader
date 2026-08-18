@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import PatientCard from '../../components/PatientCard/PatientCard'
+import { PatientCard, useAuth } from 'shared'
 import SideMenu from '../../components/SideMenu/SideMenu'
 import PopupEmBreve from '../../modals/PopupEmBreve/PopupEmBreve'
-import { useAuth } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './Dashboard.module.css'
 
@@ -139,7 +138,7 @@ export default function Dashboard() {
               name={exam.patient.name}
               date={dateFormatter.format(new Date(exam.created_at))}
               status={mapStatus(exam.status)}
-              onClick={() => navigate(`/laudo/${exam.id}`)}
+              onPress={() => navigate(`/laudo/${exam.id}`)}
             />
           ))
         )}

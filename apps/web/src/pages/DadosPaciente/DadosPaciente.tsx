@@ -1,11 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import Input from '../../components/Input/Input'
-import CheckboxGroup from '../../components/CheckboxGroup/CheckboxGroup'
-import ChipSelect from '../../components/ChipSelect/ChipSelect'
-import Button from '../../components/Button/Button'
-import { useAuth, useExamDraft } from 'shared'
+import { Button, CheckboxGroup, ChipSelect, Input, useAuth, useExamDraft } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './DadosPaciente.module.css'
 
@@ -118,16 +114,13 @@ export default function DadosPaciente() {
           <Input
             label="Nome completo do paciente"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
+            onChangeText={setName}
           />
           <Input
             label="Idade do paciente"
-            type="number"
-            min={1}
             value={age}
-            onChange={(e) => setAge(e.target.value)}
-            required
+            onChangeText={setAge}
+            keyboardType="numeric"
           />
         </div>
 
@@ -145,7 +138,7 @@ export default function DadosPaciente() {
         {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.actions}>
-          <Button fullWidth disabled={loading} onClick={handleConfirm}>
+          <Button fullWidth disabled={loading} onPress={handleConfirm}>
             {loading ? 'Enviando...' : 'Confirmar'}
           </Button>
         </div>

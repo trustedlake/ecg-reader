@@ -24,5 +24,14 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 47535,
     },
+    resolve: {
+      alias: [
+        { find: /^react-native$/, replacement: 'react-native-web' },
+      ],
+      extensions: ['.web.tsx', '.web.ts', '.web.js', '.tsx', '.ts', '.js', '.jsx'],
+    },
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    },
   }
 })

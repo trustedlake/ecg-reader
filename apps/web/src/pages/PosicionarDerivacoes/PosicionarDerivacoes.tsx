@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import Button from '../../components/Button/Button'
+import { Button } from 'shared'
 import styles from './PosicionarDerivacoes.module.css'
 
 interface FormatOption {
@@ -43,7 +43,7 @@ export default function PosicionarDerivacoes() {
         ))}
 
         <div className={styles.actions}>
-          <Button fullWidth onClick={() => navigate('/dados-paciente')}>
+          <Button fullWidth onPress={() => navigate('/dados-paciente')}>
             Continuar
           </Button>
         </div>

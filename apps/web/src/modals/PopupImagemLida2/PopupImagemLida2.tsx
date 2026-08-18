@@ -1,5 +1,5 @@
 import Modal from '../../components/Modal/Modal'
-import Button from '../../components/Button/Button'
+import { Button } from 'shared'
 import styles from './PopupImagemLida2.module.css'
 
 interface PopupImagemLida2Props {
@@ -18,8 +18,8 @@ export default function PopupImagemLida2({ open, onClose }: PopupImagemLida2Prop
           Deseja ajustar a imagem?
         </p>
         <div className={styles.actions}>
-          <Button fullWidth onClick={onClose}>Ajustar Imagem</Button>
-          <Button variant="text" onClick={onClose}>Continuar mesmo assim</Button>
+          <Button fullWidth onPress={onClose}>Ajustar Imagem</Button>
+          <Button variant="text" onPress={onClose}>Continuar mesmo assim</Button>
         </div>
       </div>
     </Modal>

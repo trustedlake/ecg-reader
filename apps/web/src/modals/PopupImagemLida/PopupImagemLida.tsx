@@ -1,5 +1,5 @@
 import Modal from '../../components/Modal/Modal'
-import Button from '../../components/Button/Button'
+import { Button } from 'shared'
 import styles from './PopupImagemLida.module.css'
 
 interface PopupImagemLidaProps {
@@ -18,8 +18,8 @@ export default function PopupImagemLida({ open, onClose, onConfirm }: PopupImage
           A imagem do ECG foi processada com sucesso.
         </p>
         <div className={styles.actions}>
-          <Button fullWidth onClick={onConfirm ?? onClose}>Continuar</Button>
-          <Button variant="text" onClick={onClose}>Cancelar</Button>
+          <Button fullWidth onPress={onConfirm ?? onClose}>Continuar</Button>
+          <Button variant="text" onPress={onClose}>Cancelar</Button>
         </div>
       </div>
     </Modal>

@@ -1,5 +1,5 @@
 import Modal from '../../components/Modal/Modal'
-import Button from '../../components/Button/Button'
+import { Button } from 'shared'
 import styles from './PopupEmBreve.module.css'
 
 interface PopupEmBreveProps {
@@ -23,7 +23,7 @@ export default function PopupEmBreve({ open, onClose }: PopupEmBreveProps) {
           estará disponível pra todos os usuários.
         </p>
         <div className={styles.actions}>
-          <Button fullWidth onClick={onClose}>Entendi</Button>
+          <Button fullWidth onPress={onClose}>Entendi</Button>
         </div>
       </div>
     </Modal>

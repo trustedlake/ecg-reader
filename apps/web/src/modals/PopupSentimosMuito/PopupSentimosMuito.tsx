@@ -1,5 +1,5 @@
 import Modal from '../../components/Modal/Modal'
-import Button from '../../components/Button/Button'
+import { Button } from 'shared'
 import styles from './PopupSentimosMuito.module.css'
 
 interface PopupSentimosMuitoProps {
@@ -19,9 +19,9 @@ export default function PopupSentimosMuito({ open, onClose, onSendFeedback }: Po
           ou entre em contato com o suporte.
         </p>
         <div className={styles.actions}>
-          <Button fullWidth onClick={onClose}>Tentar Novamente</Button>
+          <Button fullWidth onPress={onClose}>Tentar Novamente</Button>
           {onSendFeedback && (
-            <Button variant="text" onClick={onSendFeedback}>Enviar Feedback</Button>
+            <Button variant="text" onPress={onSendFeedback}>Enviar Feedback</Button>
           )}
         </div>
       </div>

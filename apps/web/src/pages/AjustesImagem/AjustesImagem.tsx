@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import Button from '../../components/Button/Button'
+import { Button } from 'shared'
 import styles from './AjustesImagem.module.css'
 
 export default function AjustesImagem() {
@@ -32,7 +32,7 @@ export default function AjustesImagem() {
           </div>
         </div>
 
-        <Button fullWidth onClick={() => navigate('/ecg-viewer')}>
+        <Button fullWidth onPress={() => navigate('/ecg-viewer')}>
           Confirmar
         </Button>
       </div>

@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import ChipSelect from '../../components/ChipSelect/ChipSelect'
-import Button from '../../components/Button/Button'
+import { Button, ChipSelect } from 'shared'
 import styles from './ConfigECG.module.css'
 
 const speedOptions = [
@@ -44,7 +43,7 @@ export default function ConfigECG() {
         </div>
 
         <div className={styles.actions}>
-          <Button fullWidth onClick={() => navigate('/posicionar-derivacoes')}>
+          <Button fullWidth onPress={() => navigate('/posicionar-derivacoes')}>
             Confirmar
           </Button>
         </div>

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import Button from '../../components/Button/Button'
+import { Button } from 'shared'
 import styles from './DadosCadastrais.module.css'
 
 interface InfoRowProps {
@@ -41,7 +41,7 @@ export default function DadosCadastrais() {
         <InfoRow label="Especialidade" value="Cardiologia" />
 
         <div className={styles.actions}>
-          <Button fullWidth onClick={() => navigate('/dashboard')}>
+          <Button fullWidth onPress={() => navigate('/dashboard')}>
             Salvar
           </Button>
         </div>

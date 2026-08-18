@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import CheckboxGroup from '../../components/CheckboxGroup/CheckboxGroup'
-import Button from '../../components/Button/Button'
-import { useAuth, useExamDraft } from 'shared'
+import { Button, CheckboxGroup, useAuth, useExamDraft } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './Feedback.module.css'
 
@@ -67,7 +65,7 @@ export default function Feedback() {
 
         {error && <p className={styles.error}>{error}</p>}
 
-        <Button fullWidth disabled={loading} onClick={handleSend}>
+        <Button fullWidth disabled={loading} onPress={handleSend}>
           {loading ? 'Enviando...' : 'Enviar'}
         </Button>
       </div>

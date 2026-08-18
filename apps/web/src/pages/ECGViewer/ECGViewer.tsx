@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
-import Button from '../../components/Button/Button'
-import { useAuth, useExamDraft } from 'shared'
+import { Button, useAuth, useExamDraft } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './ECGViewer.module.css'
 
@@ -58,7 +57,7 @@ export default function ECGViewer() {
         <Header title="Análise do ECG" showBack />
         <div className={styles.content}>
           <p className={styles.statusText}>Nenhum exame em andamento.</p>
-          <Button fullWidth onClick={() => navigate('/novo-ecg')}>
+          <Button fullWidth onPress={() => navigate('/novo-ecg')}>
             Iniciar novo ECG
           </Button>
         </div>
@@ -88,7 +87,7 @@ export default function ECGViewer() {
                 <span className={styles.detectedText}>{error}</span>
               </div>
             </div>
-            <Button fullWidth onClick={handleRetry}>
+            <Button fullWidth onPress={handleRetry}>
               Tentar novamente
             </Button>
           </>
@@ -108,7 +107,7 @@ export default function ECGViewer() {
               <span className={styles.badge}>Fidelidade: {result.fidelidade}</span>
             </div>
 
-            <Button fullWidth onClick={() => navigate('/laudo')}>
+            <Button fullWidth onPress={() => navigate('/laudo')}>
               Confirmar e Continuar
             </Button>
           </>

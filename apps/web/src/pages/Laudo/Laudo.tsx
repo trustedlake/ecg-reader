@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import ParamCard from '../../components/ParamCard/ParamCard'
-import Button from '../../components/Button/Button'
-import { useAuth, useExamDraft, formatNumber } from 'shared'
+import { Button, ParamCard, useAuth, useExamDraft, formatNumber } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './Laudo.module.css'
 
@@ -163,7 +161,7 @@ export default function Laudo() {
         </div>
         <div className={styles.content}>
           <p className={styles.statusText}>Nenhum exame em andamento.</p>
-          <Button fullWidth onClick={() => navigate('/novo-ecg')}>
+          <Button fullWidth onPress={() => navigate('/novo-ecg')}>
             Iniciar novo ECG
           </Button>
         </div>
@@ -201,7 +199,7 @@ export default function Laudo() {
                 <span className={styles.detectedLabel}>{error}</span>
               </div>
             </div>
-            <Button fullWidth onClick={handleRetry}>
+            <Button fullWidth onPress={handleRetry}>
               Tentar novamente
             </Button>
           </>
@@ -265,7 +263,7 @@ export default function Laudo() {
               )}
             </div>
 
-            <Button fullWidth onClick={handleSave}>
+            <Button fullWidth onPress={handleSave}>
               Concluir
             </Button>
           </>

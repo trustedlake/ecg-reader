@@ -1,5 +1,5 @@
 import Modal from '../../components/Modal/Modal'
-import Button from '../../components/Button/Button'
+import { Button } from 'shared'
 import styles from './PopupCupom.module.css'
 
 interface PopupCupomProps {
@@ -16,7 +16,7 @@ export default function PopupCupom({ open, onClose }: PopupCupomProps) {
           Utilize o cupom <strong>ECG10</strong> para ganhar 10% de desconto no seu primeiro mês!
         </p>
         <div className={styles.actions}>
-          <Button fullWidth onClick={onClose}>Ok</Button>
+          <Button fullWidth onPress={onClose}>Ok</Button>
         </div>
       </div>
     </Modal>

@@ -16,6 +16,8 @@
     "googleapis": "^174.0.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-native": "^0.86.2",
+    "react-native-web": "^0.21.2",
     "react-router-dom": "^7.18.1"
   },
   "devDependencies": {

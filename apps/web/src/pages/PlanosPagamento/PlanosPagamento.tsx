@@ -1,5 +1,5 @@
 import Header from '../../components/Header/Header'
-import Button from '../../components/Button/Button'
+import { Button } from 'shared'
 import styles from './PlanosPagamento.module.css'
 
 interface PlanCardProps {
@@ -22,7 +22,7 @@ function PlanCard({ name, price, features, highlighted, onSelect }: PlanCardProp
           <li key={f} className={styles.feature}>{f}</li>
         ))}
       </ul>
-      <Button fullWidth variant={highlighted ? 'primary' : 'outline'} onClick={onSelect}>
+      <Button fullWidth variant={highlighted ? 'primary' : 'outline'} onPress={onSelect}>
         {highlighted ? 'Assinar' : 'Assinar'}
       </Button>
     </div>
