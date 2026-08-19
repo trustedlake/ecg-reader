@@ -1,5 +1,9 @@
 # iOS E2E via Maestro (Simulador iOS, backend de produção)
 #
+# Runner: macos-26 (arm64) com Xcode 26.6 — exigido pelo Expo SDK 57
+# (Xcode 26.4+). O Xcode 26.3 (último da imagem macos-15) quebra com
+# "abs(milliseconds) ambiguous" no expo-modules-jsi (Swift 6.2 / C++ interop).
+#
 # ATENÇÃO: antes da primeira execução, crie o secret no GitHub
 # (Settings -> Secrets and variables -> Actions -> New repository secret):
 #   Nome: QA_MOBILE_PASSWORD
@@ -20,7 +24,7 @@ on:
 
 jobs:
   ios-e2e:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 60
     steps:
       - name: Checkout
@@ -73,8 +77,8 @@ jobs:
 
       - name: Boot iOS Simulator
         run: |
-          xcrun simctl boot "iPhone 15" || true
-          xcrun simctl bootstatus "iPhone 15" -b
+          xcrun simctl boot "iPhone 17 Pro" || true
+          xcrun simctl bootstatus "iPhone 17 Pro" -b
 
       - name: Add fixture photo to Simulator library
         run: xcrun simctl addmedia booted apps/mobile/e2e/fixtures/sample-ecg.jpg
