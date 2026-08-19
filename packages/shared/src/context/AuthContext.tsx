@@ -6,9 +6,10 @@ import type { StorageAdapter } from '../storage'
 export interface AuthUser {
   id: string
   name: string
+  username: string
   email: string
   crm: string
-  is_admin?: boolean
+  is_admin: boolean
 }
 
 interface LoginResponse {
@@ -80,7 +81,7 @@ export function AuthProvider({ children, storage, apiBaseUrl }: AuthProviderProp
     async (identifier: string, password: string) => {
       const data = await client.apiFetch<LoginResponse>('/api/auth/login/', {
         method: 'POST',
-        body: JSON.stringify({ email: identifier, password }),
+        body: JSON.stringify({ username: identifier, password }),
       })
       setToken(data.token)
       setUser(data.user)

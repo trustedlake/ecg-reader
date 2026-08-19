@@ -58,6 +58,16 @@
   margin-bottom: 4px;
 }
 
+.retakeButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
 .cameraSub {
   font-size: 12px;
   font-weight: 400;

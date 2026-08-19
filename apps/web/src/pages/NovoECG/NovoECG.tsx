@@ -16,10 +16,15 @@ export default function NovoECG() {
     event.target.value = ''
   }
 
+  function handleBack() {
+    setImageFile(null)
+    navigate(-1)
+  }
+
   return (
     <div className={styles.page}>
       <AppBrandHeader />
-      <PageHeader title="Novo ECG" />
+      <PageHeader title="Novo ECG" onBack={handleBack} />
 
       <div className={styles.content}>
         <h2 className={styles.sectionTitle}>1. Capturar Imagem do ECG</h2>
@@ -51,7 +56,16 @@ export default function NovoECG() {
                 src={URL.createObjectURL(imageFile)}
                 alt="Pré-visualização do ECG"
               />
-              <p className={styles.cameraLabel}>{imageFile.name}</p>
+              <button
+                type="button"
+                className={styles.retakeButton}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  fileInputRef.current?.click()
+                }}
+              >
+                Não gostou da imagem enviada? Clique aqui
+              </button>
             </>
           ) : (
             <>
@@ -64,11 +78,13 @@ export default function NovoECG() {
           )}
         </div>
 
-        <div className={styles.actions}>
-          <Button fullWidth disabled={!imageFile} onPress={() => navigate('/config-ecg')}>
-            Continuar
-          </Button>
-        </div>
+        {imageFile && (
+          <div className={styles.actions}>
+            <Button fullWidth onPress={() => navigate('/config-ecg')}>
+              Continuar
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )
