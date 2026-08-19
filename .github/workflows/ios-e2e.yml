@@ -63,9 +63,14 @@ jobs:
         working-directory: apps/mobile/ios
         run: |
           WORKSPACE=$(ls -d *.xcworkspace | head -1)
-          SCHEME=$(xcodebuild -list -workspace "$WORKSPACE" -json | python3 -c "import json,sys; print(json.load(sys.stdin)['workspace']['schemes'][0])")
+          SCHEME="${WORKSPACE%.xcworkspace}"
           echo "WORKSPACE=$WORKSPACE" >> "$GITHUB_ENV"
           echo "SCHEME=$SCHEME" >> "$GITHUB_ENV"
+          if ! xcodebuild -list -workspace "$WORKSPACE" -json | grep -q "\"$SCHEME\""; then
+            echo "ERRO: scheme '$SCHEME' não encontrado no workspace $WORKSPACE" >&2
+            xcodebuild -list -workspace "$WORKSPACE"
+            exit 1
+          fi
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
