@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import AppHeader from '../../components/nav/AppHeader'
+import PageHeader from '../../components/nav/PageHeader'
+import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button, ChipSelect } from 'shared'
 import styles from './ConfigECG.module.css'
 
@@ -27,7 +28,8 @@ export default function ConfigECG() {
 
   return (
     <div className={styles.page}>
-      <AppHeader title="Configurações do ECG" />
+      <AppBrandHeader />
+      <PageHeader title="Configurações do ECG" />
 
       <div className={styles.content}>
         <h2 className={styles.sectionTitle}>Calibração</h2>

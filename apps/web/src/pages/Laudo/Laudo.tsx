@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button, ParamCard, useAuth, useExamDraft, formatNumber } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './Laudo.module.css'
@@ -171,6 +172,7 @@ export default function Laudo() {
 
   return (
     <div className={styles.page}>
+      <AppBrandHeader />
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Laudo</h1>
         <button className={styles.close} onClick={() => navigate('/dashboard')}>

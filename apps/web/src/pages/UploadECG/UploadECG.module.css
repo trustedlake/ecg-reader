@@ -127,7 +127,35 @@
   padding-right: 32px;
 }
 
+.cameraVideoWrap {
+  position: relative;
+}
+
+.cameraSwitch {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--white);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cameraSwitch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .cameraVideo {
+  display: block;
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;

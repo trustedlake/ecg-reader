@@ -1,4 +1,5 @@
-import AppHeader from '../../components/nav/AppHeader'
+import PageHeader from '../../components/nav/PageHeader'
+import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button } from 'shared'
 import styles from './PlanosPagamento.module.css'
 
@@ -53,7 +54,8 @@ const plans = [
 export default function PlanosPagamento() {
   return (
     <div className={styles.page}>
-      <AppHeader title="Planos de Pagamento" />
+      <AppBrandHeader />
+      <PageHeader title="Planos de Pagamento" />
 
       <div className={styles.content}>
         {plans.map((plan) => (

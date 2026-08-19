@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import AppHeader from '../../components/nav/AppHeader'
+import PageHeader from '../../components/nav/PageHeader'
+import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button, confirmUploadBatch, Modal, uploadECGBatch } from 'shared'
 import { apiClient } from '../../platform/api'
 import styles from './UploadECG.module.css'
 
 type Status = 'idle' | 'uploading' | 'review' | 'confirming' | 'done' | 'error'
+type FacingMode = 'environment' | 'user'
 
 interface Selected {
   file: File
@@ -21,6 +23,7 @@ export default function UploadECG() {
   const [errorMsg, setErrorMsg] = useState('')
   const [cameraOpen, setCameraOpen] = useState(false)
   const [cameraError, setCameraError] = useState('')
+  const [facingMode, setFacingMode] = useState<FacingMode>('environment')
   const galleryInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -58,14 +61,25 @@ export default function UploadECG() {
     })
   }
 
-  async function openCamera() {
+  async function openCamera(mode: FacingMode = facingMode) {
     setCameraError('')
     setCameraOpen(true)
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
         throw new Error('unsupported')
       }
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      let stream: MediaStream
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: mode } },
+        })
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'OverconstrainedError') {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true })
+        } else {
+          throw err
+        }
+      }
       streamRef.current = stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
@@ -81,6 +95,14 @@ export default function UploadECG() {
         setCameraError('Não foi possível acessar a câmera. Tente novamente ou escolha da galeria.')
       }
     }
+  }
+
+  async function switchCamera() {
+    const next: FacingMode = facingMode === 'environment' ? 'user' : 'environment'
+    setFacingMode(next)
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+    await openCamera(next)
   }
 
   function closeCamera() {
@@ -163,7 +185,8 @@ export default function UploadECG() {
   if (status === 'done') {
     return (
       <div className={styles.page}>
-        <AppHeader title="Upload de arquivos" />
+        <AppBrandHeader />
+        <PageHeader title="Upload de arquivos" />
         <div className={styles.content}>
           <div className={styles.confirmCard}>
             <h1 className={styles.confirmTitle}>Obrigado!</h1>
@@ -181,7 +204,8 @@ export default function UploadECG() {
   if (status === 'review' || status === 'confirming') {
     return (
       <div className={styles.page}>
-        <AppHeader title="Confirmar envio" />
+        <AppBrandHeader />
+        <PageHeader title="Confirmar envio" />
         <div className={styles.content}>
           <p className={styles.subtitle}>Confira as fotos enviadas antes de confirmar.</p>
 
@@ -205,7 +229,8 @@ export default function UploadECG() {
 
   return (
     <div className={styles.page}>
-      <AppHeader title="Upload de arquivos" />
+      <AppBrandHeader />
+      <PageHeader title="Upload de arquivos" />
       <div className={styles.content}>
         <p className={styles.subtitle}>Tire uma foto ou escolha da galeria. Pode enviar várias de uma vez.</p>
 
@@ -275,7 +300,18 @@ export default function UploadECG() {
             <p className={styles.error}>{cameraError}</p>
           ) : (
             <>
-              <video ref={videoRef} className={styles.cameraVideo} autoPlay playsInline muted />
+              <div className={styles.cameraVideoWrap}>
+                <video ref={videoRef} className={styles.cameraVideo} autoPlay playsInline muted />
+                <button
+                  type="button"
+                  className={styles.cameraSwitch}
+                  onClick={() => void switchCamera()}
+                  disabled={!!cameraError}
+                  aria-label="Trocar câmera"
+                >
+                  ⇄
+                </button>
+              </div>
               <p className={styles.cameraHint}>Posicione o ECG no enquadramento e toque em Capturar.</p>
             </>
           )}
