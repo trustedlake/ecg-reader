@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   card: {
+    position: 'relative',
     width: '100%',
     maxWidth: 327,
     backgroundColor: colors.white,

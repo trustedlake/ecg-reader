@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button } from 'shared'
 import styles from './NotFound.module.css'
 
@@ -7,11 +8,14 @@ export default function NotFound() {
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.code}>404</h1>
-      <p className={styles.message}>Página não encontrada</p>
-      <Button onPress={() => navigate('/dashboard')}>
-        Voltar ao início
-      </Button>
+      <AppBrandHeader />
+      <div className={styles.content}>
+        <h1 className={styles.code}>404</h1>
+        <p className={styles.message}>Página não encontrada</p>
+        <Button onPress={() => navigate('/dashboard')}>
+          Voltar ao início
+        </Button>
+      </div>
     </div>
   )
 }
