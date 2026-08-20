@@ -12,11 +12,6 @@ appId: com.ecg.leitorecg
 - assertVisible: "Upload de ECG"
 - takeScreenshot: 02_upload_screen
 - tapOn: "Escolher da galeria"
-- runFlow:
-    when:
-      visible: "Allow"
-    commands:
-      - tapOn: "Allow"
 - tapOn:
     point: "10%,20%"
 - assertVisible: "Enviar"

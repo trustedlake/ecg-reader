@@ -111,6 +111,9 @@ jobs:
           APP_PATH=$(find apps/mobile/ios/build/Build/Products -name "*.app" -maxdepth 2 | head -1)
           xcrun simctl install booted "$APP_PATH"
 
+      - name: Pre-grant photo library permission
+        run: xcrun simctl privacy booted grant photos com.ecg.leitorecg
+
       - name: Launch app on Simulator
         run: xcrun simctl launch booted com.ecg.leitorecg
 
