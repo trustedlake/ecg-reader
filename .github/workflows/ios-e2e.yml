@@ -26,6 +26,8 @@ jobs:
   ios-e2e:
     runs-on: macos-26
     timeout-minutes: 60
+    env:
+      EXPO_PUBLIC_API_BASE_URL: https://d1i155fprtk4at.cloudfront.net
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,7 +76,7 @@ jobs:
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
-            -configuration Debug \
+            -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
