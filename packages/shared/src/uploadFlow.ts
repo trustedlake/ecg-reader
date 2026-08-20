@@ -45,9 +45,12 @@ export async function uploadECGBatch(
         method: 'PUT',
         headers: { 'Content-Type': file.contentType },
         body: file.blob,
-      }).then((res) => {
+      }).then(async (res) => {
         if (!res.ok) {
-          throw new Error(`Falha no upload de "${file.filename}" (HTTP ${res.status}).`)
+          const body = await res.text().catch(() => '')
+          throw new Error(
+            `Falha no upload de "${file.filename}" (HTTP ${res.status}): ${body}`,
+          )
         }
       })
     }),
