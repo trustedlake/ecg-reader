@@ -48,6 +48,7 @@ export async function uploadECGBatch(
       }).then(async (res) => {
         if (!res.ok) {
           const body = await res.text().catch(() => '')
+          console.error('S3_PRESIGN_FULL_ERROR_START' + body + 'S3_PRESIGN_FULL_ERROR_END')
           throw new Error(
             `Falha no upload de "${file.filename}" (HTTP ${res.status}): ${body}`,
           )
