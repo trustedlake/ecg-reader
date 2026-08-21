@@ -16,10 +16,12 @@ function driveUploadDevMiddleware(): Plugin {
 }
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
+  const rootDir = import.meta.dirname
+  const env = loadEnv(mode, rootDir, '')
   Object.assign(process.env, env)
 
   return {
+    root: rootDir,
     plugins: [react(), driveUploadDevMiddleware()],
     server: {
       port: 47535,
