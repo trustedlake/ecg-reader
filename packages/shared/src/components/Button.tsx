@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text } from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native'
 import type { ReactNode } from 'react'
 import type { StyleProp, ViewStyle } from 'react-native'
 import { colors } from '../theme'
@@ -8,6 +8,9 @@ interface ButtonProps {
   fullWidth?: boolean
   disabled?: boolean
   onPress?: () => void
+  loading?: boolean
+  accessibilityLabel?: string
+  testID?: string
   style?: StyleProp<ViewStyle>
   children?: ReactNode
 }
@@ -16,23 +19,36 @@ export default function Button({
   variant = 'primary',
   fullWidth = false,
   disabled = false,
+  loading = false,
+  accessibilityLabel,
+  testID,
   onPress,
   style,
   children,
 }: ButtonProps) {
+  const inactive = disabled || loading
   return (
     <Pressable
-      disabled={disabled}
+      disabled={inactive}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled: inactive, busy: loading }}
+      testID={testID}
       style={({ pressed }) => [
         styles.button,
         styles[variant],
         fullWidth && styles.fullWidth,
-        pressed && !disabled && styles.pressed,
+        pressed && !inactive && styles.pressed,
+        disabled && styles.disabled,
         style,
       ]}
     >
-      <Text style={[styles.label, textStyles[variant]]}>{children}</Text>
+      {loading ? (
+        <ActivityIndicator color={variant === 'primary' ? colors.white : colors.primary} />
+      ) : (
+        <Text style={[styles.label, textStyles[variant]]}>{children}</Text>
+      )}
     </Pressable>
   )
 }
@@ -42,12 +58,16 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 52,
+    minHeight: 52,
     paddingHorizontal: 24,
+    paddingVertical: 8,
     borderRadius: 10,
   },
   pressed: {
     opacity: 0.85,
+  },
+  disabled: {
+    opacity: 0.45,
   },
   fullWidth: {
     width: '100%',
@@ -63,11 +83,13 @@ const styles = StyleSheet.create({
   text: {
     backgroundColor: 'transparent',
     height: 'auto',
-    paddingHorizontal: 0,
+    minHeight: 44,
+    paddingHorizontal: 8,
   },
   label: {
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
   primaryText: {
     color: colors.white,
