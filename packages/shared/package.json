@@ -10,6 +10,11 @@
     "react-native-svg": ">=15.0.0"
   },
   "devDependencies": {
-    "react": "^19.2.7"
+    "react": "^19.2.7",
+    "vitest": "^3.2.7"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   }
 }
