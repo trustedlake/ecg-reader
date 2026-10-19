@@ -7,6 +7,7 @@ import { AttemptDraftProvider } from './src/flow/AttemptDraft'
 import { API_BASE_URL } from './src/platform/config'
 import { mobileStorageAdapter } from './src/platform/storage'
 import RootNavigator from './src/navigation/RootNavigator'
+import { linking } from './src/navigation/linking'
 
 export default function App() {
   return (
@@ -14,7 +15,7 @@ export default function App() {
       <AuthProvider storage={mobileStorageAdapter} apiBaseUrl={API_BASE_URL}>
         <ApiProvider>
           <AttemptDraftProvider>
-            <NavigationContainer>
+            <NavigationContainer linking={linking}>
               <RootNavigator />
             </NavigationContainer>
           </AttemptDraftProvider>

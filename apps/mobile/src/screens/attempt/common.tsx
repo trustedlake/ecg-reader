@@ -25,7 +25,7 @@ export function useNewPhoto(exam: Exam, attempt: Attempt, navigation: AttemptNav
   const { start } = useAttemptDraft()
   return useCallback(() => {
     start(exam.id, exam.patient, attempt.calibration)
-    navigation.navigate('Capture')
+    navigation.navigate('Capture', { examId: exam.id })
   }, [attempt.calibration, exam.id, exam.patient, navigation, start])
 }
 

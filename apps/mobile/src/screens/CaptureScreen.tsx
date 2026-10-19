@@ -48,12 +48,13 @@ function toPickedImage(asset: ImagePicker.ImagePickerAsset): PickedImage | strin
   }
 }
 
-export default function CaptureScreen({ navigation }: AppScreenProps<'Capture'>) {
+export default function CaptureScreen({ navigation, route }: AppScreenProps<'Capture'>) {
+  const { examId } = route.params
   const { config } = useApi()
   const { draft, update } = useAttemptDraft()
   const [error, setError] = useState<string | null>(null)
 
-  if (!draft) return <MissingDraft onBack={() => navigation.popToTop()} />
+  if (!draft || draft.examId !== examId) return <MissingDraft examId={examId} navigation={navigation} />
 
   async function pick(source: 'camera' | 'library') {
     setError(null)
@@ -97,7 +98,7 @@ export default function CaptureScreen({ navigation }: AppScreenProps<'Capture'>)
       title="Foto do ECG"
       onBack={() => navigation.goBack()}
       footer={
-        <Button fullWidth disabled={!image} onPress={() => navigation.navigate('Layout')} testID="capture-continue">
+        <Button fullWidth disabled={!image} onPress={() => navigation.navigate('Layout', { examId })} testID="capture-continue">
           Escolher o layout
         </Button>
       }

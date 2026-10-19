@@ -47,7 +47,7 @@ export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>)
       const exam = await api.createExam({ name: name.trim(), age: Number(age), sex })
       start(exam.id, exam.patient, config?.calibration.default ?? DEFAULT_CALIBRATION)
       // replace: voltar da foto leva à lista, sem recriar o exame.
-      navigation.replace('Capture')
+      navigation.replace('Capture', { examId: exam.id })
     } catch (err) {
       setError(err)
       setSubmitting(false)

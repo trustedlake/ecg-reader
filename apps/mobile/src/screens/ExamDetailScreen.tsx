@@ -48,7 +48,7 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
   function newAttempt() {
     if (!exam) return
     start(exam.id, exam.patient, config?.calibration.default ?? DEFAULT_CALIBRATION)
-    navigation.navigate('Capture')
+    navigation.navigate('Capture', { examId: exam.id })
   }
 
   return (

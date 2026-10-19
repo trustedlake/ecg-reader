@@ -8,8 +8,8 @@ export type AppStackParamList = {
   Exams: undefined
   NewExam: undefined
   ExamDetail: { examId: string }
-  Capture: undefined
-  Layout: undefined
+  Capture: { examId: string }
+  Layout: { examId: string }
   /** Sem attemptId: cria a tentativa a partir do rascunho. Com attemptId: só acompanha. */
   Processing: { examId: string; attemptId?: string }
   AttemptState: { examId: string; attemptId: string }

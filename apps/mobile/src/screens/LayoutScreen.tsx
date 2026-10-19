@@ -10,14 +10,14 @@ import MissingDraft from '../ui/MissingDraft'
 import { LAYOUT_LABELS } from '../ui/labels'
 import Screen from '../ui/Screen'
 
-export default function LayoutScreen({ navigation }: AppScreenProps<'Layout'>) {
+export default function LayoutScreen({ navigation, route }: AppScreenProps<'Layout'>) {
+  const { examId } = route.params
   const { config } = useApi()
   const { draft, update } = useAttemptDraft()
 
-  if (!draft?.image) return <MissingDraft onBack={() => navigation.popToTop()} />
+  if (!draft?.image || draft.examId !== examId) return <MissingDraft examId={examId} navigation={navigation} />
 
   const layouts: Layout[] = config?.layouts ?? LAYOUTS
-  const examId = draft.examId
 
   return (
     <Screen

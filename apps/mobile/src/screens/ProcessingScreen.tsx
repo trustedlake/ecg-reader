@@ -6,6 +6,7 @@ import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
 import type { AppScreenProps } from '../navigation/types'
 import { ErrorBanner } from '../ui/Feedback'
+import MissingDraft from '../ui/MissingDraft'
 import { errorMessage } from '../ui/labels'
 import Screen from '../ui/Screen'
 
@@ -107,8 +108,21 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
         })
       }
 
-      if (!route.params.attemptId) clear()
-      navigation.replace('AttemptState', { examId, attemptId })
+      if (route.params.attemptId) {
+        navigation.replace('AttemptState', { examId, attemptId })
+      } else {
+        // Tentativa nova: as telas de foto e layout saem da pilha (o rascunho acabou), então
+        // "voltar" no resultado leva ao exame, também no histórico do navegador.
+        clear()
+        navigation.reset({
+          index: 2,
+          routes: [
+            { name: 'Exams' },
+            { name: 'ExamDetail', params: { examId } },
+            { name: 'AttemptState', params: { examId, attemptId } },
+          ],
+        })
+      }
     } catch (err) {
       if (isAbort(err) || signal.aborted) return
       setError(err instanceof Error && err.message === 'Rascunho incompleto' ? 'Os dados da foto se perderam. Volte e escolha a foto de novo.' : errorMessage(err))
@@ -117,17 +131,23 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
     }
   }, [api, clear, examId, navigation, route.params.attemptId])
 
+  // Tentativa nova sem rascunho (página recarregada ou "voltar" do navegador depois do envio): volta ao exame.
+  const draftMissing = !route.params.attemptId && !draftRef.current
+
   useEffect(() => {
+    if (draftMissing) return
     void run()
     // Sair da tela (voltar, cancelar, trocar de pilha no logout) interrompe o polling.
     return () => controllerRef.current?.abort()
-  }, [run])
+  }, [draftMissing, run])
 
   function cancel() {
     controllerRef.current?.abort()
     if (stepRef.current === 'poll') navigation.popToTop()
     else navigation.goBack()
   }
+
+  if (draftMissing) return <MissingDraft examId={examId} navigation={navigation} />
 
   const polling = step === 'poll'
   const message = polling ? (status && POLL_MESSAGES[status]) ?? 'Consultando o andamento…' : STEP_LABELS[step]
