@@ -5,8 +5,8 @@ import { Button, colors, useAuth } from 'shared'
 import type { Exam } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import type { AppScreenProps } from '../navigation/types'
-import { ErrorBanner, LoadingView, StatusBadge } from '../ui/Feedback'
-import { SEX_LABELS, errorMessage, formatDateTime } from '../ui/labels'
+import { ErrorNotice, LoadingView, StatusBadge } from '../ui/Feedback'
+import { SEX_LABELS, formatDateTime } from '../ui/labels'
 import Screen from '../ui/Screen'
 
 export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
@@ -14,7 +14,7 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
   const { logout, user } = useAuth()
   const [exams, setExams] = useState<Exam[] | null>(null)
   const [nextPage, setNextPage] = useState<number | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<unknown>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const loadedOnce = useRef(false)
@@ -28,7 +28,7 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
         setExams(page.results)
         setNextPage(page.next ? 2 : null)
       } catch (err) {
-        setError(errorMessage(err))
+        setError(err)
       } finally {
         setRefreshing(false)
       }
@@ -52,7 +52,7 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
       setExams((current) => [...(current ?? []), ...page.results])
       setNextPage(page.next ? nextPage + 1 : null)
     } catch (err) {
-      setError(errorMessage(err))
+      setError(err)
     } finally {
       setLoadingMore(false)
     }
@@ -88,7 +88,7 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
           ListHeaderComponent={
             <View style={styles.header}>
               {user?.name ? <Text style={styles.greeting}>Olá, {user.name}</Text> : null}
-              {error && <ErrorBanner message={error} onRetry={() => void load('refresh')} />}
+              {error != null && <ErrorNotice error={error} onRetry={() => void load('refresh')} />}
             </View>
           }
           ListEmptyComponent={

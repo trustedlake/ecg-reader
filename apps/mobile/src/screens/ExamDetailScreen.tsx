@@ -2,29 +2,40 @@ import { useCallback, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { Button, colors } from 'shared'
-import type { Exam } from 'shared'
+import type { Attempt, Exam } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
 import { DEFAULT_CALIBRATION } from '../flow/defaults'
 import type { AppScreenProps } from '../navigation/types'
-import { ErrorBanner, LoadingView, StatusBadge } from '../ui/Feedback'
-import { LAYOUT_LABELS, SEX_LABELS, errorMessage, formatDateTime } from '../ui/labels'
+import { ErrorNotice, LoadingView, StatusBadge } from '../ui/Feedback'
+import { CLASSIFICATION_LABELS, LAYOUT_LABELS, SEX_LABELS, STATUS_LABELS, formatDateTime } from '../ui/labels'
 import Screen from '../ui/Screen'
 
-// PROVISÓRIA (F2): o histórico completo do exame é da etapa F3.
+/** Uma linha sobre o desfecho, para o histórico: classificação, motivo da recusa ou do erro. */
+function outcomeLine(attempt: Attempt): string | null {
+  if (attempt.status === 'concluido') {
+    const summary = attempt.interpretation?.summary
+    return summary ? `${CLASSIFICATION_LABELS[summary.classification].label} · ${summary.headline}` : null
+  }
+  if (attempt.status === 'erro_interpretacao') return attempt.interpretation?.error?.message ?? null
+  if (attempt.status === 'leitura_recusada' || attempt.status === 'erro_leitura') return attempt.reading?.error?.message ?? null
+  return null
+}
+
+/** Histórico do exame: cada tentativa abre a tela do seu estado atual (AttemptState decide qual). */
 export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'ExamDetail'>) {
   const { examId } = route.params
   const { api, config } = useApi()
   const { start } = useAttemptDraft()
   const [exam, setExam] = useState<Exam | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<unknown>(null)
 
   const load = useCallback(async () => {
     setError(null)
     try {
       setExam(await api.getExam(examId))
     } catch (err) {
-      setError(errorMessage(err))
+      setError(err)
     }
   }, [api, examId])
 
@@ -52,8 +63,8 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
         ) : undefined
       }
     >
-      {error && <ErrorBanner message={error} onRetry={() => void load()} />}
-      {!exam && !error && <LoadingView />}
+      {error != null && <ErrorNotice error={error} onRetry={() => void load()} />}
+      {!exam && error == null && <LoadingView />}
       {exam && (
         <>
           <View style={styles.block}>
@@ -61,6 +72,7 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
             <Text style={styles.meta}>
               {exam.patient.age} anos{exam.patient.sex ? ` · ${SEX_LABELS[exam.patient.sex]}` : ''}
             </Text>
+            {exam.reason ? <Text style={styles.meta}>Motivo: {exam.reason}</Text> : null}
             <StatusBadge status={exam.status} />
           </View>
           <Text style={styles.section}>Tentativas</Text>
@@ -70,7 +82,7 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
               key={attempt.id}
               onPress={() => navigation.navigate('AttemptState', { examId, attemptId: attempt.id })}
               accessibilityRole="button"
-              accessibilityLabel={`Tentativa ${all.length - index}`}
+              accessibilityLabel={`Tentativa ${all.length - index}: ${STATUS_LABELS[attempt.status]}`}
               style={({ pressed }) => [styles.card, pressed && styles.pressed]}
             >
               <Text style={styles.cardTitle}>
@@ -78,6 +90,11 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
               </Text>
               <Text style={styles.meta}>{formatDateTime(attempt.created_at)}</Text>
               <StatusBadge status={attempt.status} />
+              {outcomeLine(attempt) && (
+                <Text style={styles.outcome} numberOfLines={2}>
+                  {outcomeLine(attempt)}
+                </Text>
+              )}
             </Pressable>
           ))}
         </>
@@ -93,5 +110,6 @@ const styles = StyleSheet.create({
   section: { fontSize: 16, fontWeight: '700', color: colors.dark, marginTop: 8 },
   card: { gap: 6, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.gridBorder },
   pressed: { backgroundColor: colors.background },
+  outcome: { fontSize: 14, color: colors.dark },
   cardTitle: { fontSize: 15, fontWeight: '600', color: colors.dark },
 })

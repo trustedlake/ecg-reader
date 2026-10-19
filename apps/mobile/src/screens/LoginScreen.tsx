@@ -5,15 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import Svg, { Path } from 'react-native-svg'
 import { Button, colors, useAuth } from 'shared'
 import { API_BASE_URL_MISSING } from '../platform/config'
-import { ErrorBanner } from '../ui/Feedback'
-import { errorMessage } from '../ui/labels'
+import { ErrorBanner, ErrorNotice } from '../ui/Feedback'
 import TextField from '../ui/TextField'
 
 export default function LoginScreen() {
   const { login } = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<unknown>(null)
   const [loading, setLoading] = useState(false)
   const passwordRef = useRef<TextInput>(null)
 
@@ -26,7 +25,7 @@ export default function LoginScreen() {
     try {
       await login(username.trim(), password)
     } catch (err) {
-      setError(errorMessage(err))
+      setError(err)
       setLoading(false)
     }
   }
@@ -79,7 +78,7 @@ export default function LoginScreen() {
               onSubmitEditing={() => void handleSubmit()}
               testID="login-password"
             />
-            {error && <ErrorBanner message={error} />}
+            {error != null && <ErrorNotice error={error} />}
             <Button fullWidth disabled={!canSubmit} loading={loading} onPress={() => void handleSubmit()} testID="login-submit">
               Entrar
             </Button>

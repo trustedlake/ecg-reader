@@ -37,6 +37,8 @@ export class ApiError extends Error {
   kind: ApiErrorKind
   status: number
   fieldErrors?: Record<string, string[]>
+  /** 503 que não veio do Django: o API Gateway está sem tasks (fora do horário, D8). */
+  offHours?: boolean
 
   constructor(
     kind: ApiErrorKind,
@@ -54,7 +56,7 @@ export class ApiError extends Error {
 
 /** 503 sem corpo do Django = API Gateway sem tasks rodando (fora do horário, D8). */
 export function isOffHours(error: unknown): boolean {
-  return error instanceof ApiError && error.kind === 'server' && error.status === 503
+  return error instanceof ApiError && error.offHours === true
 }
 
 function firstString(value: unknown): string | undefined {
@@ -96,7 +98,11 @@ export async function toApiError(response: Response): Promise<ApiError> {
   if (status === 401) return new ApiError('unauthorized', status, API_MESSAGES.unauthorized)
   if (status === 404) return new ApiError('not_found', status, detail ?? API_MESSAGES.not_found)
   if (status === 409) return new ApiError('conflict', status, detail ?? API_MESSAGES.conflict)
-  if (status === 503) return new ApiError('server', status, detail ?? API_MESSAGES.offHours)
+  if (status === 503) {
+    // Todo erro do Django tem `detail`; o 503 do API Gateway vem vazio ou com {"message": "Service Unavailable"}.
+    if (detail) return new ApiError('server', status, detail)
+    return Object.assign(new ApiError('server', status, API_MESSAGES.offHours), { offHours: true })
+  }
   if (status >= 400 && status < 500) {
     const fieldErrors = collectFieldErrors(obj)
     const message =
@@ -243,7 +249,9 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
         if (!isProcessing(attempt.status)) return attempt
       } catch (error) {
         // Falha transitória (rede, 5xx, fora do ar por instantes): continua tentando até o prazo.
-        const transient = error instanceof ApiError && (error.kind === 'network' || error.kind === 'server')
+        // Fora do horário não é transitório: para na hora, sem consultar em loop.
+        const transient =
+          error instanceof ApiError && (error.kind === 'network' || error.kind === 'server') && !isOffHours(error)
         if (!transient) throw error
       }
       if (Date.now() + intervalMs > deadline) {

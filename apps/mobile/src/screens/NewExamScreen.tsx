@@ -5,8 +5,7 @@ import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
 import type { AppScreenProps } from '../navigation/types'
 import { DEFAULT_CALIBRATION } from '../flow/defaults'
-import { ErrorBanner } from '../ui/Feedback'
-import { errorMessage } from '../ui/labels'
+import { ErrorNotice } from '../ui/Feedback'
 import Screen from '../ui/Screen'
 import SegmentedControl from '../ui/SegmentedControl'
 import TextField from '../ui/TextField'
@@ -35,7 +34,7 @@ export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>)
   const [sex, setSex] = useState<Sex | null>(null)
   const [touched, setTouched] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<unknown>(null)
 
   const errors = touched ? validate(name, age, sex) : {}
 
@@ -50,7 +49,7 @@ export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>)
       // replace: voltar da foto leva à lista, sem recriar o exame.
       navigation.replace('Capture')
     } catch (err) {
-      setError(errorMessage(err))
+      setError(err)
       setSubmitting(false)
     }
   }
@@ -95,7 +94,7 @@ export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>)
         onChange={setSex}
         error={errors.sex}
       />
-      {error && <ErrorBanner message={error} />}
+      {error != null && <ErrorNotice error={error} />}
     </Screen>
   )
 }

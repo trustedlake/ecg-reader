@@ -116,6 +116,18 @@ describe('normalização de erros', () => {
     expect(isOffHours(error)).toBe(true)
   })
 
+  it('503 do API Gateway com message também é fora do horário', async () => {
+    const error = await errorFor(json(503, { message: 'Service Unavailable' }))
+    expect(error).toMatchObject({ kind: 'server', status: 503, message: API_MESSAGES.offHours })
+    expect(isOffHours(error)).toBe(true)
+  })
+
+  it('503 com detail do Django não é fora do horário', async () => {
+    const error = await errorFor(json(503, { detail: 'Banco indisponível.' }))
+    expect(error).toMatchObject({ kind: 'server', status: 503, message: 'Banco indisponível.' })
+    expect(isOffHours(error)).toBe(false)
+  })
+
   it('500 com HTML vira mensagem genérica', async () => {
     const error = await errorFor(new Response('<h1>Server Error</h1>', { status: 500 }))
     expect(error).toMatchObject({ kind: 'server', status: 500, message: API_MESSAGES.server })
@@ -204,7 +216,7 @@ describe('pollAttempt', () => {
   it('tolera falha transitória e para em erro definitivo', async () => {
     fetchMock
       .mockRejectedValueOnce(new TypeError('offline'))
-      .mockResolvedValueOnce(new Response('', { status: 503 }))
+      .mockResolvedValueOnce(new Response('', { status: 502 }))
       .mockResolvedValueOnce(json(200, attempt('erro_leitura')))
     const promise = client.pollAttempt('e1', 'a1', { intervalMs: 100 })
     await vi.advanceTimersByTimeAsync(300)
@@ -213,5 +225,12 @@ describe('pollAttempt', () => {
     fetchMock.mockReset()
     fetchMock.mockResolvedValueOnce(json(401, {}))
     await expect(client.pollAttempt('e1', 'a1')).rejects.toMatchObject({ kind: 'unauthorized' })
+  })
+
+  it('fora do horário para o polling na hora', async () => {
+    fetchMock.mockResolvedValue(new Response('', { status: 503 }))
+    const promise = client.pollAttempt('e1', 'a1', { intervalMs: 100 })
+    await expect(promise).rejects.toMatchObject({ offHours: true })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })

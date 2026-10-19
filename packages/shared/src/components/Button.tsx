@@ -4,7 +4,7 @@ import type { StyleProp, ViewStyle } from 'react-native'
 import { colors } from '../theme'
 
 interface ButtonProps {
-  variant?: 'primary' | 'outline' | 'text'
+  variant?: 'primary' | 'outline' | 'text' | 'danger'
   fullWidth?: boolean
   disabled?: boolean
   onPress?: () => void
@@ -45,7 +45,7 @@ export default function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.white : colors.primary} />
+        <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? colors.white : colors.primary} />
       ) : (
         <Text style={[styles.label, textStyles[variant]]}>{children}</Text>
       )}
@@ -74,6 +74,9 @@ const styles = StyleSheet.create({
   },
   primary: {
     backgroundColor: colors.secondary,
+  },
+  danger: {
+    backgroundColor: '#a12a22',
   },
   outline: {
     backgroundColor: colors.white,
@@ -104,6 +107,7 @@ const styles = StyleSheet.create({
 
 const textStyles = {
   primary: styles.primaryText,
+  danger: styles.primaryText,
   outline: styles.outlineText,
   text: styles.textVariantText,
 }
