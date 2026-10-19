@@ -1,43 +1,46 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { colors, useAuth } from 'shared'
+import { useAuth } from 'shared'
+import { LoadingView } from '../ui/Feedback'
 import LoginScreen from '../screens/LoginScreen'
-import UploadScreen from '../screens/UploadScreen'
+import ExamsScreen from '../screens/ExamsScreen'
+import NewExamScreen from '../screens/NewExamScreen'
+import ExamDetailScreen from '../screens/ExamDetailScreen'
+import CaptureScreen from '../screens/CaptureScreen'
+import LayoutScreen from '../screens/LayoutScreen'
+import ProcessingScreen from '../screens/ProcessingScreen'
+import AttemptStateScreen from '../screens/AttemptStateScreen'
+import type { AppStackParamList, AuthStackParamList } from './types'
 
-export type RootStackParamList = {
-  Login: undefined
-  AppHome: undefined
-}
+const AuthStack = createNativeStackNavigator<AuthStackParamList>()
+const AppStack = createNativeStackNavigator<AppStackParamList>()
 
-const Stack = createNativeStackNavigator<RootStackParamList>()
-
+/** Pilha de login × pilha do app, decidida pelo token salvo (logout ou 401 → volta ao login). */
 export default function RootNavigator() {
   const { isHydrated, isAuthenticated } = useAuth()
 
-  if (!isHydrated) {
+  if (!isHydrated) return <LoadingView />
+
+  if (!isAuthenticated) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
+      <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+        <AuthStack.Screen name="Login" component={LoginScreen} options={{ title: 'Entrar · Leitor ECG' }} />
+      </AuthStack.Navigator>
     )
   }
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {isAuthenticated ? (
-        <Stack.Screen name="AppHome" component={UploadScreen} />
-      ) : (
-        <Stack.Screen name="Login" component={LoginScreen} />
-      )}
-    </Stack.Navigator>
+    <AppStack.Navigator screenOptions={{ headerShown: false }}>
+      <AppStack.Screen name="Exams" component={ExamsScreen} options={{ title: 'Exames · Leitor ECG' }} />
+      <AppStack.Screen name="NewExam" component={NewExamScreen} options={{ title: 'Novo exame · Leitor ECG' }} />
+      <AppStack.Screen name="ExamDetail" component={ExamDetailScreen} options={{ title: 'Exame · Leitor ECG' }} />
+      <AppStack.Screen name="Capture" component={CaptureScreen} options={{ title: 'Foto do ECG · Leitor ECG' }} />
+      <AppStack.Screen name="Layout" component={LayoutScreen} options={{ title: 'Layout · Leitor ECG' }} />
+      <AppStack.Screen
+        name="Processing"
+        component={ProcessingScreen}
+        options={{ title: 'Processando · Leitor ECG', gestureEnabled: false }}
+      />
+      <AppStack.Screen name="AttemptState" component={AttemptStateScreen} options={{ title: 'Resultado · Leitor ECG' }} />
+    </AppStack.Navigator>
   )
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.white,
-  },
-})

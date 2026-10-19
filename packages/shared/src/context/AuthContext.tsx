@@ -10,6 +10,7 @@ export interface AuthUser {
   email: string
   crm: string
   is_admin: boolean
+  is_staff?: boolean
 }
 
 interface LoginResponse {
