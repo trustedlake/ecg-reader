@@ -57,8 +57,10 @@ export function formatDateTime(iso: string): string {
 
 // ── Desfechos da tentativa (F3). A UI decide o fluxo por `code`/`retryable`, nunca pelo texto da lambda.
 
-/** Dica prática para cada motivo de recusa da leitura (CONTRATO_LAMBDAS.md §5, categoria `refused`). */
+/** Dica prática para cada motivo de recusa da leitura (CONTRATO_LAMBDAS.md, catálogo, categoria `refused`). */
 export const REFUSAL_TIPS: Record<string, string> = {
+  READ_REFUSED_UNREADABLE_TRACE:
+    'Fotografe o papel de frente, reto e sem dobras, com boa luz e sem sombra, e só envie quando as linhas do traçado estiverem nítidas.',
   READ_REFUSED_BLURRY:
     'Apoie o celular (ou os cotovelos) numa superfície firme, toque na tela para focar e só fotografe quando o traçado estiver nítido.',
   READ_REFUSED_CROPPED:

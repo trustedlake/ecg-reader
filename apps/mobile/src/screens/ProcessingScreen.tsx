@@ -20,7 +20,8 @@ const STEP_LABELS: Record<Step, string> = {
 }
 
 const POLL_MESSAGES: Partial<Record<AttemptStatus, string>> = {
-  leitura_processando: 'Lendo o ECG: detectando a grade e extraindo o traçado das derivações…',
+  leitura_processando:
+    'Lendo o ECG: detectando a grade e extraindo o traçado das derivações. Isso costuma levar de 1 a 3 minutos…',
   interpretacao_processando: 'Interpretando o sinal: ritmo, frequência e medidas…',
 }
 

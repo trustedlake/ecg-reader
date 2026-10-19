@@ -239,7 +239,8 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
   }
 
   async function pollAttempt(examId: string, attemptId: string, options: PollOptions = {}) {
-    const { intervalMs = 2000, timeoutMs = 300000, signal, onUpdate } = options
+    // 20 min: a leitura real leva 50–190 s (até 15 min); o backend marca TASK_TIMEOUT antes disso.
+    const { intervalMs = 2000, timeoutMs = 1200000, signal, onUpdate } = options
     const deadline = Date.now() + timeoutMs
     for (;;) {
       if (signal?.aborted) throw abortError(signal)
