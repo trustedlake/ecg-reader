@@ -14,7 +14,7 @@ import ValidationView from './attempt/ValidationView'
 import type { AttemptViewProps } from './attempt/common'
 
 /**
- * Attempt screen: loads the state from the server and shows the right outcome (docs/fluxo-usuario-v1.md §4).
+ * Attempt screen: loads the state from the server and shows the right outcome (the V1 user-flow doc §4).
  * When the app is reopened mid-flow, the attempt always leads to the screen for its current state.
  */
 export default function AttemptStateScreen({ navigation, route }: AppScreenProps<'AttemptState'>) {

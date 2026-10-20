@@ -18,12 +18,12 @@ export const linking: LinkingOptions<RootParamList> | undefined =
           screens: {
             Login: 'login',
             Exams: '',
-            NewExam: 'exames/novo',
-            ExamDetail: 'exames/:examId',
-            Capture: 'exames/:examId/foto',
-            Layout: 'exames/:examId/layout',
-            Processing: 'exames/:examId/processando/:attemptId?',
-            AttemptState: 'exames/:examId/tentativas/:attemptId',
+            NewExam: 'exams/new',
+            ExamDetail: 'exams/:examId',
+            Capture: 'exams/:examId/photo',
+            Layout: 'exams/:examId/layout',
+            Processing: 'exams/:examId/processing/:attemptId?',
+            AttemptState: 'exams/:examId/attempts/:attemptId',
           },
         },
       }

@@ -57,7 +57,7 @@ export function formatDateTime(iso: string): string {
 
 // ── Attempt outcomes (F3). The UI decides the flow by `code`/`retryable`, never by the lambda's text.
 
-/** Practical tip for each reading refusal reason (CONTRATO_LAMBDAS.md, catalog, `refused` category). */
+/** Practical tip for each reading refusal reason (the Lambda contract doc, catalog, `refused` category). */
 export const REFUSAL_TIPS: Record<string, string> = {
   READ_REFUSED_UNREADABLE_TRACE:
     'Photograph the paper head-on, flat and without folds, with good light and no shadows, and only upload when the trace lines are sharp.',

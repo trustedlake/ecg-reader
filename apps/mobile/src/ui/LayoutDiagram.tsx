@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import { colors } from 'shared'
 import type { Layout } from 'shared'
 
-// Grid of each layout (CONTRATO_LAMBDAS.md §2.2): grid rows + rhythm leads (10 s).
+// Grid of each layout (the Lambda contract doc §2.2): grid rows + rhythm leads (10 s).
 const GRID_3X4 = [
   ['I', 'aVR', 'V1', 'V4'],
   ['II', 'aVL', 'V2', 'V5'],

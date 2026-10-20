@@ -9,18 +9,8 @@ appId: com.ecg.leitorecg
 - tapOn: "Password"
 - inputText: ${MAESTRO_QA_PASSWORD}
 - tapOn: "Sign in"
-- assertVisible: "Upload de ECG"
-- takeScreenshot: 02_upload_screen
-- tapOn: "Escolher da galeria"
-- waitForAnimationToEnd:
-    timeout: 3000
-- tapOn:
-    point: "10%,20%"
-- assertVisible: "Enviar"
-- takeScreenshot: 03_preview
-- tapOn: "Enviar"
-- assertVisible: "Confirmar envio"
-- takeScreenshot: 04_review
-- tapOn: "Confirmar envio"
-- assertVisible: "Obrigado!"
-- takeScreenshot: 05_done
+- assertVisible: "Exams"
+- takeScreenshot: 02_exams_screen
+- tapOn: "New exam"
+- assertVisible: "Patient name"
+- takeScreenshot: 03_new_exam
