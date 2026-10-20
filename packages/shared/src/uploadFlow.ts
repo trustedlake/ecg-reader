@@ -6,7 +6,7 @@ export interface UploadFile {
   contentType: string
 }
 
-export type UploadProgressStep = 'iniciando' | 'enviando' | 'confirmando'
+export type UploadProgressStep = 'starting' | 'uploading' | 'confirming'
 
 interface UploadBatchFile {
   file_id: string
@@ -24,7 +24,7 @@ export async function uploadECGBatch(
   files: UploadFile[],
   onProgress?: (step: UploadProgressStep) => void,
 ): Promise<{ batchId: string }> {
-  onProgress?.('iniciando')
+  onProgress?.('starting')
 
   const batch = await apiClient.apiFetch<UploadBatchResponse>('/api/uploads/', {
     method: 'POST',
@@ -36,7 +36,7 @@ export async function uploadECGBatch(
     }),
   })
 
-  onProgress?.('enviando')
+  onProgress?.('uploading')
 
   await Promise.all(
     batch.files.map((entry, index) => {
@@ -65,7 +65,7 @@ export async function confirmUploadBatch(
   batchId: string,
   onProgress?: (step: UploadProgressStep) => void,
 ): Promise<void> {
-  onProgress?.('confirmando')
+  onProgress?.('confirming')
 
   await apiClient.apiFetch(`/api/uploads/${batchId}/confirmar/`, {
     method: 'POST',
