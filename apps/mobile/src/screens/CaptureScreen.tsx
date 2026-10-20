@@ -32,10 +32,10 @@ function contentTypeOf(asset: ImagePicker.ImagePickerAsset): ImageContentType | 
 
 function toPickedImage(asset: ImagePicker.ImagePickerAsset): PickedImage | string {
   const contentType = contentTypeOf(asset)
-  if (!contentType) return 'Formato não suportado. Use uma foto JPG, PNG ou WebP.'
+  if (!contentType) return 'Unsupported format. Use a JPG, PNG or WebP photo.'
   const { width, height } = asset
   if (width > 0 && height > 0 && (Math.max(width, height) < MIN_LONG_SIDE_PX || Math.min(width, height) < MIN_SHORT_SIDE_PX)) {
-    return `Resolução baixa (${width}×${height}). A foto precisa ter ao menos ${MIN_LONG_SIDE_PX}×${MIN_SHORT_SIDE_PX} px.`
+    return `Low resolution (${width}×${height}). The photo must be at least ${MIN_LONG_SIDE_PX}×${MIN_SHORT_SIDE_PX} px.`
   }
   const extension = contentType.split('/')[1] === 'jpeg' ? 'jpg' : contentType.split('/')[1]
   return {
@@ -58,7 +58,7 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
 
   async function pick(source: 'camera' | 'library') {
     setError(null)
-    // No web, o seletor precisa abrir direto no toque (sem await antes) e não há permissão a pedir.
+    // On web, the picker must open directly on tap (no await before it) and there is no permission to request.
     if (Platform.OS !== 'web') {
       const permission =
         source === 'camera'
@@ -67,8 +67,8 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
       if (!permission.granted) {
         setError(
           source === 'camera'
-            ? 'Sem permissão para usar a câmera. Libere nas configurações do aparelho ou escolha da galeria.'
-            : 'Sem permissão para acessar as fotos. Libere nas configurações do aparelho ou use a câmera.',
+            ? 'No permission to use the camera. Allow it in your device settings or choose from the gallery.'
+            : 'No permission to access photos. Allow it in your device settings or use the camera.',
         )
         return
       }
@@ -84,7 +84,7 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
       if (typeof picked === 'string') setError(picked)
       else update({ image: picked })
     } catch {
-      setError('Não foi possível abrir a câmera ou a galeria. Tente de novo.')
+      setError('Could not open the camera or the gallery. Try again.')
     }
   }
 
@@ -95,16 +95,16 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
 
   return (
     <Screen
-      title="Foto do ECG"
+      title="ECG photo"
       onBack={() => navigation.goBack()}
       footer={
         <Button fullWidth disabled={!image} onPress={() => navigation.navigate('Layout', { examId })} testID="capture-continue">
-          Escolher o layout
+          Choose the layout
         </Button>
       }
     >
       <Text style={styles.patient}>
-        {patient.name} · {patient.age} anos{patient.sex ? ` · ${SEX_LABELS[patient.sex]}` : ''}
+        {patient.name} · {patient.age} years old{patient.sex ? ` · ${SEX_LABELS[patient.sex]}` : ''}
       </Text>
 
       {image ? (
@@ -112,40 +112,40 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
           source={{ uri: image.uri }}
           style={[styles.preview, { aspectRatio }]}
           resizeMode="contain"
-          accessibilityLabel="Prévia da foto do ECG"
+          accessibilityLabel="ECG photo preview"
         />
       ) : (
         <View style={styles.placeholder}>
-          <Text style={styles.placeholderTitle}>Fotografe o ECG em papel</Text>
+          <Text style={styles.placeholderTitle}>Photograph the paper ECG</Text>
           <Text style={styles.tips}>
-            Papel inteiro no quadro, bem iluminado, sem reflexo nem sombra, e a câmera paralela à folha.
+            Whole sheet in frame, well lit, no glare or shadows, and the camera parallel to the sheet.
           </Text>
         </View>
       )}
 
       <View style={styles.row}>
         <Button variant={image ? 'outline' : 'primary'} style={styles.half} onPress={() => void pick('camera')}>
-          {image ? 'Tirar outra' : 'Tirar foto'}
+          {image ? 'Retake' : 'Take photo'}
         </Button>
         <Button variant="outline" style={styles.half} onPress={() => void pick('library')} testID="pick-library">
-          Galeria
+          Gallery
         </Button>
       </View>
       {error && <ErrorBanner message={error} />}
 
       <SegmentedControl<number>
-        label="Velocidade do papel"
-        options={speeds.map((v) => ({ value: v, label: `${String(v).replace('.', ',')} mm/s` }))}
+        label="Paper speed"
+        options={speeds.map((v) => ({ value: v, label: `${String(v)} mm/s` }))}
         value={calibration.speed_mm_s}
         onChange={(speed_mm_s) => update({ calibration: { ...calibration, speed_mm_s } })}
       />
       <SegmentedControl<number>
-        label="Ganho"
+        label="Gain"
         options={gains.map((v) => ({ value: v, label: `${v} mm/mV` }))}
         value={calibration.gain_mm_mv}
         onChange={(gain_mm_mv) => update({ calibration: { ...calibration, gain_mm_mv } })}
       />
-      <Text style={styles.hint}>O padrão da maioria dos aparelhos é 25 mm/s e 10 mm/mV.</Text>
+      <Text style={styles.hint}>Most machines default to 25 mm/s and 10 mm/mV.</Text>
 
       {config?.test_scenarios_enabled && (
         <TestScenarioPicker value={draft.testScenario} onChange={(testScenario) => update({ testScenario })} />

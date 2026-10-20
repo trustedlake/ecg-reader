@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import PageHeader from '../../components/nav/PageHeader'
 import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button } from 'shared'
-import styles from './DadosCadastrais.module.css'
+import styles from './AccountDetails.module.css'
 
 interface InfoRowProps {
   label: string
@@ -18,33 +18,33 @@ function InfoRow({ label, value }: InfoRowProps) {
   )
 }
 
-export default function DadosCadastrais() {
+export default function AccountDetails() {
   const navigate = useNavigate()
 
   return (
     <div className={styles.page}>
       <AppBrandHeader />
       <PageHeader
-        title="Dados Cadastrais"
-        rightAction={{ label: 'Editar', onClick: () => {} }}
+        title="Account Details"
+        rightAction={{ label: 'Edit', onClick: () => {} }}
       />
 
       <div className={styles.content}>
-        <h2 className={styles.section}>Dados Pessoais</h2>
+        <h2 className={styles.section}>Personal Details</h2>
 
-        <InfoRow label="Nome" value="Dr. Carlos Silva" />
-        <InfoRow label="Email" value="carlos.silva@clinica.com" />
-        <InfoRow label="Telefone" value="(11) 99999-8888" />
-        <InfoRow label="Data de Nascimento" value="15/03/1978" />
-        <InfoRow label="Endereço" value="Rua das Flores, 123" />
+        <InfoRow label="Name" value="Dr. John Smith" />
+        <InfoRow label="Email" value="john.smith@clinic.com" />
+        <InfoRow label="Phone" value="+1 (555) 123-4567" />
+        <InfoRow label="Date of Birth" value="03/15/1978" />
+        <InfoRow label="Address" value="123 Main Street" />
 
-        <h2 className={styles.section}>Dados Profissionais</h2>
-        <InfoRow label="CRM" value="123456-SP" />
-        <InfoRow label="Especialidade" value="Cardiologia" />
+        <h2 className={styles.section}>Professional Details</h2>
+        <InfoRow label="Medical License" value="MD-123456" />
+        <InfoRow label="Specialty" value="Cardiology" />
 
         <div className={styles.actions}>
           <Button fullWidth onPress={() => navigate('/dashboard')}>
-            Salvar
+            Save
           </Button>
         </div>
       </div>

@@ -14,8 +14,8 @@ import ValidationView from './attempt/ValidationView'
 import type { AttemptViewProps } from './attempt/common'
 
 /**
- * Tela de uma tentativa: carrega o estado no servidor e mostra o desfecho certo (docs/fluxo-usuario-v1.md §4).
- * Ao reabrir o app no meio do fluxo, a tentativa sempre leva à tela do estado atual.
+ * Attempt screen: loads the state from the server and shows the right outcome (the V1 user-flow doc §4).
+ * When the app is reopened mid-flow, the attempt always leads to the screen for its current state.
  */
 export default function AttemptStateScreen({ navigation, route }: AppScreenProps<'AttemptState'>) {
   const { examId, attemptId } = route.params
@@ -29,7 +29,7 @@ export default function AttemptStateScreen({ navigation, route }: AppScreenProps
       const [exam, attempt] = await Promise.all([api.getExam(examId), api.getAttempt(examId, attemptId)])
       setData({ exam, attempt })
     } catch (err) {
-      // Falha de rede não apaga a tentativa já carregada: o banner oferece reconsultar.
+      // A network failure does not discard the attempt already loaded: the banner offers a refetch.
       setError(err)
     }
   }, [api, examId, attemptId])
@@ -42,18 +42,18 @@ export default function AttemptStateScreen({ navigation, route }: AppScreenProps
 
   const status = data?.attempt.status
   useEffect(() => {
-    // Ainda processando (ex.: saiu e voltou): a tela de processamento acompanha até o desfecho.
+    // Still processing (e.g. the user left and came back): the processing screen follows it through to the outcome.
     if (status && isProcessing(status)) navigation.replace('Processing', { examId, attemptId })
   }, [attemptId, examId, navigation, status])
 
   if (!data || isProcessing(data.attempt.status)) {
     return (
       <Screen
-        title="Tentativa"
+        title="Attempt"
         onBack={() => navigation.goBack()}
         footer={
           <Button fullWidth variant="outline" onPress={() => navigation.popToTop()}>
-            Voltar aos exames
+            Back to exams
           </Button>
         }
       >
@@ -66,14 +66,14 @@ export default function AttemptStateScreen({ navigation, route }: AppScreenProps
   const banner = error != null ? <ErrorNotice error={error} onRetry={() => void load()} /> : null
 
   switch (data.attempt.status) {
-    case 'aguardando_validacao':
+    case 'awaiting_validation':
       return <ValidationView {...props} banner={banner} />
-    case 'leitura_recusada':
+    case 'reading_refused':
       return <RefusedView {...props} banner={banner} />
-    case 'erro_leitura':
-    case 'erro_interpretacao':
+    case 'reading_error':
+    case 'interpretation_error':
       return <ErrorView {...props} banner={banner} />
-    case 'concluido':
+    case 'completed':
       return <ResultView {...props} banner={banner} />
     default:
       return <NewPhotoView {...props} banner={banner} />

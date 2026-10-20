@@ -7,11 +7,11 @@ import { apiFetch } from '../../platform/api'
 import styles from './Feedback.module.css'
 
 const options = [
-  { value: 'not-recognized', label: 'Parte do ECG não foi reconhecida.' },
-  { value: 'cropped', label: 'A imagem foi cortada.' },
-  { value: 'extra-areas', label: 'A detecção incluiu áreas que não fazem parte do ECG.' },
-  { value: 'quality', label: 'A qualidade da imagem ficou comprometida.' },
-  { value: 'other', label: 'Outro.' },
+  { value: 'not-recognized', label: 'Part of the ECG was not recognized.' },
+  { value: 'cropped', label: 'The image was cropped.' },
+  { value: 'extra-areas', label: 'The detection included areas that are not part of the ECG.' },
+  { value: 'quality', label: 'The image quality was compromised.' },
+  { value: 'other', label: 'Other.' },
 ]
 
 export default function Feedback() {
@@ -26,7 +26,7 @@ export default function Feedback() {
   async function handleSend() {
     setError(null)
     if (!attemptId) {
-      setError('Nenhuma tentativa associada')
+      setError('No associated attempt')
       return
     }
     setLoading(true)
@@ -38,7 +38,7 @@ export default function Feedback() {
       })
       navigate(-1)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao enviar o feedback.')
+      setError(err instanceof Error ? err.message : 'Failed to send the feedback.')
     } finally {
       setLoading(false)
     }
@@ -50,15 +50,15 @@ export default function Feedback() {
       <PageHeader title="Feedback" />
 
       <div className={styles.content}>
-        <h2 className={styles.sectionTitle}>O que aconteceu?</h2>
+        <h2 className={styles.sectionTitle}>What happened?</h2>
 
         <CheckboxGroup options={options} values={selected} onChange={setSelected} />
 
         <div className={styles.descSection}>
-          <span className={styles.descLabel}>Descreva o problema (opcional)</span>
+          <span className={styles.descLabel}>Describe the problem (optional)</span>
           <textarea
             className={styles.descField}
-            placeholder="Descreva aqui..."
+            placeholder="Describe here..."
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -68,7 +68,7 @@ export default function Feedback() {
         {error && <p className={styles.error}>{error}</p>}
 
         <Button fullWidth disabled={loading} onPress={handleSend}>
-          {loading ? 'Enviando...' : 'Enviar'}
+          {loading ? 'Sending...' : 'Send'}
         </Button>
       </div>
     </div>

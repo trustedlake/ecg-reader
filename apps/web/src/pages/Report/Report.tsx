@@ -3,25 +3,25 @@ import { useNavigate, useParams } from 'react-router-dom'
 import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button, ParamCard, useAuth, useExamDraft, formatNumber } from 'shared'
 import { apiFetch } from '../../platform/api'
-import styles from './Laudo.module.css'
+import styles from './Report.module.css'
 
-interface Ritmo {
-  ritmo: string
-  fc_bpm: number
+interface Rhythm {
+  rhythm: string
+  hr_bpm: number
 }
 
 interface ReportResponse {
   id: string
   attempt_id: string
-  ritmo: Ritmo | null
-  eixo_graus: number | null
+  rhythm: Rhythm | null
+  axis_degrees: number | null
   sokolow_mm: number | null
-  achados: unknown
-  conclusao: string | null
-  confiabilidade: string | null
-  versao_codigo: string
+  findings: unknown
+  conclusion: string | null
+  reliability: string | null
+  code_version: string
   created_at: string
-  imagem_original_url: string | null
+  original_image_url: string | null
   overlay_trace_url: string | null
   overlay_signal_url: string | null
 }
@@ -31,7 +31,7 @@ interface Attempt {
   exam_id: string
   status: string
   image_type: string
-  fidelidade: string
+  fidelity: string
   created_at: string
   updated_at: string
   original_url: string | null
@@ -40,13 +40,13 @@ interface Attempt {
   report: {
     id: string
     attempt_id: string
-    ritmo: Ritmo | null
-    eixo_graus: number | null
+    rhythm: Rhythm | null
+    axis_degrees: number | null
     sokolow_mm: number | null
-    achados: unknown
-    conclusao: string | null
-    confiabilidade: string | null
-    versao_codigo: string
+    findings: unknown
+    conclusion: string | null
+    reliability: string | null
+    code_version: string
     created_at: string
   } | null
 }
@@ -57,7 +57,7 @@ interface ExamDetail {
   attempts: Attempt[]
 }
 
-export default function Laudo() {
+export default function Report() {
   const navigate = useNavigate()
   const { examId: examIdParam } = useParams<{ examId: string }>()
   const { token } = useAuth()
@@ -77,12 +77,12 @@ export default function Laudo() {
     setError(null)
     try {
       const data = await apiFetch<ReportResponse>(
-        `/api/exams/${examId}/attempts/${attemptId}/aprovar/`,
+        `/api/exams/${examId}/attempts/${attemptId}/accept/`,
         { method: 'POST', token },
       )
       setResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao gerar o laudo.')
+      setError(err instanceof Error ? err.message : 'Failed to generate the report.')
     } finally {
       setLoading(false)
     }
@@ -99,7 +99,7 @@ export default function Laudo() {
         .filter((a) => a.report !== null)
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       if (concluded.length === 0) {
-        setNotConcluded(`Status atual: ${exam.status}`)
+        setNotConcluded(`Current status: ${exam.status}`)
         return
       }
       const attempt = concluded[0]
@@ -108,20 +108,20 @@ export default function Laudo() {
       setResult({
         id: report.id,
         attempt_id: report.attempt_id,
-        ritmo: report.ritmo,
-        eixo_graus: report.eixo_graus,
+        rhythm: report.rhythm,
+        axis_degrees: report.axis_degrees,
         sokolow_mm: report.sokolow_mm,
-        achados: report.achados,
-        conclusao: report.conclusao,
-        confiabilidade: report.confiabilidade,
-        versao_codigo: report.versao_codigo,
+        findings: report.findings,
+        conclusion: report.conclusion,
+        reliability: report.reliability,
+        code_version: report.code_version,
         created_at: report.created_at,
-        imagem_original_url: attempt.original_url,
+        original_image_url: attempt.original_url,
         overlay_trace_url: attempt.overlay_trace_url,
         overlay_signal_url: attempt.overlay_signal_url,
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao carregar o laudo.')
+      setError(err instanceof Error ? err.message : 'Failed to load the report.')
     } finally {
       setLoading(false)
     }
@@ -144,26 +144,26 @@ export default function Laudo() {
     if (!isViewMode) {
       reset()
     }
-    navigate('/dashboard', { state: { savedMessage: 'Seu exame foi salvo!' } })
+    navigate('/dashboard', { state: { savedMessage: 'Your exam was saved!' } })
   }
 
-  const fcBpm = formatNumber(result?.ritmo?.fc_bpm, 0)
-  const eixoGraus = formatNumber(result?.eixo_graus, 0)
+  const hrBpm = formatNumber(result?.rhythm?.hr_bpm, 0)
+  const axisDegrees = formatNumber(result?.axis_degrees, 0)
   const sokolowMm = formatNumber(result?.sokolow_mm, 1)
 
   if (!isViewMode && (!examId || !attemptId)) {
     return (
       <div className={styles.page}>
         <div className={styles.headerRow}>
-          <h1 className={styles.title}>Laudo</h1>
+          <h1 className={styles.title}>Report</h1>
           <button className={styles.close} onClick={() => navigate('/dashboard')}>
             ✕
           </button>
         </div>
         <div className={styles.content}>
-          <p className={styles.statusText}>Nenhum exame em andamento.</p>
-          <Button fullWidth onPress={() => navigate('/novo-ecg')}>
-            Iniciar novo ECG
+          <p className={styles.statusText}>No exam in progress.</p>
+          <Button fullWidth onPress={() => navigate('/new-ecg')}>
+            Start new ECG
           </Button>
         </div>
       </div>
@@ -174,7 +174,7 @@ export default function Laudo() {
     <div className={styles.page}>
       <AppBrandHeader />
       <div className={styles.headerRow}>
-        <h1 className={styles.title}>Laudo</h1>
+        <h1 className={styles.title}>Report</h1>
         <button className={styles.close} onClick={() => navigate('/dashboard')}>
           ✕
         </button>
@@ -185,11 +185,11 @@ export default function Laudo() {
           <>
             <div className={styles.imageArea}>
               <div className={styles.imageBox}>
-                <span className={styles.detectedLabel}>Gerando laudo...</span>
+                <span className={styles.detectedLabel}>Generating report...</span>
               </div>
             </div>
             <Button fullWidth disabled>
-              Confirmar e Continuar
+              Confirm and Continue
             </Button>
           </>
         )}
@@ -202,7 +202,7 @@ export default function Laudo() {
               </div>
             </div>
             <Button fullWidth onPress={handleRetry}>
-              Tentar novamente
+              Try again
             </Button>
           </>
         )}
@@ -215,50 +215,50 @@ export default function Laudo() {
           <>
             <div className={styles.imageArea}>
               <div className={styles.imageBox}>
-                {result.imagem_original_url ? (
+                {result.original_image_url ? (
                   <img
                     className={styles.originalImg}
-                    src={result.imagem_original_url}
-                    alt="Imagem original do ECG"
+                    src={result.original_image_url}
+                    alt="Original ECG image"
                   />
                 ) : (
-                  <span className={styles.detectedLabel}>Imagem indisponível</span>
+                  <span className={styles.detectedLabel}>Image unavailable</span>
                 )}
               </div>
-              <span className={styles.imageHint}>Clique na imagem para ampliá-la</span>
+              <span className={styles.imageHint}>Click the image to enlarge it</span>
             </div>
 
-            <h2 className={styles.sectionTitle}>Parâmetros</h2>
+            <h2 className={styles.sectionTitle}>Parameters</h2>
 
             <div className={styles.paramsGrid}>
               <div className={styles.paramCard}>
-                <ParamCard label="Ritmo" value={result.ritmo?.ritmo ?? '—'} />
+                <ParamCard label="Rhythm" value={result.rhythm?.rhythm ?? '—'} />
               </div>
               <div className={styles.paramCard}>
-                <ParamCard label="FC" value={fcBpm != null ? `${fcBpm} bpm` : '—'} />
+                <ParamCard label="HR" value={hrBpm != null ? `${hrBpm} bpm` : '—'} />
               </div>
               <div className={styles.paramCard}>
-                <ParamCard label="Eixo" value={eixoGraus != null ? `${eixoGraus}°` : '—'} />
+                <ParamCard label="Axis" value={axisDegrees != null ? `${axisDegrees}°` : '—'} />
               </div>
               <div className={styles.paramCard}>
                 <ParamCard label="Sokolow" value={sokolowMm != null ? `${sokolowMm} mm` : '—'} />
               </div>
               <div className={styles.paramCard}>
-                <ParamCard label="Confiabilidade" value={result.confiabilidade ?? '—'} />
+                <ParamCard label="Reliability" value={result.reliability ?? '—'} />
               </div>
             </div>
 
-            <h2 className={styles.sectionTitle}>Interpretação</h2>
+            <h2 className={styles.sectionTitle}>Interpretation</h2>
 
             <div className={styles.interpretCard}>
               <p className={styles.interpretText}>
-                {result.conclusao ?? 'Sem conclusão disponível'}
+                {result.conclusion ?? 'No conclusion available'}
               </p>
-              {Array.isArray(result.achados) && result.achados.length > 0 && (
-                <ul className={styles.achadosList}>
-                  {result.achados.map((achado, index) => (
-                    <li key={index} className={styles.achadoItem}>
-                      {typeof achado === 'string' ? achado : JSON.stringify(achado)}
+              {Array.isArray(result.findings) && result.findings.length > 0 && (
+                <ul className={styles.findingsList}>
+                  {result.findings.map((finding, index) => (
+                    <li key={index} className={styles.findingItem}>
+                      {typeof finding === 'string' ? finding : JSON.stringify(finding)}
                     </li>
                   ))}
                 </ul>
@@ -266,7 +266,7 @@ export default function Laudo() {
             </div>
 
             <Button fullWidth onPress={handleSave}>
-              Concluir
+              Done
             </Button>
           </>
         )}

@@ -1,20 +1,37 @@
-// Tipos da API do backend (V1). Fonte da verdade: ecg-backend docs/plano-migracao-v1.md §0.1
-// e CONTRATO_LAMBDAS.md §3.2 (formato de summary/details).
+// Backend API types (V1). Source of truth: the ecg-backend V1 migration plan §0.1
+// and the Lambda contract doc §3.2 (summary/details format).
 
 export type AttemptStatus =
-  | 'criado'
-  | 'leitura_processando'
-  | 'aguardando_validacao'
-  | 'leitura_recusada'
-  | 'erro_leitura'
-  | 'rejeitado_usuario'
-  | 'interpretacao_processando'
-  | 'concluido'
-  | 'erro_interpretacao'
+  | 'created'
+  | 'reading'
+  | 'awaiting_validation'
+  | 'reading_refused'
+  | 'reading_error'
+  | 'user_rejected'
+  | 'interpreting'
+  | 'completed'
+  | 'interpretation_error'
+
+/** Backend wire values -> app status. The backend still sends these legacy codes. */
+export const WIRE_STATUS: Readonly<Record<string, AttemptStatus>> = {
+  interpretacao_processando: 'interpreting',
+  leitura_processando: 'reading',
+  aguardando_validacao: 'awaiting_validation',
+  leitura_recusada: 'reading_refused',
+  erro_leitura: 'reading_error',
+  rejeitado_usuario: 'user_rejected',
+  erro_interpretacao: 'interpretation_error',
+  concluido: 'completed',
+  criado: 'created',
+}
+
+export function toAttemptStatus(value: string): AttemptStatus {
+  return WIRE_STATUS[value] ?? (value as AttemptStatus)
+}
 
 export const PROCESSING_STATUSES: readonly AttemptStatus[] = [
-  'leitura_processando',
-  'interpretacao_processando',
+  'reading',
+  'interpreting',
 ]
 
 export function isProcessing(status: AttemptStatus): boolean {

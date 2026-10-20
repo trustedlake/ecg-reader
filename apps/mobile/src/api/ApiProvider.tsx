@@ -13,7 +13,7 @@ interface ApiContextValue {
 
 const ApiContext = createContext<ApiContextValue | undefined>(undefined)
 
-/** Envolve cada chamada: um 401 em qualquer lugar limpa a sessão e volta ao login. */
+/** Wraps every call: a 401 anywhere clears the session and returns to login. */
 function withSessionGuard(client: ApiClient, onUnauthorized: () => void): ApiClient {
   const guarded: Record<string, unknown> = {}
   for (const [name, fn] of Object.entries(client)) {
@@ -59,6 +59,6 @@ export function ApiProvider({ children }: { children: ReactNode }) {
 
 export function useApi(): ApiContextValue {
   const ctx = useContext(ApiContext)
-  if (!ctx) throw new Error('useApi deve ser usado dentro de <ApiProvider>')
+  if (!ctx) throw new Error('useApi must be used inside <ApiProvider>')
   return ctx
 }

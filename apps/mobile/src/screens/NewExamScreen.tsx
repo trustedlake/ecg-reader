@@ -18,11 +18,11 @@ interface FieldErrors {
 
 function validate(name: string, age: string, sex: Sex | null): FieldErrors {
   const errors: FieldErrors = {}
-  if (!name.trim()) errors.name = 'Informe o nome do paciente.'
+  if (!name.trim()) errors.name = 'Enter the patient name.'
   const ageNumber = Number(age)
-  if (!age.trim()) errors.age = 'Informe a idade.'
-  else if (!/^\d+$/.test(age.trim()) || ageNumber > 130) errors.age = 'Idade inválida (0 a 130 anos).'
-  if (!sex) errors.sex = 'Selecione o sexo: ele é usado na interpretação.'
+  if (!age.trim()) errors.age = 'Enter the age.'
+  else if (!/^\d+$/.test(age.trim()) || ageNumber > 130) errors.age = 'Invalid age (0 to 130 years).'
+  if (!sex) errors.sex = 'Select the sex: it is used in the interpretation.'
   return errors
 }
 
@@ -46,7 +46,7 @@ export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>)
     try {
       const exam = await api.createExam({ name: name.trim(), age: Number(age), sex })
       start(exam.id, exam.patient, config?.calibration.default ?? DEFAULT_CALIBRATION)
-      // replace: voltar da foto leva à lista, sem recriar o exame.
+      // replace: going back from the photo leads to the list, without recreating the exam.
       navigation.replace('Capture', { examId: exam.id })
     } catch (err) {
       setError(err)
@@ -56,16 +56,16 @@ export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>)
 
   return (
     <Screen
-      title="Novo exame"
+      title="New exam"
       onBack={() => navigation.goBack()}
       footer={
         <Button fullWidth loading={submitting} onPress={() => void handleSubmit()} testID="new-exam-submit">
-          Continuar para a foto
+          Continue to photo
         </Button>
       }
     >
       <TextField
-        label="Nome do paciente"
+        label="Patient name"
         value={name}
         onChangeText={setName}
         error={errors.name}
@@ -75,7 +75,7 @@ export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>)
         testID="patient-name"
       />
       <TextField
-        label="Idade (anos)"
+        label="Age (years)"
         value={age}
         onChangeText={(text) => setAge(text.replace(/[^\d]/g, ''))}
         error={errors.age}
@@ -85,10 +85,10 @@ export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>)
         testID="patient-age"
       />
       <SegmentedControl<Sex>
-        label="Sexo"
+        label="Sex"
         options={[
-          { value: 'F', label: 'Feminino' },
-          { value: 'M', label: 'Masculino' },
+          { value: 'F', label: 'Female' },
+          { value: 'M', label: 'Male' },
         ]}
         value={sex}
         onChange={setSex}

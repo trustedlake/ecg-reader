@@ -1,15 +1,15 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login/Login'
-import DadosCadastrais from './pages/DadosCadastrais/DadosCadastrais'
+import AccountDetails from './pages/AccountDetails/AccountDetails'
 import Dashboard from './pages/Dashboard/Dashboard'
-import NovoECG from './pages/NovoECG/NovoECG'
-import ConfigECG from './pages/ConfigECG/ConfigECG'
-import PosicionarDerivacoes from './pages/PosicionarDerivacoes/PosicionarDerivacoes'
-import AjustesImagem from './pages/AjustesImagem/AjustesImagem'
-import DadosPaciente from './pages/DadosPaciente/DadosPaciente'
+import NewECG from './pages/NewECG/NewECG'
+import ECGSettings from './pages/ECGSettings/ECGSettings'
+import LeadPlacement from './pages/LeadPlacement/LeadPlacement'
+import ImageAdjustments from './pages/ImageAdjustments/ImageAdjustments'
+import PatientDetails from './pages/PatientDetails/PatientDetails'
 import ECGViewer from './pages/ECGViewer/ECGViewer'
-import Laudo from './pages/Laudo/Laudo'
-import PlanosPagamento from './pages/PlanosPagamento/PlanosPagamento'
+import Report from './pages/Report/Report'
+import PaymentPlans from './pages/PaymentPlans/PaymentPlans'
 import Feedback from './pages/Feedback/Feedback'
 import UploadECG from './pages/UploadECG/UploadECG'
 import NotFound from './pages/NotFound/NotFound'
@@ -20,17 +20,17 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/dados-cadastrais" element={<DadosCadastrais />} />
+      <Route path="/account-details" element={<AccountDetails />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/novo-ecg" element={<ProtectedRoute><NovoECG /></ProtectedRoute>} />
-      <Route path="/config-ecg" element={<ProtectedRoute><ConfigECG /></ProtectedRoute>} />
-      <Route path="/posicionar-derivacoes" element={<ProtectedRoute><PosicionarDerivacoes /></ProtectedRoute>} />
-      <Route path="/ajustes-imagem" element={<ProtectedRoute><AjustesImagem /></ProtectedRoute>} />
-      <Route path="/dados-paciente" element={<ProtectedRoute><DadosPaciente /></ProtectedRoute>} />
+      <Route path="/new-ecg" element={<ProtectedRoute><NewECG /></ProtectedRoute>} />
+      <Route path="/ecg-settings" element={<ProtectedRoute><ECGSettings /></ProtectedRoute>} />
+      <Route path="/lead-placement" element={<ProtectedRoute><LeadPlacement /></ProtectedRoute>} />
+      <Route path="/image-adjustments" element={<ProtectedRoute><ImageAdjustments /></ProtectedRoute>} />
+      <Route path="/patient-details" element={<ProtectedRoute><PatientDetails /></ProtectedRoute>} />
       <Route path="/ecg-viewer" element={<ProtectedRoute><ECGViewer /></ProtectedRoute>} />
-      <Route path="/laudo" element={<ProtectedRoute><Laudo /></ProtectedRoute>} />
-      <Route path="/laudo/:examId" element={<ProtectedRoute><Laudo /></ProtectedRoute>} />
-      <Route path="/planos" element={<ProtectedRoute><PlanosPagamento /></ProtectedRoute>} />
+      <Route path="/report" element={<ProtectedRoute><Report /></ProtectedRoute>} />
+      <Route path="/report/:examId" element={<ProtectedRoute><Report /></ProtectedRoute>} />
+      <Route path="/plans" element={<ProtectedRoute><PaymentPlans /></ProtectedRoute>} />
       <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
       <Route path="/upload" element={<ProtectedRoute><UploadECG /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />

@@ -18,7 +18,7 @@ export default function Login() {
       await login(identifier, password)
       navigate('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Não foi possível entrar. Tente novamente.')
+      setError(err instanceof Error ? err.message : 'Could not sign in. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -33,18 +33,18 @@ export default function Login() {
           </svg>
         </div>
 
-        <h1 className={styles.title}>Leitor ECG</h1>
-        <p className={styles.subtitle}>Leitura e análise de ECG</p>
+        <h1 className={styles.title}>ECG Reader</h1>
+        <p className={styles.subtitle}>ECG reading and analysis</p>
 
         <form className={styles.form} onSubmit={(e) => { e.preventDefault(); void handleSubmit() }}>
           <Input
-            label="Usuário ou e-mail"
+            label="Username or email"
             value={identifier}
             onChangeText={setIdentifier}
             autoComplete="username"
           />
           <Input
-            label="Senha"
+            label="Password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -54,15 +54,15 @@ export default function Login() {
           {error && <p className={styles.error}>{error}</p>}
 
           <Button fullWidth disabled={loading} onPress={() => void handleSubmit()}>
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
 
-        {/* <button className={styles.signupLink} onClick={() => navigate('/dados-cadastrais')}>
-          Criar nova conta
+        {/* <button className={styles.signupLink} onClick={() => navigate('/account-details')}>
+          Create new account
         </button> */}
 
-        <span className={styles.version}>Ambiente de testes · Versão 1.1.14</span>
+        <span className={styles.version}>Test environment · Version 1.1.14</span>
       </div>
     </div>
   )

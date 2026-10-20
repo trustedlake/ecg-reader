@@ -1,50 +1,50 @@
-# Rodar o app mobile (Expo) localmente
+# Run the mobile app (Expo) locally
 
-Guia validado em 2026-10-20 (Windows). Resultado esperado: tela de login "Leitor ECG" no navegador e no Expo Go.
+Guide validated on 2026-10-20 (Windows). Expected result: the "ECG Reader" login screen in the browser and in Expo Go.
 
-## 1. Pré-requisitos
+## 1. Prerequisites
 
-| Item | Detalhe |
+| Item | Detail |
 |---|---|
-| Repo atualizado | `git pull` em `main` (fluxo V1 do PR #4 já está nele) |
-| Dependências | `npm ci` na **raiz** do repo (nunca `npm install --prefix apps/mobile`, veja "Armadilhas") |
-| Celular | Expo Go, na **mesma rede Wi-Fi** do PC |
+| Up-to-date repo | `git pull` on `main` (the V1 flow from PR #4 is already there) |
+| Dependencies | `npm ci` at the repo **root** (never `npm install --prefix apps/mobile`, see "Pitfalls") |
+| Phone | Expo Go, on the **same Wi-Fi network** as the PC |
 
-## 2. Configuração: `apps/mobile/.env` (gitignored)
+## 2. Configuration: `apps/mobile/.env` (gitignored)
 
 ```
 EXPO_PUBLIC_API_BASE_URL=https://d1i155fprtk4at.cloudfront.net
 RCT_METRO_PORT=8142
 ```
 
-- `EXPO_PUBLIC_API_BASE_URL` é obrigatória no celular. Aponta para o **backend de produção** (CloudFront), não para um backend local.
-- `RCT_METRO_PORT=8142` evita a porta padrão 8081 (cada projeto tem a sua porta).
+- `EXPO_PUBLIC_API_BASE_URL` is required on the phone. It points to the **production backend** (CloudFront), not to a local backend.
+- `RCT_METRO_PORT=8142` avoids the default port 8081 (each project has its own port).
 
-## 3. Subir
+## 3. Start
 
 ```powershell
 cd apps\mobile
 npx expo start --lan --clear
 ```
 
-| Onde abrir | Como |
+| Where to open | How |
 |---|---|
-| Navegador | `http://localhost:8142` |
-| Expo Go | "Enter URL manually" -> `exp://<IP-do-PC>:8142` (veja com `ipconfig`) |
+| Browser | `http://localhost:8142` |
+| Expo Go | "Enter URL manually" -> `exp://<PC-IP>:8142` (find it with `ipconfig`) |
 
-Se o celular não conectar, libere a porta 8142 no firewall do Windows (exige admin).
-A primeira compilação do Metro demora; use `--clear` após mexer em `node_modules`.
+If the phone does not connect, allow port 8142 in the Windows firewall (requires admin).
+The first Metro build is slow; use `--clear` after touching `node_modules`.
 
 ## 4. Login
 
-O login é usuário/e-mail e senha de uma conta do backend. As contas são criadas pelo dono do sistema no Django Admin. Não há conta de teste versionada.
+Login is the username/email and password of a backend account. Accounts are created by the system owner in the Django Admin. No test account is committed to the repo.
 
-## 5. Armadilhas (erros reais encontrados)
+## 5. Pitfalls (real errors found)
 
-| Sintoma | Causa | Correção |
+| Symptom | Cause | Fix |
 |---|---|---|
-| Tela branca no navegador; log: `Incompatible React versions` (react 19.2.3 x react-dom 19.2.8) | Monorepo: `apps/mobile` fixa React 19.2.3, `apps/web` usa `^19.2.7`; o `react-dom` hoistado na raiz diverge do `react` aninhado do mobile | `npm ci` na raiz resolve (o `react-dom` 19.2.3 fica em `apps/mobile/node_modules`). O Expo Go nativo não é afetado. Correção definitiva: alinhar as versões de React entre web e mobile |
-| `Unable to resolve "rsvp" from ...node_modules\shared\lib\shared.js` | `npm install --prefix apps/mobile` baixou o pacote **`shared` do registry npm** por cima do workspace `packages/shared` | `rm -rf apps/mobile/node_modules` e `npm ci` na raiz. Confira que `node_modules/shared` é symlink para `packages/shared` |
-| `ERR_PACKAGE_PATH_NOT_EXPORTED ./rn-get-polyfills` | `npm install` na raiz sem lockfile atualizou o `react-native` hoistado | `npm ci` (respeita o lockfile) |
+| Blank page in the browser; log: `Incompatible React versions` (react 19.2.3 x react-dom 19.2.8) | Monorepo: `apps/mobile` pins React 19.2.3, `apps/web` uses `^19.2.7`; the `react-dom` hoisted to the root diverges from the mobile app's nested `react` | `npm ci` at the root fixes it (`react-dom` 19.2.3 ends up in `apps/mobile/node_modules`). Native Expo Go is not affected. Permanent fix: align the React versions between web and mobile |
+| `Unable to resolve "rsvp" from ...node_modules\shared\lib\shared.js` | `npm install --prefix apps/mobile` downloaded the **`shared` package from the npm registry** over the `packages/shared` workspace | `rm -rf apps/mobile/node_modules` and `npm ci` at the root. Check that `node_modules/shared` is a symlink to `packages/shared` |
+| `ERR_PACKAGE_PATH_NOT_EXPORTED ./rn-get-polyfills` | `npm install` at the root without a lockfile updated the hoisted `react-native` | `npm ci` (respects the lockfile) |
 
-Regra: instalar dependências **sempre com `npm ci` na raiz**, sem `--prefix`, sem `--no-package-lock`.
+Rule: always install dependencies **with `npm ci` at the root**, no `--prefix`, no `--no-package-lock`.

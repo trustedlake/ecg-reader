@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import PageHeader from '../../components/nav/PageHeader'
 import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button, ChipSelect } from 'shared'
-import styles from './ConfigECG.module.css'
+import styles from './ECGSettings.module.css'
 
 const speedOptions = [
   { value: '5', label: '5 mm/s' },
@@ -21,7 +21,7 @@ const ampOptions = [
   { value: '10', label: '10 mV' },
 ]
 
-export default function ConfigECG() {
+export default function ECGSettings() {
   const navigate = useNavigate()
   const [speed, setSpeed] = useState('25')
   const [amp, setAmp] = useState('1')
@@ -29,12 +29,12 @@ export default function ConfigECG() {
   return (
     <div className={styles.page}>
       <AppBrandHeader />
-      <PageHeader title="Configurações do ECG" />
+      <PageHeader title="ECG Settings" />
 
       <div className={styles.content}>
-        <h2 className={styles.sectionTitle}>Calibração</h2>
+        <h2 className={styles.sectionTitle}>Calibration</h2>
 
-        <p className={styles.label}>1. Velocidade</p>
+        <p className={styles.label}>1. Speed</p>
         <div className={styles.chipSection}>
           <ChipSelect options={speedOptions} value={speed} onChange={setSpeed} />
         </div>
@@ -45,8 +45,8 @@ export default function ConfigECG() {
         </div>
 
         <div className={styles.actions}>
-          <Button fullWidth onPress={() => navigate('/posicionar-derivacoes')}>
-            Confirmar
+          <Button fullWidth onPress={() => navigate('/lead-placement')}>
+            Confirm
           </Button>
         </div>
       </div>

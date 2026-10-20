@@ -5,22 +5,22 @@ import { AttemptContext, backToExam, useNewPhoto } from './common'
 import type { AttemptViewProps } from './common'
 
 const TEXTS = {
-  rejeitado_usuario: {
-    title: 'Leitura recusada',
-    box: 'Você recusou esta leitura',
-    body: 'Tire uma nova foto do mesmo ECG. Ela vira uma nova tentativa neste exame.',
+  user_rejected: {
+    title: 'Reading refused',
+    box: 'You refused this reading',
+    body: 'Take a new photo of the same ECG. It becomes a new attempt on this exam.',
   },
-  criado: {
-    title: 'Envio não concluído',
-    box: 'A foto desta tentativa não chegou a ser enviada',
-    body: 'Tire ou escolha a foto de novo para continuar este exame.',
+  created: {
+    title: 'Upload not completed',
+    box: 'The photo for this attempt was never uploaded',
+    body: 'Take or choose the photo again to continue this exam.',
   },
 } as const
 
-/** Tentativas encerradas sem desfecho da lambda: recusada pelo usuário ou abandonada antes do envio. */
+/** Attempts that ended without an outcome from the lambda: refused by the user or abandoned before upload. */
 export default function NewPhotoView({ exam, attempt, navigation, banner }: AttemptViewProps) {
   const newPhoto = useNewPhoto(exam, attempt, navigation)
-  const text = attempt.status === 'criado' ? TEXTS.criado : TEXTS.rejeitado_usuario
+  const text = attempt.status === 'created' ? TEXTS.created : TEXTS.user_rejected
 
   return (
     <Screen
@@ -29,10 +29,10 @@ export default function NewPhotoView({ exam, attempt, navigation, banner }: Atte
       footer={
         <>
           <Button fullWidth onPress={newPhoto} testID="new-photo">
-            Tirar nova foto
+            Take a new photo
           </Button>
           <Button fullWidth variant="outline" onPress={() => backToExam(navigation, exam.id)}>
-            Voltar ao exame
+            Back to exam
           </Button>
         </>
       }

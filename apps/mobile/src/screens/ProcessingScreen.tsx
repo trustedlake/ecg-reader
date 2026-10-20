@@ -13,16 +13,16 @@ import Screen from '../ui/Screen'
 type Step = 'create' | 'upload' | 'start' | 'poll'
 
 const STEP_LABELS: Record<Step, string> = {
-  create: 'Preparando o envio',
-  upload: 'Enviando a foto',
-  start: 'Iniciando a leitura',
-  poll: 'Processando',
+  create: 'Preparing the upload',
+  upload: 'Uploading the photo',
+  start: 'Starting the reading',
+  poll: 'Processing',
 }
 
 const POLL_MESSAGES: Partial<Record<AttemptStatus, string>> = {
-  leitura_processando:
-    'Lendo o ECG: detectando a grade e extraindo o traçado das derivações. Isso costuma levar de 1 a 3 minutos…',
-  interpretacao_processando: 'Interpretando o sinal: ritmo, frequência e medidas…',
+  reading:
+    'Reading the ECG: detecting the grid and extracting the trace of each lead. This usually takes 1 to 3 minutes…',
+  interpreting: 'Interpreting the signal: rhythm, rate and measurements…',
 }
 
 function isAbort(error: unknown): boolean {
@@ -34,7 +34,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
   const { api } = useApi()
   const { draft, clear } = useAttemptDraft()
 
-  // Com attemptId (vindo de aceitar/tentar de novo), só acompanha; sem, cria a partir do rascunho.
+  // With an attemptId (coming from accept/retry), it only follows along; without one, it creates from the draft.
   const attemptIdRef = useRef<string | null>(route.params.attemptId ?? null)
   const uploadRef = useRef<{ url: string; headers: Record<string, string> } | null>(null)
   const stepRef = useRef<Step>(route.params.attemptId ? 'poll' : 'create')
@@ -57,7 +57,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
     controllerRef.current = controller
     const { signal } = controller
     const checkAborted = () => {
-      if (signal.aborted) throw Object.assign(new Error('cancelado'), { name: 'AbortError' })
+      if (signal.aborted) throw Object.assign(new Error('cancelled'), { name: 'AbortError' })
     }
     setError(null)
     setRunning(true)
@@ -65,7 +65,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
     try {
       const current = draftRef.current
       if (stepRef.current === 'create') {
-        if (!current?.image || !current.layout) throw new Error('Rascunho incompleto')
+        if (!current?.image || !current.layout) throw new Error('Incomplete draft')
         const input: CreateAttemptInput = {
           filename: current.image.filename,
           content_type: current.image.contentType,
@@ -94,7 +94,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
         try {
           attempt = await api.startRead(examId, attemptId)
         } catch (err) {
-          // 409: a leitura já tinha sido iniciada (ex.: a resposta anterior se perdeu na rede).
+          // 409: the reading had already been started (e.g. the previous response was lost on the network).
           if (!(err instanceof ApiError && err.kind === 'conflict')) throw err
         }
         checkAborted()
@@ -112,8 +112,8 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
       if (route.params.attemptId) {
         navigation.replace('AttemptState', { examId, attemptId })
       } else {
-        // Tentativa nova: as telas de foto e layout saem da pilha (o rascunho acabou), então
-        // "voltar" no resultado leva ao exame, também no histórico do navegador.
+        // New attempt: the photo and layout screens leave the stack (the draft is done), so
+        // "back" from the result leads to the exam, also in the browser history.
         clear()
         navigation.reset({
           index: 2,
@@ -126,19 +126,19 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
       }
     } catch (err) {
       if (isAbort(err) || signal.aborted) return
-      setError(err instanceof Error && err.message === 'Rascunho incompleto' ? 'Os dados da foto se perderam. Volte e escolha a foto de novo.' : errorMessage(err))
+      setError(err instanceof Error && err.message === 'Incomplete draft' ? 'The photo data was lost. Go back and choose the photo again.' : errorMessage(err))
     } finally {
       if (!signal.aborted) setRunning(false)
     }
   }, [api, clear, examId, navigation, route.params.attemptId])
 
-  // Tentativa nova sem rascunho (página recarregada ou "voltar" do navegador depois do envio): volta ao exame.
+  // New attempt without a draft (page reloaded or browser "back" after the upload): returns to the exam.
   const draftMissing = !route.params.attemptId && !draftRef.current
 
   useEffect(() => {
     if (draftMissing) return
     void run()
-    // Sair da tela (voltar, cancelar, trocar de pilha no logout) interrompe o polling.
+    // Leaving the screen (back, cancel, switching stacks on logout) stops the polling.
     return () => controllerRef.current?.abort()
   }, [draftMissing, run])
 
@@ -151,22 +151,22 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
   if (draftMissing) return <MissingDraft examId={examId} navigation={navigation} />
 
   const polling = step === 'poll'
-  const message = polling ? (status && POLL_MESSAGES[status]) ?? 'Consultando o andamento…' : STEP_LABELS[step]
+  const message = polling ? (status && POLL_MESSAGES[status]) ?? 'Checking progress…' : STEP_LABELS[step]
   const steps: Step[] = route.params.attemptId ? ['poll'] : ['create', 'upload', 'start', 'poll']
   const currentIndex = steps.indexOf(step)
 
   return (
     <Screen
-      title="Processando"
+      title="Processing"
       footer={
         <>
           {error && (
             <Button fullWidth onPress={() => void run()} testID="processing-retry">
-              Tentar de novo
+              Try again
             </Button>
           )}
           <Button fullWidth variant="outline" onPress={cancel} testID="processing-cancel">
-            {polling ? 'Sair e acompanhar depois' : 'Cancelar'}
+            {polling ? 'Leave and check back later' : 'Cancel'}
           </Button>
         </>
       }
@@ -176,7 +176,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
         <Text style={styles.message}>{message}</Text>
         {polling && running && (
           <Text style={styles.note}>
-            Pode levar alguns minutos. Se sair, o processamento continua e o resultado aparece na lista de exames.
+            This may take a few minutes. If you leave, processing continues and the result appears in the exam list.
           </Text>
         )}
       </View>
@@ -200,7 +200,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
 
       {error && <ErrorBanner message={error} />}
       {draft?.testScenario && !route.params.attemptId && (
-        <Text style={styles.testTag}>Modo de teste ativo nesta tentativa</Text>
+        <Text style={styles.testTag}>Test mode active for this attempt</Text>
       )}
     </Screen>
   )

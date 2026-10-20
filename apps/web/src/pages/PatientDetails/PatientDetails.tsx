@@ -4,19 +4,19 @@ import PageHeader from '../../components/nav/PageHeader'
 import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button, CheckboxGroup, ChipSelect, Input, useAuth, useExamDraft } from 'shared'
 import { apiFetch } from '../../platform/api'
-import styles from './DadosPaciente.module.css'
+import styles from './PatientDetails.module.css'
 
 const reasonOptions = [
-  { value: 'rotina', label: 'Exame completo de rotina' },
-  { value: 'dor', label: 'Dor precordial' },
-  { value: 'dispneia', label: 'Dispneia' },
-  { value: 'sincope', label: 'Síncope' },
-  { value: 'taquicardia', label: 'Taquicardia (palpitações)' },
+  { value: 'routine', label: 'Routine full exam' },
+  { value: 'chest-pain', label: 'Chest pain' },
+  { value: 'dyspnea', label: 'Dyspnea' },
+  { value: 'syncope', label: 'Syncope' },
+  { value: 'tachycardia', label: 'Tachycardia (palpitations)' },
 ]
 
 const genderOptions = [
-  { value: 'M', label: 'Masculino' },
-  { value: 'F', label: 'Feminino' },
+  { value: 'M', label: 'Male' },
+  { value: 'F', label: 'Female' },
 ]
 
 interface CreateExamResponse {
@@ -26,10 +26,9 @@ interface CreateExamResponse {
 interface CreateAttemptResponse {
   attempt_id: string
   upload_url: string
-  imagem_s3_key: string
 }
 
-export default function DadosPaciente() {
+export default function PatientDetails() {
   const navigate = useNavigate()
   const { token } = useAuth()
   const { imageFile, setExamCreated, setAttemptCreated } = useExamDraft()
@@ -44,16 +43,16 @@ export default function DadosPaciente() {
     setError(null)
 
     if (!name.trim()) {
-      setError('Informe o nome do paciente.')
+      setError("Enter the patient's name.")
       return
     }
     const ageNumber = Number(age)
     if (!age.trim() || !Number.isFinite(ageNumber) || ageNumber <= 0) {
-      setError('Informe uma idade válida (maior que 0).')
+      setError('Enter a valid age (greater than 0).')
       return
     }
     if (!imageFile) {
-      setError('Nenhuma imagem capturada — volte e capture o ECG.')
+      setError('No image captured: go back and capture the ECG.')
       return
     }
 
@@ -93,12 +92,12 @@ export default function DadosPaciente() {
         body: imageFile,
       })
       if (!uploadResponse.ok) {
-        throw new Error(`Falha no upload da imagem para o S3 (HTTP ${uploadResponse.status}).`)
+        throw new Error(`Image upload to S3 failed (HTTP ${uploadResponse.status}).`)
       }
 
       navigate('/ecg-viewer')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Não foi possível criar o exame. Tente novamente.')
+      setError(err instanceof Error ? err.message : 'Could not create the exam. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -107,33 +106,33 @@ export default function DadosPaciente() {
   return (
     <div className={styles.page}>
       <AppBrandHeader />
-      <PageHeader title="Dados do Paciente" />
+      <PageHeader title="Patient Details" />
 
       <div className={styles.content}>
-        <h2 className={styles.sectionTitle}>Dados do Paciente</h2>
+        <h2 className={styles.sectionTitle}>Patient Details</h2>
 
         <div className={styles.fields}>
           <Input
-            label="Nome completo do paciente"
+            label="Patient's full name"
             value={name}
             onChangeText={setName}
           />
           <Input
-            label="Idade do paciente"
+            label="Patient's age"
             value={age}
             onChangeText={setAge}
             keyboardType="numeric"
           />
         </div>
 
-        <h2 className={styles.sectionTitle}>Gênero</h2>
+        <h2 className={styles.sectionTitle}>Sex</h2>
 
         <div className={styles.chipSection}>
           <ChipSelect options={genderOptions} value={gender} onChange={setGender} />
         </div>
 
-        <h2 className={styles.sectionTitle}>Motivo do Exame</h2>
-        <span className={styles.optional}>Opcional</span>
+        <h2 className={styles.sectionTitle}>Reason for Exam</h2>
+        <span className={styles.optional}>Optional</span>
 
         <CheckboxGroup options={reasonOptions} values={reasons} onChange={setReasons} />
 
@@ -141,7 +140,7 @@ export default function DadosPaciente() {
 
         <div className={styles.actions}>
           <Button fullWidth disabled={loading} onPress={handleConfirm}>
-            {loading ? 'Enviando...' : 'Confirmar'}
+            {loading ? 'Sending...' : 'Confirm'}
           </Button>
         </div>
       </div>

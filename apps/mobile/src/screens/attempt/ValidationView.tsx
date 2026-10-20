@@ -9,7 +9,7 @@ import ZoomableImage from '../../ui/ZoomableImage'
 import { AttemptContext, backToExam, useAttemptAction, viewStyles } from './common'
 import type { AttemptViewProps } from './common'
 
-/** aguardando_validacao: o usuário confere o overlay (grade + traço) e aceita ou recusa a leitura. */
+/** awaiting_validation: the user checks the overlay (grid + trace) and accepts or refuses the reading. */
 export default function ValidationView({ exam, attempt, navigation, reload, banner }: AttemptViewProps) {
   const { api } = useApi()
   const { busy, error, run } = useAttemptAction(reload)
@@ -27,31 +27,31 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
     run(async () => {
       await api.reject(exam.id, attempt.id)
       setConfirmingReject(false)
-      reload() // rejeitado_usuario → NewPhotoView oferece a nova foto
+      reload() // user_rejected → NewPhotoView offers the new photo
     })
 
   return (
     <Screen
-      title="Confira a leitura"
+      title="Check the reading"
       onBack={() => backToExam(navigation, exam.id)}
       footer={
         confirmingReject ? (
           <View style={styles.confirm} accessibilityRole="alert">
-            <Text style={styles.confirmText}>Recusar esta leitura? Você vai precisar tirar outra foto.</Text>
+            <Text style={styles.confirmText}>Refuse this reading? You will need to take another photo.</Text>
             <Button fullWidth variant="danger" loading={busy} onPress={() => void reject()} testID="reject-confirm">
-              Sim, recusar
+              Yes, refuse
             </Button>
             <Button fullWidth variant="outline" disabled={busy} onPress={() => setConfirmingReject(false)}>
-              Cancelar
+              Cancel
             </Button>
           </View>
         ) : (
           <>
             <Button fullWidth loading={busy} onPress={() => void accept()} testID="accept">
-              Aceitar leitura
+              Accept reading
             </Button>
             <Button fullWidth variant="outline" disabled={busy} onPress={() => setConfirmingReject(true)} testID="reject">
-              Recusar
+              Refuse
             </Button>
           </>
         )
@@ -60,27 +60,27 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
       {banner}
       <AttemptContext exam={exam} attempt={attempt} />
       <Text style={viewStyles.text}>
-        As linhas desenhadas por cima da foto mostram a grade e o traçado que o sistema extraiu. Amplie e confira se o
-        traçado acompanha o do papel em todas as derivações antes de aceitar.
+        The lines drawn over the photo show the grid and the trace the system extracted. Zoom in and check that the
+        trace matches the one on the paper in every lead before accepting.
       </Text>
 
       {image ? (
-        <ZoomableImage uri={image} accessibilityLabel="Foto do ECG com a grade e o traçado extraído" testID="overlay" />
+        <ZoomableImage uri={image} accessibilityLabel="ECG photo with the grid and the extracted trace" testID="overlay" />
       ) : (
-        <InfoBox>A imagem da leitura não está disponível no momento. Atualize a tela para tentar de novo.</InfoBox>
+        <InfoBox>The reading image is not available right now. Refresh the screen to try again.</InfoBox>
       )}
 
-      {reading && <WarningList title="Avisos da leitura" warnings={reading.warnings} />}
+      {reading && <WarningList title="Reading warnings" warnings={reading.warnings} />}
 
       {reading && reading.leads.length > 0 && (
         <View style={styles.leads}>
-          <Text style={viewStyles.section}>Qualidade por derivação</Text>
+          <Text style={viewStyles.section}>Quality per lead</Text>
           <View style={styles.chips}>
             {reading.leads.map((lead) => {
               const quality = LEAD_QUALITY_LABELS[lead.quality]
-              const name = lead.kind === 'rhythm' ? `${lead.name} (ritmo)` : lead.name
+              const name = lead.kind === 'rhythm' ? `${lead.name} (rhythm)` : lead.name
               return (
-                <View key={`${lead.name}-${lead.kind}`} style={styles.chip} accessibilityLabel={`${name}: qualidade ${quality.label}`}>
+                <View key={`${lead.name}-${lead.kind}`} style={styles.chip} accessibilityLabel={`${name}: ${quality.label} quality`}>
                   <Text style={styles.chipName}>{name}</Text>
                   <Tag label={quality.label} icon={quality.icon} tone={quality.tone} />
                 </View>

@@ -96,7 +96,7 @@ export default function SideMenu({ open, onClose, items, onLogout }: SideMenuPro
           onPress={handleLogoutPress}
         >
           <LogoutIcon color={colors.secondary} size={20} />
-          <Text style={styles.logoutText}>Sair</Text>
+          <Text style={styles.logoutText}>Sign out</Text>
         </Pressable>
       </Animated.View>
     </View>

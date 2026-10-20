@@ -1,7 +1,7 @@
 import PageHeader from '../../components/nav/PageHeader'
 import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button } from 'shared'
-import styles from './PlanosPagamento.module.css'
+import styles from './PaymentPlans.module.css'
 
 interface PlanCardProps {
   name: string
@@ -24,7 +24,7 @@ function PlanCard({ name, price, features, highlighted, onSelect }: PlanCardProp
         ))}
       </ul>
       <Button fullWidth variant={highlighted ? 'primary' : 'outline'} onPress={onSelect}>
-        {highlighted ? 'Assinar' : 'Assinar'}
+        Subscribe
       </Button>
     </div>
   )
@@ -32,30 +32,30 @@ function PlanCard({ name, price, features, highlighted, onSelect }: PlanCardProp
 
 const plans = [
   {
-    name: 'Essencial',
-    price: 'R$ 29,90',
-    features: ['10 exames/mês', 'Laudo automático', 'Suporte por email'],
+    name: 'Essential',
+    price: '$9.99',
+    features: ['10 exams/month', 'Automatic report', 'Email support'],
     highlighted: false,
   },
   {
-    name: 'Profissional',
-    price: 'R$ 59,90',
-    features: ['50 exames/mês', 'Laudo automático', 'Suporte prioritário', 'Exportação PDF'],
+    name: 'Professional',
+    price: '$19.99',
+    features: ['50 exams/month', 'Automatic report', 'Priority support', 'PDF export'],
     highlighted: true,
   },
   {
     name: 'Premium',
-    price: 'R$ 99,90',
-    features: ['Exames ilimitados', 'Laudo automático', 'Suporte 24h', 'Exportação PDF', 'API access'],
+    price: '$34.99',
+    features: ['Unlimited exams', 'Automatic report', '24/7 support', 'PDF export', 'API access'],
     highlighted: false,
   },
 ]
 
-export default function PlanosPagamento() {
+export default function PaymentPlans() {
   return (
     <div className={styles.page}>
       <AppBrandHeader />
-      <PageHeader title="Planos de Pagamento" />
+      <PageHeader title="Payment Plans" />
 
       <div className={styles.content}>
         {plans.map((plan) => (

@@ -10,11 +10,11 @@ terraform {
     }
   }
 
-  # Reusa o bucket de state do ecg-lambdas, em key propria - nao toca o state dele.
+  # Dedicated state bucket (versioned, private).
   backend "s3" {
-    bucket = "ecg-lambdas-terraform-state"
-    key    = "leitor-ecg/terraform.tfstate"
-    region = "sa-east-1"
+    bucket = "ecg-reader-terraform-state-785236377332"
+    key    = "ecg-reader/terraform.tfstate"
+    region = "us-east-1"
   }
 }
 
@@ -24,11 +24,12 @@ provider "aws" {
 }
 
 locals {
-  app_name = "leitor-ecg"
+  app_name = "ecg-reader"
+  app_host = "app.${var.domain}"
 }
 
-# Sufixo unico (8 chars hex) do bucket. Keeper fixo: impede o random_id de
-# regenerar e "trocar" o nome do bucket em runs futuros.
+# Unique bucket suffix (8 hex chars). Fixed keeper: stops random_id from
+# regenerating and "changing" the bucket name in future runs.
 resource "random_id" "bucket_suffix" {
   keepers = {
     app_name = local.app_name
@@ -36,9 +37,9 @@ resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
 
-# Bucket privado: nada de publico. Acesso sai so via CloudFront + OAC.
+# Private bucket: nothing public. Access only through CloudFront + OAC.
 resource "aws_s3_bucket" "spa" {
-  bucket = "leitor-ecg-spa-${random_id.bucket_suffix.hex}"
+  bucket = "${local.app_name}-spa-${random_id.bucket_suffix.hex}"
   tags = {
     Name = "${local.app_name}-spa"
   }
@@ -52,17 +53,17 @@ resource "aws_s3_bucket_public_access_block" "spa" {
   restrict_public_buckets = true
 }
 
-# OAC (Origin Access Control): acesso autenticado do CloudFront ao bucket.
+# OAC (Origin Access Control): authenticated CloudFront access to the bucket.
 resource "aws_cloudfront_origin_access_control" "spa" {
   name                              = "${local.app_name}-oac"
-  description                       = "OAC entre CloudFront e o bucket estatico do ${local.app_name}"
+  description                       = "OAC between CloudFront and the ${local.app_name} static bucket"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
 
-# Bucket policy: GetObject SO para este CloudFront (via OAC). Nao e publico
-# relativo a block_public_policy acima: o principal e o servico CloudFront.
+# Bucket policy: GetObject ONLY for this CloudFront (via OAC). Not public
+# under block_public_policy above: the principal is the CloudFront service.
 resource "aws_s3_bucket_policy" "spa" {
   bucket = aws_s3_bucket.spa.id
   policy = jsonencode({
@@ -85,23 +86,17 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
-# Zones ja existentes no Route53 (nao criadas por este state).
-data "aws_route53_zone" "leitorecg_com_br" {
-  name         = "leitorecg.com.br."
+# Zone that already exists in Route53 (not created by this state).
+data "aws_route53_zone" "main" {
+  name         = "${var.domain}."
   private_zone = false
 }
 
-data "aws_route53_zone" "leitorecg_com" {
-  name         = "leitorecg.com."
-  private_zone = false
-}
-
-# Certificado unico cobrindo os dois dominios. Precisa estar em us-east-1
-# (provider ja e us-east-1) para o CloudFront aceitar.
+# Certificate for the app host. Must be in us-east-1
+# (the provider already is) for CloudFront to accept it.
 resource "aws_acm_certificate" "spa" {
-  domain_name               = "app.leitorecg.com.br"
-  subject_alternative_names = ["app.leitorecg.com"]
-  validation_method          = "DNS"
+  domain_name       = local.app_host
+  validation_method = "DNS"
 
   lifecycle {
     create_before_destroy = true
@@ -114,7 +109,7 @@ resource "aws_route53_record" "spa_cert_validation" {
       name    = dvo.resource_record_name
       record  = dvo.resource_record_value
       type    = dvo.resource_record_type
-      zone_id = dvo.domain_name == "app.leitorecg.com" ? data.aws_route53_zone.leitorecg_com.zone_id : data.aws_route53_zone.leitorecg_com_br.zone_id
+      zone_id = data.aws_route53_zone.main.zone_id
     }
   }
 
@@ -133,10 +128,10 @@ resource "aws_acm_certificate_validation" "spa" {
 
 resource "aws_cloudfront_distribution" "spa" {
   enabled             = true
-  comment             = "SPA ${local.app_name} (React) servida do S3"
+  comment             = "SPA ${local.app_name} (React) served from S3"
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
-  aliases             = ["app.leitorecg.com.br", "app.leitorecg.com"]
+  aliases             = [local.app_host]
 
   origin {
     domain_name              = aws_s3_bucket.spa.bucket_regional_domain_name
@@ -154,8 +149,8 @@ resource "aws_cloudfront_distribution" "spa" {
     compress = true
   }
 
-  # SPA com client-side routing (react-router): qualquer 403/404 cai no
-  # index.html com status 200.
+  # SPA with client-side routing (react-router): any 403/404 falls back to
+  # index.html with status 200.
   custom_error_response {
     error_code         = 403
     response_code      = 200
@@ -182,20 +177,8 @@ resource "aws_cloudfront_distribution" "spa" {
 }
 
 resource "aws_route53_record" "spa_app" {
-  zone_id = data.aws_route53_zone.leitorecg_com_br.zone_id
-  name    = "app.leitorecg.com.br"
-  type    = "A"
-
-  alias {
-    name                   = aws_cloudfront_distribution.spa.domain_name
-    zone_id                = aws_cloudfront_distribution.spa.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
-resource "aws_route53_record" "spa_app_com" {
-  zone_id = data.aws_route53_zone.leitorecg_com.zone_id
-  name    = "app.leitorecg.com"
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = local.app_host
   type    = "A"
 
   alias {

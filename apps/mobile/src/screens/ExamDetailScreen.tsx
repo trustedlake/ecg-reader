@@ -11,18 +11,18 @@ import { ErrorNotice, LoadingView, StatusBadge } from '../ui/Feedback'
 import { CLASSIFICATION_LABELS, LAYOUT_LABELS, SEX_LABELS, STATUS_LABELS, formatDateTime } from '../ui/labels'
 import Screen from '../ui/Screen'
 
-/** Uma linha sobre o desfecho, para o histórico: classificação, motivo da recusa ou do erro. */
+/** One line about the outcome, for the history: classification, or the reason for the refusal or error. */
 function outcomeLine(attempt: Attempt): string | null {
-  if (attempt.status === 'concluido') {
+  if (attempt.status === 'completed') {
     const summary = attempt.interpretation?.summary
     return summary ? `${CLASSIFICATION_LABELS[summary.classification].label} · ${summary.headline}` : null
   }
-  if (attempt.status === 'erro_interpretacao') return attempt.interpretation?.error?.message ?? null
-  if (attempt.status === 'leitura_recusada' || attempt.status === 'erro_leitura') return attempt.reading?.error?.message ?? null
+  if (attempt.status === 'interpretation_error') return attempt.interpretation?.error?.message ?? null
+  if (attempt.status === 'reading_refused' || attempt.status === 'reading_error') return attempt.reading?.error?.message ?? null
   return null
 }
 
-/** Histórico do exame: cada tentativa abre a tela do seu estado atual (AttemptState decide qual). */
+/** Exam history: each attempt opens the screen for its current state (AttemptState decides which). */
 export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'ExamDetail'>) {
   const { examId } = route.params
   const { api, config } = useApi()
@@ -53,12 +53,12 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
 
   return (
     <Screen
-      title="Exame"
+      title="Exam"
       onBack={() => navigation.goBack()}
       footer={
         exam ? (
           <Button fullWidth onPress={newAttempt}>
-            Nova foto neste exame
+            New photo for this exam
           </Button>
         ) : undefined
       }
@@ -70,23 +70,23 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
           <View style={styles.block}>
             <Text style={styles.name}>{exam.patient.name}</Text>
             <Text style={styles.meta}>
-              {exam.patient.age} anos{exam.patient.sex ? ` · ${SEX_LABELS[exam.patient.sex]}` : ''}
+              {exam.patient.age} years old{exam.patient.sex ? ` · ${SEX_LABELS[exam.patient.sex]}` : ''}
             </Text>
-            {exam.reason ? <Text style={styles.meta}>Motivo: {exam.reason}</Text> : null}
+            {exam.reason ? <Text style={styles.meta}>Reason: {exam.reason}</Text> : null}
             <StatusBadge status={exam.status} />
           </View>
-          <Text style={styles.section}>Tentativas</Text>
-          {(exam.attempts ?? []).length === 0 && <Text style={styles.meta}>Nenhuma foto enviada ainda.</Text>}
+          <Text style={styles.section}>Attempts</Text>
+          {(exam.attempts ?? []).length === 0 && <Text style={styles.meta}>No photo submitted yet.</Text>}
           {(exam.attempts ?? []).map((attempt, index, all) => (
             <Pressable
               key={attempt.id}
               onPress={() => navigation.navigate('AttemptState', { examId, attemptId: attempt.id })}
               accessibilityRole="button"
-              accessibilityLabel={`Tentativa ${all.length - index}: ${STATUS_LABELS[attempt.status]}`}
+              accessibilityLabel={`Attempt ${all.length - index}: ${STATUS_LABELS[attempt.status]}`}
               style={({ pressed }) => [styles.card, pressed && styles.pressed]}
             >
               <Text style={styles.cardTitle}>
-                Tentativa {all.length - index} · {LAYOUT_LABELS[attempt.layout]}
+                Attempt {all.length - index} · {LAYOUT_LABELS[attempt.layout]}
               </Text>
               <Text style={styles.meta}>{formatDateTime(attempt.created_at)}</Text>
               <StatusBadge status={attempt.status} />

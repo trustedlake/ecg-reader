@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import PageHeader from '../../components/nav/PageHeader'
 import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button, useExamDraft } from 'shared'
-import styles from './NovoECG.module.css'
+import styles from './NewECG.module.css'
 
-export default function NovoECG() {
+export default function NewECG() {
   const navigate = useNavigate()
   const { imageFile, setImageFile } = useExamDraft()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -24,10 +24,10 @@ export default function NovoECG() {
   return (
     <div className={styles.page}>
       <AppBrandHeader />
-      <PageHeader title="Novo ECG" onBack={handleBack} />
+      <PageHeader title="New ECG" onBack={handleBack} />
 
       <div className={styles.content}>
-        <h2 className={styles.sectionTitle}>1. Capturar Imagem do ECG</h2>
+        <h2 className={styles.sectionTitle}>1. Capture ECG Image</h2>
 
         <div
           className={styles.cameraArea}
@@ -54,7 +54,7 @@ export default function NovoECG() {
               <img
                 className={styles.preview}
                 src={URL.createObjectURL(imageFile)}
-                alt="Pré-visualização do ECG"
+                alt="ECG preview"
               />
               <button
                 type="button"
@@ -64,7 +64,7 @@ export default function NovoECG() {
                   fileInputRef.current?.click()
                 }}
               >
-                Não gostou da imagem enviada? Clique aqui
+                Not happy with the uploaded image? Click here
               </button>
             </>
           ) : (
@@ -72,16 +72,16 @@ export default function NovoECG() {
               <div className={styles.cameraButton}>
                 <span className={styles.cameraIcon}>+</span>
               </div>
-              <p className={styles.cameraLabel}>Toque para fotografar o ECG</p>
-              <p className={styles.cameraSub}>Inserir foto do exame</p>
+              <p className={styles.cameraLabel}>Tap to photograph the ECG</p>
+              <p className={styles.cameraSub}>Insert exam photo</p>
             </>
           )}
         </div>
 
         {imageFile && (
           <div className={styles.actions}>
-            <Button fullWidth onPress={() => navigate('/config-ecg')}>
-              Continuar
+            <Button fullWidth onPress={() => navigate('/ecg-settings')}>
+              Continue
             </Button>
           </div>
         )}

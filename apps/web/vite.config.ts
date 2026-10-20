@@ -1,8 +1,8 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Serve api/drive-upload/upload.ts localmente sem precisar do Vercel CLI.
-// Módulo temporário — remover junto com api/drive-upload quando ele sair de uso.
+// Serves api/drive-upload/upload.ts locally without the Vercel CLI.
+// Temporary module: remove together with api/drive-upload when it is no longer used.
 function driveUploadDevMiddleware(): Plugin {
   return {
     name: 'drive-upload-dev-middleware',

@@ -3,18 +3,18 @@ import { colors } from '../theme'
 import Button from './Button'
 import Modal from './Modal'
 
-interface PopupCupomProps {
+interface CouponPopupProps {
   open: boolean
   onClose: () => void
 }
 
-export default function PopupCupom({ open, onClose }: PopupCupomProps) {
+export default function CouponPopup({ open, onClose }: CouponPopupProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <View style={styles.content}>
-        <Text style={styles.title}>Cupom de Desconto</Text>
+        <Text style={styles.title}>Discount Coupon</Text>
         <Text style={styles.description}>
-          Utilize o cupom <Text style={styles.strong}>ECG10</Text> para ganhar 10% de desconto no seu primeiro mês!
+          Use the coupon <Text style={styles.strong}>ECG10</Text> to get 10% off your first month!
         </Text>
         <View style={styles.actions}>
           <Button fullWidth onPress={onClose}>Ok</Button>

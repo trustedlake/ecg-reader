@@ -3,26 +3,29 @@ import { colors } from '../theme'
 import Button from './Button'
 import Modal from './Modal'
 
-interface PopupImagemLida2Props {
+interface SorryPopupProps {
   open: boolean
   onClose: () => void
+  onSendFeedback?: () => void
 }
 
-export default function PopupImagemLida2({ open, onClose }: PopupImagemLida2Props) {
+export default function SorryPopup({ open, onClose, onSendFeedback }: SorryPopupProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <View style={styles.content}>
         <View style={styles.icon}>
-          <Text style={styles.iconText}>!</Text>
+          <Text style={styles.iconText}>:(</Text>
         </View>
-        <Text style={styles.title}>Atenção</Text>
+        <Text style={styles.title}>We're Sorry</Text>
         <Text style={styles.description}>
-          Algumas partes da imagem não foram reconhecidas corretamente.
-          Deseja ajustar a imagem?
+          The ECG image could not be processed. Please try again
+          or contact support.
         </Text>
         <View style={styles.actions}>
-          <Button fullWidth onPress={onClose}>Ajustar Imagem</Button>
-          <Button variant="text" onPress={onClose}>Continuar mesmo assim</Button>
+          <Button fullWidth onPress={onClose}>Try Again</Button>
+          {onSendFeedback && (
+            <Button variant="text" onPress={onSendFeedback}>Send Feedback</Button>
+          )}
         </View>
       </View>
     </Modal>
@@ -38,12 +41,12 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.warning,
+    backgroundColor: colors.error,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconText: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '700',
     color: colors.white,
   },

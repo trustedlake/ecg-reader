@@ -88,11 +88,11 @@ export default function UploadECG() {
     } catch (err) {
       const name = err instanceof DOMException ? err.name : ''
       if (name === 'NotAllowedError' || name === 'SecurityError') {
-        setCameraError('Permissão de câmera negada. Permita o acesso no navegador ou escolha da galeria.')
+        setCameraError('Camera permission denied. Allow access in the browser or choose from the gallery.')
       } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
-        setCameraError('Nenhuma câmera encontrada neste dispositivo.')
+        setCameraError('No camera found on this device.')
       } else {
-        setCameraError('Não foi possível acessar a câmera. Tente novamente ou escolha da galeria.')
+        setCameraError('Could not access the camera. Try again or choose from the gallery.')
       }
     }
   }
@@ -154,7 +154,7 @@ export default function UploadECG() {
       setSentCount(selected.length)
       setStatus('review')
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'Falha ao enviar')
+      setErrorMsg(err instanceof Error ? err.message : 'Upload failed')
       setStatus('error')
     }
   }
@@ -170,7 +170,7 @@ export default function UploadECG() {
       setSelected([])
       setStatus('done')
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'Falha ao confirmar')
+      setErrorMsg(err instanceof Error ? err.message : 'Confirmation failed')
       setStatus('review')
     }
   }
@@ -186,14 +186,14 @@ export default function UploadECG() {
     return (
       <div className={styles.page}>
         <AppBrandHeader />
-        <PageHeader title="Upload de arquivos" />
+        <PageHeader title="Upload files" />
         <div className={styles.content}>
           <div className={styles.confirmCard}>
-            <h1 className={styles.confirmTitle}>Obrigado!</h1>
-            <p className={styles.subtitle}>Recebemos {sentCount} foto{sentCount === 1 ? '' : 's'}.</p>
-            <Button onPress={handleReset}>Enviar mais fotos</Button>
+            <h1 className={styles.confirmTitle}>Thank you!</h1>
+            <p className={styles.subtitle}>We received {sentCount} photo{sentCount === 1 ? '' : 's'}.</p>
+            <Button onPress={handleReset}>Send more photos</Button>
             <Button variant="outline" onPress={() => navigate('/dashboard')}>
-              Concluir
+              Done
             </Button>
           </div>
         </div>
@@ -205,14 +205,14 @@ export default function UploadECG() {
     return (
       <div className={styles.page}>
         <AppBrandHeader />
-        <PageHeader title="Confirmar envio" />
+        <PageHeader title="Confirm upload" />
         <div className={styles.content}>
-          <p className={styles.subtitle}>Confira as fotos enviadas antes de confirmar.</p>
+          <p className={styles.subtitle}>Check the uploaded photos before confirming.</p>
 
           <div className={styles.previewGrid}>
             {selected.map((item, index) => (
               <div key={item.previewUrl} className={styles.previewItem}>
-                <img src={item.previewUrl} alt={`Foto ${index + 1}`} className={styles.previewImg} />
+                <img src={item.previewUrl} alt={`Photo ${index + 1}`} className={styles.previewImg} />
               </div>
             ))}
           </div>
@@ -220,7 +220,7 @@ export default function UploadECG() {
           {errorMsg && <p className={styles.error}>{errorMsg}</p>}
 
           <Button fullWidth disabled={status === 'confirming'} onPress={handleConfirm}>
-            {status === 'confirming' ? 'Confirmando…' : 'Confirmar'}
+            {status === 'confirming' ? 'Confirming…' : 'Confirm'}
           </Button>
         </div>
       </div>
@@ -230,16 +230,16 @@ export default function UploadECG() {
   return (
     <div className={styles.page}>
       <AppBrandHeader />
-      <PageHeader title="Upload de arquivos" />
+      <PageHeader title="Upload files" />
       <div className={styles.content}>
-        <p className={styles.subtitle}>Tire uma foto ou escolha da galeria. Pode enviar várias de uma vez.</p>
+        <p className={styles.subtitle}>Take a photo or choose from the gallery. You can send several at once.</p>
 
         <div className={styles.actionsRow}>
           <Button variant="outline" fullWidth onPress={openCamera}>
-            Tirar foto
+            Take photo
           </Button>
           <Button variant="outline" fullWidth onPress={() => galleryInputRef.current?.click()}>
-            Escolher da galeria
+            Choose from gallery
           </Button>
         </div>
 
@@ -259,13 +259,13 @@ export default function UploadECG() {
           <div className={styles.previewGrid}>
             {selected.map((item, index) => (
               <div key={item.previewUrl} className={styles.previewItem}>
-                <img src={item.previewUrl} alt={`Foto ${index + 1}`} className={styles.previewImg} />
+                <img src={item.previewUrl} alt={`Photo ${index + 1}`} className={styles.previewImg} />
                 <button
                   type="button"
                   className={styles.removeBtn}
                   onClick={() => removeFile(index)}
                   disabled={status === 'uploading'}
-                  aria-label="Remover foto"
+                  aria-label="Remove photo"
                 >
                   ×
                 </button>
@@ -281,7 +281,7 @@ export default function UploadECG() {
           disabled={selected.length === 0 || status === 'uploading'}
           onPress={handleSend}
         >
-          {status === 'uploading' ? 'Enviando…' : `Enviar${selected.length > 0 ? ` (${selected.length})` : ''}`}
+          {status === 'uploading' ? 'Sending…' : `Send${selected.length > 0 ? ` (${selected.length})` : ''}`}
         </Button>
 
         <canvas ref={canvasRef} className={styles.hiddenInput} />
@@ -291,11 +291,11 @@ export default function UploadECG() {
             type="button"
             className={styles.cameraClose}
             onClick={closeCamera}
-            aria-label="Fechar câmera"
+            aria-label="Close camera"
           >
             ×
           </button>
-          <h2 className={styles.cameraTitle}>Tirar foto</h2>
+          <h2 className={styles.cameraTitle}>Take photo</h2>
           {cameraError ? (
             <p className={styles.error}>{cameraError}</p>
           ) : (
@@ -307,20 +307,20 @@ export default function UploadECG() {
                   className={styles.cameraSwitch}
                   onClick={() => void switchCamera()}
                   disabled={!!cameraError}
-                  aria-label="Trocar câmera"
+                  aria-label="Switch camera"
                 >
                   ⇄
                 </button>
               </div>
-              <p className={styles.cameraHint}>Posicione o ECG no enquadramento e toque em Capturar.</p>
+              <p className={styles.cameraHint}>Frame the ECG and tap Capture.</p>
             </>
           )}
           <div className={styles.cameraActions}>
             <Button variant="outline" fullWidth onPress={closeCamera}>
-              Cancelar
+              Cancel
             </Button>
             <Button fullWidth onPress={capturePhoto} disabled={!!cameraError}>
-              Capturar
+              Capture
             </Button>
           </div>
         </Modal>
