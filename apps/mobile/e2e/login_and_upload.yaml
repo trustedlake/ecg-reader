@@ -2,7 +2,7 @@ appId: com.ecg.leitorecg
 ---
 - launchApp:
     clearState: true
-- assertVisible: "Leitor ECG"
+- assertVisible: "ECG Reader"
 - takeScreenshot: 01_login_screen
 - tapOn: "Username"
 - inputText: "qa-mobile@ecg.local"
