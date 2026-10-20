@@ -9,7 +9,7 @@ import type {
   LoginResponse,
   Paginated,
 } from './types'
-import { isProcessing, toAttemptStatus } from './types'
+import { isProcessing } from './types'
 
 export type ApiErrorKind =
   | 'network'
@@ -182,19 +182,6 @@ async function toBlob(file: UploadSource): Promise<Blob> {
   }
 }
 
-/** Recursively converts every `status` field from the backend wire code to the app status. */
-function normalizeStatuses(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(normalizeStatuses)
-  if (value && typeof value === 'object') {
-    const out: Record<string, unknown> = {}
-    for (const [key, item] of Object.entries(value)) {
-      out[key] = key === 'status' && typeof item === 'string' ? toAttemptStatus(item) : normalizeStatuses(item)
-    }
-    return out
-  }
-  return value
-}
-
 export function createApiClient(config: ApiClientConfig): ApiClient {
   const baseUrl = config.baseUrl.replace(/\/+$/, '')
 
@@ -224,7 +211,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     if (response.status === 204) {
       return undefined as T
     }
-    return normalizeStatuses(await response.json()) as T
+    return (await response.json()) as T
   }
 
   const post = <T>(path: string, body?: unknown) =>
