@@ -9,7 +9,7 @@ import ZoomableImage from '../../ui/ZoomableImage'
 import { AttemptContext, backToExam, useAttemptAction, viewStyles } from './common'
 import type { AttemptViewProps } from './common'
 
-/** aguardando_validacao: the user checks the overlay (grid + trace) and accepts or refuses the reading. */
+/** awaiting_validation: the user checks the overlay (grid + trace) and accepts or refuses the reading. */
 export default function ValidationView({ exam, attempt, navigation, reload, banner }: AttemptViewProps) {
   const { api } = useApi()
   const { busy, error, run } = useAttemptAction(reload)
@@ -27,7 +27,7 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
     run(async () => {
       await api.reject(exam.id, attempt.id)
       setConfirmingReject(false)
-      reload() // rejeitado_usuario → NewPhotoView offers the new photo
+      reload() // user_rejected → NewPhotoView offers the new photo
     })
 
   return (

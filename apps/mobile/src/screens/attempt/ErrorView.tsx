@@ -7,20 +7,20 @@ import { AttemptContext, backToExam, useAttemptAction, useNewPhoto, viewStyles }
 import type { AttemptViewProps } from './common'
 
 const PHASE_TITLES = {
-  erro_leitura: 'Reading error',
-  erro_interpretacao: 'Interpretation error',
+  reading_error: 'Reading error',
+  interpretation_error: 'Interpretation error',
 } as const
 
 /**
- * erro_leitura / erro_interpretacao: "Try again" reruns the phase on the same attempt when the backend
+ * reading_error / interpretation_error: "Try again" reruns the phase on the same attempt when the backend
  * allows it (`can_retry`); otherwise the photo is unusable and the way forward is a new attempt.
  */
 export default function ErrorView({ exam, attempt, navigation, reload, banner }: AttemptViewProps) {
   const { api } = useApi()
   const { busy, error, run } = useAttemptAction(reload)
   const newPhoto = useNewPhoto(exam, attempt, navigation)
-  const phase = attempt.status === 'erro_interpretacao' ? 'erro_interpretacao' : 'erro_leitura'
-  const contractError = phase === 'erro_interpretacao' ? attempt.interpretation?.error : attempt.reading?.error
+  const phase = attempt.status === 'interpretation_error' ? 'interpretation_error' : 'reading_error'
+  const contractError = phase === 'interpretation_error' ? attempt.interpretation?.error : attempt.reading?.error
 
   const retry = () =>
     run(async () => {
@@ -52,7 +52,7 @@ export default function ErrorView({ exam, attempt, navigation, reload, banner }:
       {banner}
       <AttemptContext exam={exam} attempt={attempt} />
       <Text style={viewStyles.title} accessibilityRole="header">
-        ✕ {phase === 'erro_interpretacao' ? 'Could not interpret the ECG' : 'Could not read the ECG'}
+        ✕ {phase === 'interpretation_error' ? 'Could not interpret the ECG' : 'Could not read the ECG'}
       </Text>
       <Text style={viewStyles.text} testID="error-message">
         {contractError?.message ?? 'An unexpected error occurred during processing.'}

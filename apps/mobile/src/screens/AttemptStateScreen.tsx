@@ -66,14 +66,14 @@ export default function AttemptStateScreen({ navigation, route }: AppScreenProps
   const banner = error != null ? <ErrorNotice error={error} onRetry={() => void load()} /> : null
 
   switch (data.attempt.status) {
-    case 'aguardando_validacao':
+    case 'awaiting_validation':
       return <ValidationView {...props} banner={banner} />
-    case 'leitura_recusada':
+    case 'reading_refused':
       return <RefusedView {...props} banner={banner} />
-    case 'erro_leitura':
-    case 'erro_interpretacao':
+    case 'reading_error':
+    case 'interpretation_error':
       return <ErrorView {...props} banner={banner} />
-    case 'concluido':
+    case 'completed':
       return <ResultView {...props} banner={banner} />
     default:
       return <NewPhotoView {...props} banner={banner} />

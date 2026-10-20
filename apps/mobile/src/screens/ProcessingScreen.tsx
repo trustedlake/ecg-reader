@@ -20,9 +20,9 @@ const STEP_LABELS: Record<Step, string> = {
 }
 
 const POLL_MESSAGES: Partial<Record<AttemptStatus, string>> = {
-  leitura_processando:
+  reading:
     'Reading the ECG: detecting the grid and extracting the trace of each lead. This usually takes 1 to 3 minutes…',
-  interpretacao_processando: 'Interpreting the signal: rhythm, rate and measurements…',
+  interpreting: 'Interpreting the signal: rhythm, rate and measurements…',
 }
 
 function isAbort(error: unknown): boolean {

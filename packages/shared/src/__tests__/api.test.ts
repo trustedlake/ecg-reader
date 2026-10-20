@@ -39,7 +39,7 @@ const client = createApiClient({ baseUrl: 'https://api.test/', getToken: () => '
 
 describe('requests', () => {
   it('uses baseUrl without a double slash and sends the token', async () => {
-    fetchMock.mockResolvedValueOnce(json(200, attempt('criado')))
+    fetchMock.mockResolvedValueOnce(json(200, attempt('created')))
     await client.getAttempt('e1', 'a1')
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toBe('https://api.test/api/exams/e1/attempts/a1/')
@@ -48,7 +48,7 @@ describe('requests', () => {
 
   it('empty baseUrl = same origin', async () => {
     const sameOrigin = createApiClient({ baseUrl: '', getToken: () => null })
-    fetchMock.mockResolvedValueOnce(json(200, attempt('criado')))
+    fetchMock.mockResolvedValueOnce(json(200, attempt('created')))
     await sameOrigin.startRead('e1', 'a1')
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toBe('/api/exams/e1/attempts/a1/read/')
@@ -168,9 +168,9 @@ describe('pollAttempt', () => {
 
   it('polls at each interval until leaving *_processando', async () => {
     fetchMock
-      .mockResolvedValueOnce(json(200, attempt('leitura_processando')))
-      .mockResolvedValueOnce(json(200, attempt('leitura_processando')))
-      .mockResolvedValueOnce(json(200, attempt('aguardando_validacao')))
+      .mockResolvedValueOnce(json(200, attempt('reading')))
+      .mockResolvedValueOnce(json(200, attempt('reading')))
+      .mockResolvedValueOnce(json(200, attempt('awaiting_validation')))
     const onUpdate = vi.fn()
     const promise = client.pollAttempt('e1', 'a1', { intervalMs: 2000, onUpdate })
 
@@ -182,18 +182,24 @@ describe('pollAttempt', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2)
     await vi.advanceTimersByTimeAsync(2000)
 
-    await expect(promise).resolves.toMatchObject({ status: 'aguardando_validacao' })
+    await expect(promise).resolves.toMatchObject({ status: 'awaiting_validation' })
     expect(fetchMock).toHaveBeenCalledTimes(3)
     expect(onUpdate).toHaveBeenCalledTimes(3)
   })
 
+  it('maps backend wire status codes to app statuses', async () => {
+    const wire = { ...attempt('completed'), status: 'concluido' }
+    fetchMock.mockResolvedValueOnce(json(200, wire))
+    await expect(client.pollAttempt('e1', 'a1')).resolves.toMatchObject({ status: 'completed' })
+  })
+
   it('resolves immediately if it is no longer processing', async () => {
-    fetchMock.mockResolvedValueOnce(json(200, attempt('concluido')))
-    await expect(client.pollAttempt('e1', 'a1')).resolves.toMatchObject({ status: 'concluido' })
+    fetchMock.mockResolvedValueOnce(json(200, attempt('completed')))
+    await expect(client.pollAttempt('e1', 'a1')).resolves.toMatchObject({ status: 'completed' })
   })
 
   it('timeout', async () => {
-    fetchMock.mockImplementation(async () => json(200, attempt('interpretacao_processando')))
+    fetchMock.mockImplementation(async () => json(200, attempt('interpreting')))
     const promise = client.pollAttempt('e1', 'a1', { intervalMs: 1000, timeoutMs: 3000 })
     const assertion = expect(promise).rejects.toMatchObject({ kind: 'timeout', message: API_MESSAGES.timeout })
     await vi.advanceTimersByTimeAsync(5000)
@@ -202,7 +208,7 @@ describe('pollAttempt', () => {
   })
 
   it('abort interrupts the wait', async () => {
-    fetchMock.mockImplementation(async () => json(200, attempt('leitura_processando')))
+    fetchMock.mockImplementation(async () => json(200, attempt('reading')))
     const controller = new AbortController()
     const promise = client.pollAttempt('e1', 'a1', { signal: controller.signal })
     const assertion = expect(promise).rejects.toMatchObject({ name: 'AbortError' })
@@ -217,10 +223,10 @@ describe('pollAttempt', () => {
     fetchMock
       .mockRejectedValueOnce(new TypeError('offline'))
       .mockResolvedValueOnce(new Response('', { status: 502 }))
-      .mockResolvedValueOnce(json(200, attempt('erro_leitura')))
+      .mockResolvedValueOnce(json(200, attempt('reading_error')))
     const promise = client.pollAttempt('e1', 'a1', { intervalMs: 100 })
     await vi.advanceTimersByTimeAsync(300)
-    await expect(promise).resolves.toMatchObject({ status: 'erro_leitura' })
+    await expect(promise).resolves.toMatchObject({ status: 'reading_error' })
 
     fetchMock.mockReset()
     fetchMock.mockResolvedValueOnce(json(401, {}))

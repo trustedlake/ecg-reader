@@ -5,12 +5,12 @@ import { AttemptContext, backToExam, useNewPhoto } from './common'
 import type { AttemptViewProps } from './common'
 
 const TEXTS = {
-  rejeitado_usuario: {
+  user_rejected: {
     title: 'Reading refused',
     box: 'You refused this reading',
     body: 'Take a new photo of the same ECG. It becomes a new attempt on this exam.',
   },
-  criado: {
+  created: {
     title: 'Upload not completed',
     box: 'The photo for this attempt was never uploaded',
     body: 'Take or choose the photo again to continue this exam.',
@@ -20,7 +20,7 @@ const TEXTS = {
 /** Attempts that ended without an outcome from the lambda: refused by the user or abandoned before upload. */
 export default function NewPhotoView({ exam, attempt, navigation, banner }: AttemptViewProps) {
   const newPhoto = useNewPhoto(exam, attempt, navigation)
-  const text = attempt.status === 'criado' ? TEXTS.criado : TEXTS.rejeitado_usuario
+  const text = attempt.status === 'created' ? TEXTS.created : TEXTS.user_rejected
 
   return (
     <Screen

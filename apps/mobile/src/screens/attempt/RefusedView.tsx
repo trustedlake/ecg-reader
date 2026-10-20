@@ -7,7 +7,7 @@ import ZoomableImage from '../../ui/ZoomableImage'
 import { AttemptContext, backToExam, useNewPhoto, viewStyles } from './common'
 import type { AttemptViewProps } from './common'
 
-/** leitura_recusada: the lambda refused the photo (blurry, cropped, occluded…). The only option left is to take another. */
+/** reading_refused: the lambda refused the photo (blurry, cropped, occluded…). The only option left is to take another. */
 export default function RefusedView({ exam, attempt, navigation, banner }: AttemptViewProps) {
   const newPhoto = useNewPhoto(exam, attempt, navigation)
   const reading = attempt.reading

@@ -2,29 +2,29 @@ import { API_MESSAGES, ApiError, isOffHours } from 'shared'
 import type { AttemptStatus, Classification, Confidence, Criterion, Finding, Layout, LeadQuality, Sex } from 'shared'
 
 export const STATUS_LABELS: Record<AttemptStatus, string> = {
-  criado: 'Waiting to upload',
-  leitura_processando: 'Reading the ECG',
-  aguardando_validacao: 'Waiting for your validation',
-  leitura_recusada: 'Photo rejected',
-  erro_leitura: 'Reading error',
-  rejeitado_usuario: 'Reading rejected by you',
-  interpretacao_processando: 'Interpreting',
-  concluido: 'Completed',
-  erro_interpretacao: 'Interpretation error',
+  created: 'Waiting to upload',
+  reading: 'Reading the ECG',
+  awaiting_validation: 'Waiting for your validation',
+  reading_refused: 'Photo rejected',
+  reading_error: 'Reading error',
+  user_rejected: 'Reading rejected by you',
+  interpreting: 'Interpreting',
+  completed: 'Completed',
+  interpretation_error: 'Interpretation error',
 }
 
 export type StatusTone = 'neutral' | 'progress' | 'attention' | 'success' | 'danger'
 
 export const STATUS_TONES: Record<AttemptStatus, StatusTone> = {
-  criado: 'neutral',
-  leitura_processando: 'progress',
-  aguardando_validacao: 'attention',
-  leitura_recusada: 'danger',
-  erro_leitura: 'danger',
-  rejeitado_usuario: 'neutral',
-  interpretacao_processando: 'progress',
-  concluido: 'success',
-  erro_interpretacao: 'danger',
+  created: 'neutral',
+  reading: 'progress',
+  awaiting_validation: 'attention',
+  reading_refused: 'danger',
+  reading_error: 'danger',
+  user_rejected: 'neutral',
+  interpreting: 'progress',
+  completed: 'success',
+  interpretation_error: 'danger',
 }
 
 export const SEX_LABELS: Record<Sex, string> = { F: 'Female', M: 'Male' }

@@ -23,7 +23,7 @@ interface ExamsResponse {
 }
 
 function mapStatus(status: string): 'success' | 'warning' | 'error' {
-  if (status === 'concluido') return 'success'
+  if (status === 'completed') return 'success'
   if (status === 'erro' || status === 'rejeitado') return 'error'
   return 'warning'
 }

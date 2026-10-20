@@ -13,12 +13,12 @@ import Screen from '../ui/Screen'
 
 /** One line about the outcome, for the history: classification, or the reason for the refusal or error. */
 function outcomeLine(attempt: Attempt): string | null {
-  if (attempt.status === 'concluido') {
+  if (attempt.status === 'completed') {
     const summary = attempt.interpretation?.summary
     return summary ? `${CLASSIFICATION_LABELS[summary.classification].label} · ${summary.headline}` : null
   }
-  if (attempt.status === 'erro_interpretacao') return attempt.interpretation?.error?.message ?? null
-  if (attempt.status === 'leitura_recusada' || attempt.status === 'erro_leitura') return attempt.reading?.error?.message ?? null
+  if (attempt.status === 'interpretation_error') return attempt.interpretation?.error?.message ?? null
+  if (attempt.status === 'reading_refused' || attempt.status === 'reading_error') return attempt.reading?.error?.message ?? null
   return null
 }
 

@@ -18,7 +18,7 @@ import FeedbackForm from './FeedbackForm'
 import { AttemptContext, backToExam, viewStyles } from './common'
 import type { AttemptViewProps } from './common'
 
-/** concluido: highlighted summary, expandable details and the always-visible disclaimer. */
+/** completed: highlighted summary, expandable details and the always-visible disclaimer. */
 export default function ResultView({ exam, attempt, navigation, banner }: AttemptViewProps) {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const interpretation = attempt.interpretation
