@@ -67,7 +67,7 @@ export async function confirmUploadBatch(
 ): Promise<void> {
   onProgress?.('confirming')
 
-  await apiClient.apiFetch(`/api/uploads/${batchId}/confirmar/`, {
+  await apiClient.apiFetch(`/api/uploads/${batchId}/confirm/`, {
     method: 'POST',
   })
 }

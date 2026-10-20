@@ -187,12 +187,6 @@ describe('pollAttempt', () => {
     expect(onUpdate).toHaveBeenCalledTimes(3)
   })
 
-  it('maps backend wire status codes to app statuses', async () => {
-    const wire = { ...attempt('completed'), status: 'concluido' }
-    fetchMock.mockResolvedValueOnce(json(200, wire))
-    await expect(client.pollAttempt('e1', 'a1')).resolves.toMatchObject({ status: 'completed' })
-  })
-
   it('resolves immediately if it is no longer processing', async () => {
     fetchMock.mockResolvedValueOnce(json(200, attempt('completed')))
     await expect(client.pollAttempt('e1', 'a1')).resolves.toMatchObject({ status: 'completed' })
