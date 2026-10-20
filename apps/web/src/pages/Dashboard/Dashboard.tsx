@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { PatientCard, PopupEmBreve, useAuth } from 'shared'
+import { PatientCard, ComingSoonPopup, useAuth } from 'shared'
 import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { apiFetch } from '../../platform/api'
 import styles from './Dashboard.module.css'
@@ -24,11 +24,11 @@ interface ExamsResponse {
 
 function mapStatus(status: string): 'success' | 'warning' | 'error' {
   if (status === 'completed') return 'success'
-  if (status === 'erro' || status === 'rejeitado') return 'error'
+  if (status.endsWith('_error') || status === 'user_rejected' || status === 'reading_refused') return 'error'
   return 'warning'
 }
 
-const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
   day: '2-digit',
   month: 'short',
   year: 'numeric',
@@ -42,7 +42,7 @@ export default function Dashboard() {
   const { token, user } = useAuth()
   const [exams, setExams] = useState<Exam[] | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [emBreveOpen, setEmBreveOpen] = useState(false)
+  const [comingSoonOpen, setComingSoonOpen] = useState(false)
   const hasExams = exams !== null && exams.length > 0
   const [successMessage, setSuccessMessage] = useState<string | null>(
     (location.state as { savedMessage?: string } | null)?.savedMessage ?? null,
@@ -53,11 +53,11 @@ export default function Dashboard() {
     navigate('.', { replace: true, state: {} })
   }
 
-  function handleNovoExame() {
+  function handleNewExam() {
     if (user?.is_admin) {
-      navigate('/novo-ecg')
+      navigate('/new-ecg')
     } else {
-      setEmBreveOpen(true)
+      setComingSoonOpen(true)
     }
   }
 
@@ -74,7 +74,7 @@ export default function Dashboard() {
         const data = await apiFetch<ExamsResponse>('/api/exams/', { token: token ?? undefined })
         if (!cancelled) setExams(data.results)
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Falha ao carregar exames.')
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load exams.')
       }
     }
     void load()
@@ -97,26 +97,26 @@ export default function Dashboard() {
         <AppBrandHeader />
       </div>
 
-      <p className={styles.greeting}>Olá, {user?.name}</p>
+      <p className={styles.greeting}>Hello, {user?.name}</p>
 
       {hasExams && (
         <div className={styles.searchBar}>
-          <span className={styles.searchPlaceholder}>Buscar paciente ou exame...</span>
+          <span className={styles.searchPlaceholder}>Search patient or exam...</span>
         </div>
       )}
 
-      <h2 className={styles.sectionTitle}>Exames Recentes</h2>
+      <h2 className={styles.sectionTitle}>Recent Exams</h2>
 
       <div className={styles.list}>
         {error ? (
           <p className={styles.emptyText}>{error}</p>
         ) : exams === null ? (
-          <p className={styles.emptyText}>Carregando exames...</p>
+          <p className={styles.emptyText}>Loading exams...</p>
         ) : exams.length === 0 ? (
           <p className={styles.emptyText}>
-            Nenhum exame ainda
+            No exams yet
             <br />
-            Toque em + pra criar o primeiro.
+            Tap + to create the first one.
           </p>
         ) : (
           exams.map((exam) => (
@@ -125,21 +125,21 @@ export default function Dashboard() {
               name={exam.patient.name}
               date={dateFormatter.format(new Date(exam.created_at))}
               status={mapStatus(exam.status)}
-              onPress={() => navigate(`/laudo/${exam.id}`)}
+              onPress={() => navigate(`/report/${exam.id}`)}
             />
           ))
         )}
 
         <button className={styles.uploadTempButton} onClick={() => navigate('/upload')}>
-          Upload de arquivos
+          Upload files
         </button>
       </div>
 
-      <button className={styles.fab} onClick={handleNovoExame}>
+      <button className={styles.fab} onClick={handleNewExam}>
         +
       </button>
 
-      <PopupEmBreve open={emBreveOpen} onClose={() => setEmBreveOpen(false)} />
+      <ComingSoonPopup open={comingSoonOpen} onClose={() => setComingSoonOpen(false)} />
     </div>
   )
 }

@@ -29,7 +29,7 @@ export default function BrandHeader({ profileInitial, onLogoPress, onProfilePres
             />
           </Svg>
         </View>
-        <Text style={styles.logoText}>Leitor ECG</Text>
+        <Text style={styles.logoText}>ECG Reader</Text>
       </Pressable>
       <View style={styles.profile}>
         <Text style={styles.profileInitial}>{profileInitial}</Text>

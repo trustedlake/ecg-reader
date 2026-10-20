@@ -8,17 +8,17 @@ export default function AppBottomNav() {
   const items = [
     {
       key: 'dashboard',
-      label: 'Início',
+      label: 'Home',
       icon: '🏠',
       active: location.pathname === '/dashboard',
       onPress: () => navigate('/dashboard'),
     },
     {
-      key: 'novo-ecg',
-      label: 'Novo ECG',
+      key: 'new-ecg',
+      label: 'New ECG',
       icon: '➕',
-      active: location.pathname === '/novo-ecg',
-      onPress: () => navigate('/novo-ecg'),
+      active: location.pathname === '/new-ecg',
+      onPress: () => navigate('/new-ecg'),
     },
     {
       key: 'upload',
@@ -28,11 +28,11 @@ export default function AppBottomNav() {
       onPress: () => navigate('/upload'),
     },
     {
-      key: 'planos',
-      label: 'Planos',
+      key: 'plans',
+      label: 'Plans',
       icon: '💳',
-      active: location.pathname === '/planos',
-      onPress: () => navigate('/planos'),
+      active: location.pathname === '/plans',
+      onPress: () => navigate('/plans'),
     },
   ]
 

@@ -11,9 +11,9 @@ export default function NotFound() {
       <AppBrandHeader />
       <div className={styles.content}>
         <h1 className={styles.code}>404</h1>
-        <p className={styles.message}>Página não encontrada</p>
+        <p className={styles.message}>Page not found</p>
         <Button onPress={() => navigate('/dashboard')}>
-          Voltar ao início
+          Back to home
         </Button>
       </div>
     </div>

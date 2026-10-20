@@ -10,7 +10,7 @@ terraform {
     }
   }
 
-  # Reusa o bucket de state do ecg-lambdas, em key propria - nao toca o state dele.
+  # Reuses the ecg-lambdas state bucket, under its own key; does not touch that state.
   backend "s3" {
     bucket = "ecg-lambdas-terraform-state"
     key    = "leitor-ecg/terraform.tfstate"
@@ -27,8 +27,8 @@ locals {
   app_name = "leitor-ecg"
 }
 
-# Sufixo unico (8 chars hex) do bucket. Keeper fixo: impede o random_id de
-# regenerar e "trocar" o nome do bucket em runs futuros.
+# Unique bucket suffix (8 hex chars). Fixed keeper: stops random_id from
+# regenerating and "changing" the bucket name in future runs.
 resource "random_id" "bucket_suffix" {
   keepers = {
     app_name = local.app_name
@@ -36,7 +36,7 @@ resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
 
-# Bucket privado: nada de publico. Acesso sai so via CloudFront + OAC.
+# Private bucket: nothing public. Access only through CloudFront + OAC.
 resource "aws_s3_bucket" "spa" {
   bucket = "leitor-ecg-spa-${random_id.bucket_suffix.hex}"
   tags = {
@@ -52,17 +52,17 @@ resource "aws_s3_bucket_public_access_block" "spa" {
   restrict_public_buckets = true
 }
 
-# OAC (Origin Access Control): acesso autenticado do CloudFront ao bucket.
+# OAC (Origin Access Control): authenticated CloudFront access to the bucket.
 resource "aws_cloudfront_origin_access_control" "spa" {
   name                              = "${local.app_name}-oac"
-  description                       = "OAC entre CloudFront e o bucket estatico do ${local.app_name}"
+  description                       = "OAC between CloudFront and the ${local.app_name} static bucket"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
 
-# Bucket policy: GetObject SO para este CloudFront (via OAC). Nao e publico
-# relativo a block_public_policy acima: o principal e o servico CloudFront.
+# Bucket policy: GetObject ONLY for this CloudFront (via OAC). Not public
+# under block_public_policy above: the principal is the CloudFront service.
 resource "aws_s3_bucket_policy" "spa" {
   bucket = aws_s3_bucket.spa.id
   policy = jsonencode({
@@ -85,7 +85,7 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
-# Zones ja existentes no Route53 (nao criadas por este state).
+# Zones that already exist in Route53 (not created by this state).
 data "aws_route53_zone" "leitorecg_com_br" {
   name         = "leitorecg.com.br."
   private_zone = false
@@ -96,8 +96,8 @@ data "aws_route53_zone" "leitorecg_com" {
   private_zone = false
 }
 
-# Certificado unico cobrindo os dois dominios. Precisa estar em us-east-1
-# (provider ja e us-east-1) para o CloudFront aceitar.
+# Single certificate covering both domains. Must be in us-east-1
+# (the provider already is) for CloudFront to accept it.
 resource "aws_acm_certificate" "spa" {
   domain_name               = "app.leitorecg.com.br"
   subject_alternative_names = ["app.leitorecg.com"]
@@ -154,8 +154,8 @@ resource "aws_cloudfront_distribution" "spa" {
     compress = true
   }
 
-  # SPA com client-side routing (react-router): qualquer 403/404 cai no
-  # index.html com status 200.
+  # SPA with client-side routing (react-router): any 403/404 falls back to
+  # index.html with status 200.
   custom_error_response {
     error_code         = 403
     response_code      = 200

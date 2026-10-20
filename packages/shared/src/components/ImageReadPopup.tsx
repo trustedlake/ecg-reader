@@ -3,26 +3,26 @@ import { colors } from '../theme'
 import Button from './Button'
 import Modal from './Modal'
 
-interface PopupImagemLidaProps {
+interface ImageReadPopupProps {
   open: boolean
   onClose: () => void
   onConfirm?: () => void
 }
 
-export default function PopupImagemLida({ open, onClose, onConfirm }: PopupImagemLidaProps) {
+export default function ImageReadPopup({ open, onClose, onConfirm }: ImageReadPopupProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <View style={styles.content}>
         <View style={styles.icon}>
           <Text style={styles.iconText}>✓</Text>
         </View>
-        <Text style={styles.title}>Imagem Lida</Text>
+        <Text style={styles.title}>Image Read</Text>
         <Text style={styles.description}>
-          A imagem do ECG foi processada com sucesso.
+          The ECG image was processed successfully.
         </Text>
         <View style={styles.actions}>
-          <Button fullWidth onPress={onConfirm ?? onClose}>Continuar</Button>
-          <Button variant="text" onPress={onClose}>Cancelar</Button>
+          <Button fullWidth onPress={onConfirm ?? onClose}>Continue</Button>
+          <Button variant="text" onPress={onClose}>Cancel</Button>
         </View>
       </View>
     </Modal>

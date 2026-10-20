@@ -1,16 +1,16 @@
-# iOS E2E via Maestro (Simulador iOS, backend de produção)
+# iOS E2E via Maestro (iOS Simulator, production backend)
 #
-# Runner: macos-26 (arm64) com Xcode 26.6 — exigido pelo Expo SDK 57
-# (Xcode 26.4+). O Xcode 26.3 (último da imagem macos-15) quebra com
-# "abs(milliseconds) ambiguous" no expo-modules-jsi (Swift 6.2 / C++ interop).
+# Runner: macos-26 (arm64) with Xcode 26.6, required by Expo SDK 57
+# (Xcode 26.4+). Xcode 26.3 (the last one in the macos-15 image) breaks with
+# "abs(milliseconds) ambiguous" in expo-modules-jsi (Swift 6.2 / C++ interop).
 #
-# ATENÇÃO: antes da primeira execução, crie o secret no GitHub
+# WARNING: before the first run, create the secret in GitHub
 # (Settings -> Secrets and variables -> Actions -> New repository secret):
-#   Nome: QA_MOBILE_PASSWORD
-#   Valor: a senha da conta de teste qa-mobile@ecg.local (QA Mobile CI)
-# Sem esse secret, o login do fluxo Maestro falha.
+#   Name: QA_MOBILE_PASSWORD
+#   Value: the password of the test account qa-mobile@ecg.local (QA Mobile CI)
+# Without this secret, the Maestro flow login fails.
 #
-# Rodar manualmente: Actions -> "iOS E2E (Maestro)" -> Run workflow.
+# Run manually: Actions -> "iOS E2E (Maestro)" -> Run workflow.
 
 name: iOS E2E (Maestro)
 
@@ -85,7 +85,7 @@ jobs:
           echo "WORKSPACE=$WORKSPACE" >> "$GITHUB_ENV"
           echo "SCHEME=$SCHEME" >> "$GITHUB_ENV"
           if ! xcodebuild -list -workspace "$WORKSPACE" -json | grep -q "\"$SCHEME\""; then
-            echo "ERRO: scheme '$SCHEME' não encontrado no workspace $WORKSPACE" >&2
+            echo "ERROR: scheme '$SCHEME' not found in workspace $WORKSPACE" >&2
             xcodebuild -list -workspace "$WORKSPACE"
             exit 1
           fi

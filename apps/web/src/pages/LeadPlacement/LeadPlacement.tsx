@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import PageHeader from '../../components/nav/PageHeader'
 import AppBrandHeader from '../../components/nav/AppBrandHeader'
 import { Button } from 'shared'
-import styles from './PosicionarDerivacoes.module.css'
+import styles from './LeadPlacement.module.css'
 
 interface FormatOption {
   value: string
@@ -13,20 +13,20 @@ interface FormatOption {
 }
 
 const options: FormatOption[] = [
-  { value: '3x4', label: '3×4 Derivações', id: 'A' },
-  { value: '3x4+dii', label: '3×4 Derivações + DII Longo', id: 'B', disabled: true },
-  { value: '6x2', label: '6×2 Derivações', id: 'C', disabled: true },
-  { value: '12x1', label: '12×1 Derivações', id: 'D', disabled: true },
+  { value: '3x4', label: '3×4 Leads', id: 'A' },
+  { value: '3x4+dii', label: '3×4 Leads + Long II', id: 'B', disabled: true },
+  { value: '6x2', label: '6×2 Leads', id: 'C', disabled: true },
+  { value: '12x1', label: '12×1 Leads', id: 'D', disabled: true },
 ]
 
-export default function PosicionarDerivacoes() {
+export default function LeadPlacement() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState('3x4')
 
   return (
     <div className={styles.page}>
       <AppBrandHeader />
-      <PageHeader title="Formato do ECG" />
+      <PageHeader title="ECG Format" />
 
       <div className={styles.content}>
         {options.map((opt) => (
@@ -45,8 +45,8 @@ export default function PosicionarDerivacoes() {
         ))}
 
         <div className={styles.actions}>
-          <Button fullWidth onPress={() => navigate('/dados-paciente')}>
-            Continuar
+          <Button fullWidth onPress={() => navigate('/patient-details')}>
+            Continue
           </Button>
         </div>
       </div>

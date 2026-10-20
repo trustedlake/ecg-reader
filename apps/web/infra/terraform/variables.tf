@@ -1,5 +1,5 @@
 variable "aws_profile" {
   type        = string
-  description = "Perfil AWS local (~/.aws/credentials) usado pelo provider."
+  description = "Local AWS profile (~/.aws/credentials) used by the provider."
   default     = "trustedlake"
 }

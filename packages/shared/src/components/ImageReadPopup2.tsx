@@ -3,26 +3,26 @@ import { colors } from '../theme'
 import Button from './Button'
 import Modal from './Modal'
 
-interface PopupEmBreveProps {
+interface ImageReadPopup2Props {
   open: boolean
   onClose: () => void
 }
 
-export default function PopupEmBreve({ open, onClose }: PopupEmBreveProps) {
+export default function ImageReadPopup2({ open, onClose }: ImageReadPopup2Props) {
   return (
     <Modal open={open} onClose={onClose}>
       <View style={styles.content}>
         <View style={styles.icon}>
-          <Text style={styles.iconText}>🔧</Text>
+          <Text style={styles.iconText}>!</Text>
         </View>
-        <Text style={styles.title}>Novidade a caminho</Text>
+        <Text style={styles.title}>Attention</Text>
         <Text style={styles.description}>
-          O Leitor ECG ainda está em fase de testes. A criação de novos exames
-          está liberada apenas para a equipe interna por enquanto, mas logo
-          estará disponível pra todos os usuários.
+          Some parts of the image were not recognized correctly.
+          Do you want to adjust the image?
         </Text>
         <View style={styles.actions}>
-          <Button fullWidth onPress={onClose}>Entendi</Button>
+          <Button fullWidth onPress={onClose}>Adjust Image</Button>
+          <Button variant="text" onPress={onClose}>Continue anyway</Button>
         </View>
       </View>
     </Modal>
@@ -38,12 +38,13 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.warning,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconText: {
-    fontSize: 26,
+    fontSize: 28,
+    fontWeight: '700',
     color: colors.white,
   },
   title: {

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Leitor ECG",
-    "slug": "leitor-ecg-mobile",
+    "name": "ECG Reader",
+    "slug": "ecg-reader-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

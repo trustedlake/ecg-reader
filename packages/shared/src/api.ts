@@ -9,7 +9,7 @@ import type {
   LoginResponse,
   Paginated,
 } from './types'
-import { isProcessing, toAttemptStatus } from './types'
+import { isProcessing, toAttemptStatus, WIRE_KEYS } from './types'
 
 export type ApiErrorKind =
   | 'network'
@@ -182,13 +182,13 @@ async function toBlob(file: UploadSource): Promise<Blob> {
   }
 }
 
-/** Recursively converts every `status` field from the backend wire code to the app status. */
+/** Recursively renames legacy wire keys and converts every `status` field from the backend wire code to the app status. */
 function normalizeStatuses(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(normalizeStatuses)
   if (value && typeof value === 'object') {
     const out: Record<string, unknown> = {}
     for (const [key, item] of Object.entries(value)) {
-      out[key] = key === 'status' && typeof item === 'string' ? toAttemptStatus(item) : normalizeStatuses(item)
+      out[WIRE_KEYS[key] ?? key] = key === 'status' && typeof item === 'string' ? toAttemptStatus(item) : normalizeStatuses(item)
     }
     return out
   }

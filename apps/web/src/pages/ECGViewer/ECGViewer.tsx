@@ -9,7 +9,7 @@ import styles from './ECGViewer.module.css'
 interface ProcessResponse {
   overlay_trace_url: string
   overlay_signal_url: string
-  fidelidade: string
+  fidelity: string
   image_type: string
   status: string
 }
@@ -35,7 +35,7 @@ export default function ECGViewer() {
       )
       setResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao processar o ECG.')
+      setError(err instanceof Error ? err.message : 'Failed to process the ECG.')
     } finally {
       setLoading(false)
     }
@@ -56,11 +56,11 @@ export default function ECGViewer() {
     return (
       <div className={styles.page}>
         <AppBrandHeader />
-        <PageHeader title="Análise do ECG" showBack />
+        <PageHeader title="ECG Analysis" showBack />
         <div className={styles.content}>
-          <p className={styles.statusText}>Nenhum exame em andamento.</p>
-          <Button fullWidth onPress={() => navigate('/novo-ecg')}>
-            Iniciar novo ECG
+          <p className={styles.statusText}>No exam in progress.</p>
+          <Button fullWidth onPress={() => navigate('/new-ecg')}>
+            Start new ECG
           </Button>
         </div>
       </div>
@@ -70,14 +70,14 @@ export default function ECGViewer() {
   return (
     <div className={styles.page}>
       <AppBrandHeader />
-      <PageHeader title="Análise do ECG" showBack />
+      <PageHeader title="ECG Analysis" showBack />
 
       <div className={styles.content}>
         {loading && (
           <div className={styles.gridArea}>
             <div className={styles.gridBg}>
               <span className={styles.detectedText}>
-                Processando ECG... isso pode levar alguns minutos
+                Processing ECG... this may take a few minutes
               </span>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function ECGViewer() {
               </div>
             </div>
             <Button fullWidth onPress={handleRetry}>
-              Tentar novamente
+              Try again
             </Button>
           </>
         )}
@@ -100,18 +100,18 @@ export default function ECGViewer() {
           <>
             <div className={styles.gridArea}>
               <div className={styles.overlayStack}>
-                <img className={styles.overlayImg} src={result.overlay_trace_url} alt="Sobreposição do traçado" />
-                <img className={styles.overlayImg} src={result.overlay_signal_url} alt="Sobreposição do sinal" />
+                <img className={styles.overlayImg} src={result.overlay_trace_url} alt="Trace overlay" />
+                <img className={styles.overlayImg} src={result.overlay_signal_url} alt="Signal overlay" />
               </div>
             </div>
 
             <div className={styles.badges}>
-              <span className={styles.badge}>Tipo: {result.image_type}</span>
-              <span className={styles.badge}>Fidelidade: {result.fidelidade}</span>
+              <span className={styles.badge}>Type: {result.image_type}</span>
+              <span className={styles.badge}>Fidelity: {result.fidelity}</span>
             </div>
 
-            <Button fullWidth onPress={() => navigate('/laudo')}>
-              Confirmar e Continuar
+            <Button fullWidth onPress={() => navigate('/report')}>
+              Confirm and Continue
             </Button>
           </>
         )}

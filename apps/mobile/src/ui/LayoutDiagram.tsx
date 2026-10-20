@@ -30,7 +30,7 @@ export const LAYOUT_GRIDS: Record<Layout, { grid: string[][]; rhythm: string[] }
 export function layoutDescription(layout: Layout): string {
   const { grid, rhythm } = LAYOUT_GRIDS[layout]
   const rows = grid.map((row) => row.join(', ')).join('; ')
-  return rhythm.length ? `Linhas: ${rows}. Ritmo: ${rhythm.join(', ')}.` : `Linhas: ${rows}.`
+  return rhythm.length ? `Rows: ${rows}. Rhythm: ${rhythm.join(', ')}.` : `Rows: ${rows}.`
 }
 
 /** Thumbnail of the ECG sheet: each cell is a lead; the rhythm strip spans the full width. */

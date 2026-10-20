@@ -38,7 +38,7 @@ export function ExamDraftProvider({ children }: { children: ReactNode }) {
 export function useExamDraft(): ExamDraftContextValue {
   const ctx = useContext(ExamDraftContext)
   if (!ctx) {
-    throw new Error('useExamDraft deve ser usado dentro de <ExamDraftProvider>')
+    throw new Error('useExamDraft must be used inside <ExamDraftProvider>')
   }
   return ctx
 }

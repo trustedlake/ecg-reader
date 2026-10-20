@@ -3,29 +3,26 @@ import { colors } from '../theme'
 import Button from './Button'
 import Modal from './Modal'
 
-interface PopupSentimosMuitoProps {
+interface ComingSoonPopupProps {
   open: boolean
   onClose: () => void
-  onSendFeedback?: () => void
 }
 
-export default function PopupSentimosMuito({ open, onClose, onSendFeedback }: PopupSentimosMuitoProps) {
+export default function ComingSoonPopup({ open, onClose }: ComingSoonPopupProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <View style={styles.content}>
         <View style={styles.icon}>
-          <Text style={styles.iconText}>:(</Text>
+          <Text style={styles.iconText}>🔧</Text>
         </View>
-        <Text style={styles.title}>Sentimos Muito</Text>
+        <Text style={styles.title}>Coming soon</Text>
         <Text style={styles.description}>
-          Não foi possível processar a imagem do ECG. Por favor, tente novamente
-          ou entre em contato com o suporte.
+          ECG Reader is still in testing. Creating new exams is only
+          available to the internal team for now, but it will soon be
+          available to all users.
         </Text>
         <View style={styles.actions}>
-          <Button fullWidth onPress={onClose}>Tentar Novamente</Button>
-          {onSendFeedback && (
-            <Button variant="text" onPress={onSendFeedback}>Enviar Feedback</Button>
-          )}
+          <Button fullWidth onPress={onClose}>Got it</Button>
         </View>
       </View>
     </Modal>
@@ -41,13 +38,12 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.error,
+    backgroundColor: colors.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconText: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 26,
     color: colors.white,
   },
   title: {

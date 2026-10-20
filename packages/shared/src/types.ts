@@ -25,6 +25,22 @@ export const WIRE_STATUS: Readonly<Record<string, AttemptStatus>> = {
   criado: 'created',
 }
 
+/** Legacy backend wire field names -> app field names (renamed when a response is parsed). */
+export const WIRE_KEYS: Readonly<Record<string, string>> = {
+  ritmo: 'rhythm',
+  fc_bpm: 'hr_bpm',
+  eixo_graus: 'axis_degrees',
+  achados: 'findings',
+  conclusao: 'conclusion',
+  confiabilidade: 'reliability',
+  versao_codigo: 'code_version',
+  imagem_original_url: 'original_image_url',
+  fidelidade: 'fidelity',
+}
+
+/** Legacy backend URL segments. */
+export const WIRE_PATHS = { approve: 'aprovar' } as const
+
 export function toAttemptStatus(value: string): AttemptStatus {
   return WIRE_STATUS[value] ?? (value as AttemptStatus)
 }
