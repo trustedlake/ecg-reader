@@ -8,10 +8,10 @@ export type RegionPx = [number, number, number, number]
 interface ZoomableImageProps {
   uri: string
   accessibilityLabel: string
-  /** Região a destacar, em pixels da imagem original ([x0, y0, x1, y1]). */
+  /** Region to highlight, in pixels of the original image ([x0, y0, x1, y1]). */
   highlight?: RegionPx | null
   highlightLabel?: string
-  /** Altura máxima da área da imagem. */
+  /** Maximum height of the image area. */
   maxHeight?: number
   testID?: string
 }
@@ -36,14 +36,14 @@ function distance(event: GestureResponderEvent): number | null {
 }
 
 /**
- * Imagem com zoom de até 4× e arraste, igual no iOS, Android e web (PanResponder, sem libs nativas):
- * pinça com dois dedos, arraste com um dedo ou o mouse quando ampliada, e botões −/+/Ajustar.
+ * Image with up to 4× zoom and panning, the same on iOS, Android and web (PanResponder, no native libs):
+ * two-finger pinch, one-finger or mouse drag when zoomed in, and −/+/Fit buttons.
  */
 export default function ZoomableImage({
   uri,
   accessibilityLabel,
   highlight,
-  highlightLabel = 'Região do problema',
+  highlightLabel = 'Problem region',
   maxHeight = 560,
   testID,
 }: ZoomableImageProps) {
@@ -66,7 +66,7 @@ export default function ZoomableImage({
     }
   }, [uri])
 
-  // Tamanho da moldura e da imagem encaixada nela (contain).
+  // Size of the frame and of the image fitted inside it (contain).
   const ratio = natural ? natural.height / natural.width : 0.62
   const frameHeight = frameWidth ? Math.min(frameWidth * ratio, maxHeight) : 0
   const fitWidth = frameHeight / ratio > frameWidth ? frameWidth : frameHeight / ratio
@@ -103,7 +103,7 @@ export default function ZoomableImage({
   const zoomIn = () => zoomTo(STEPS.find((step) => step > view.current.scale + 0.01) ?? MAX_SCALE)
   const zoomOut = () => zoomTo([...STEPS].reverse().find((step) => step < view.current.scale - 0.01) ?? 1)
 
-  // Ajusta de novo quando a moldura muda de tamanho (girar o celular, redimensionar a janela).
+  // Fits again when the frame changes size (rotating the phone, resizing the window).
   useEffect(() => {
     apply(view.current)
   }, [frameWidth, frameHeight]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -113,7 +113,7 @@ export default function ZoomableImage({
   const responder = useMemo(
     () =>
       PanResponder.create({
-        // Com a imagem no tamanho normal, um dedo só rola a tela; dois dedos sempre ampliam.
+        // With the image at normal size, one finger only scrolls the screen; two fingers always zoom.
         onStartShouldSetPanResponder: (event) => touchesOf(event).length >= 2 || view.current.scale > 1,
         onMoveShouldSetPanResponder: (event, state) =>
           touchesOf(event).length >= 2 || (view.current.scale > 1 && Math.abs(state.dx) + Math.abs(state.dy) > 2),
@@ -123,7 +123,7 @@ export default function ZoomableImage({
         },
         onPanResponderMove: (event, state) => {
           const count = Math.max(1, touchesOf(event).length)
-          // Mudou o número de dedos: recomeça o gesto a partir da posição atual, sem pulo.
+          // The number of fingers changed: restart the gesture from the current position, without a jump.
           if (count !== gesture.current.touches) {
             gesture.current = { start: view.current, dx: state.dx, dy: state.dy, pinchStart: distance(event), touches: count }
           }
@@ -152,7 +152,7 @@ export default function ZoomableImage({
   if (failed) {
     return (
       <View style={styles.failed}>
-        <Text style={styles.failedText}>Não foi possível carregar a imagem. Atualize a tela para tentar de novo.</Text>
+        <Text style={styles.failedText}>Could not load the image. Refresh the screen to try again.</Text>
       </View>
     )
   }
@@ -196,17 +196,17 @@ export default function ZoomableImage({
       </View>
 
       <View style={styles.controls}>
-        <ZoomButton label="−" accessibilityLabel="Diminuir zoom" onPress={zoomOut} disabled={level <= 1} testID="zoom-out" />
+        <ZoomButton label="−" accessibilityLabel="Zoom out" onPress={zoomOut} disabled={level <= 1} testID="zoom-out" />
         <Text style={styles.level} accessibilityLiveRegion="polite" testID="zoom-level">
-          {`${String(Math.round(level * 10) / 10).replace('.', ',')}×`}
+          {`${String(Math.round(level * 10) / 10)}×`}
         </Text>
-        <ZoomButton label="+" accessibilityLabel="Aumentar zoom" onPress={zoomIn} disabled={level >= MAX_SCALE} testID="zoom-in" />
-        <ZoomButton label="Ajustar" accessibilityLabel="Ajustar à tela" onPress={() => zoomTo(1)} disabled={level <= 1} wide />
+        <ZoomButton label="+" accessibilityLabel="Zoom in" onPress={zoomIn} disabled={level >= MAX_SCALE} testID="zoom-in" />
+        <ZoomButton label="Fit" accessibilityLabel="Fit to screen" onPress={() => zoomTo(1)} disabled={level <= 1} wide />
       </View>
       <Text style={styles.hint}>
         {Platform.OS === 'web'
-          ? 'Use + e − para ampliar e arraste a imagem para ver os detalhes.'
-          : 'Afaste dois dedos para ampliar e arraste para ver os detalhes.'}
+          ? 'Use + and − to zoom and drag the image to see the details.'
+          : 'Spread two fingers to zoom and drag to see the details.'}
       </Text>
     </View>
   )

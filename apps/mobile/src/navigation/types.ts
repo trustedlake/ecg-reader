@@ -10,7 +10,7 @@ export type AppStackParamList = {
   ExamDetail: { examId: string }
   Capture: { examId: string }
   Layout: { examId: string }
-  /** Sem attemptId: cria a tentativa a partir do rascunho. Com attemptId: só acompanha. */
+  /** Without attemptId: creates the attempt from the draft. With attemptId: only follows it. */
   Processing: { examId: string; attemptId?: string }
   AttemptState: { examId: string; attemptId: string }
 }

@@ -21,7 +21,7 @@ export default function LayoutScreen({ navigation, route }: AppScreenProps<'Layo
 
   return (
     <Screen
-      title="Layout das derivações"
+      title="Lead layout"
       onBack={() => navigation.goBack()}
       footer={
         <Button
@@ -30,12 +30,12 @@ export default function LayoutScreen({ navigation, route }: AppScreenProps<'Layo
           onPress={() => navigation.navigate('Processing', { examId })}
           testID="layout-continue"
         >
-          Enviar para leitura
+          Send for reading
         </Button>
       }
     >
-      <Text style={styles.help}>Escolha o layout igual ao impresso no papel do ECG.</Text>
-      <View style={styles.grid} accessibilityRole="radiogroup" accessibilityLabel="Layout das derivações">
+      <Text style={styles.help}>Choose the layout that matches the one printed on the ECG paper.</Text>
+      <View style={styles.grid} accessibilityRole="radiogroup" accessibilityLabel="Lead layout">
         {layouts.map((layout) => {
           const selected = draft.layout === layout
           return (

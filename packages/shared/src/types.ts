@@ -1,5 +1,5 @@
-// Tipos da API do backend (V1). Fonte da verdade: ecg-backend docs/plano-migracao-v1.md §0.1
-// e CONTRATO_LAMBDAS.md §3.2 (formato de summary/details).
+// Backend API types (V1). Source of truth: ecg-backend docs/plano-migracao-v1.md §0.1
+// e CONTRATO_LAMBDAS.md §3.2 (summary/details format).
 
 export type AttemptStatus =
   | 'criado'

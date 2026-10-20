@@ -4,8 +4,8 @@ import type { AppStackParamList } from '../navigation/types'
 import { LoadingView } from './Feedback'
 
 /**
- * O rascunho vive em memória. Sem ele (página web recarregada no meio do fluxo, ou "voltar" do navegador
- * depois de a foto já ter sido enviada), as telas de foto, layout e processamento voltam para o exame.
+ * The draft lives in memory. Without it (web page reloaded mid-flow, or the browser's "back"
+ * after the photo has already been uploaded), the photo, layout and processing screens go back to the exam.
  */
 export default function MissingDraft({
   examId,
@@ -15,9 +15,9 @@ export default function MissingDraft({
   navigation: NativeStackNavigationProp<AppStackParamList>
 }) {
   useEffect(() => {
-    // Adiado: aberta direto pela URL, a tela monta antes de o navegador aceitar ações.
+    // Deferred: when opened directly by URL, the screen mounts before the browser accepts actions.
     const timer = setTimeout(() => {
-      // popTo não faz nada se o exame não está na pilha (ex.: URL aberta direto): aí troca a tela atual.
+      // popTo does nothing if the exam is not in the stack (e.g. URL opened directly): then it replaces the current screen.
       const inStack = navigation.getState().routes.some((r) => r.name === 'ExamDetail')
       if (inStack) navigation.popTo('ExamDetail', { examId })
       else navigation.replace('ExamDetail', { examId })

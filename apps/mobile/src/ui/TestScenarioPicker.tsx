@@ -12,7 +12,7 @@ interface Props {
   onChange: (value: TestScenario | null) => void
 }
 
-/** Cenário das lambdas mock por tentativa (D7). Só aparece para staff com a flag ligada no backend. */
+/** Mock lambda scenario per attempt (D7). Only shown to staff with the flag enabled on the backend. */
 export default function TestScenarioPicker({ value, onChange }: Props) {
   function setPhase(phase: Phase, scenario: string, code?: string) {
     const next: TestScenario = { ...(value ?? {}) }
@@ -34,7 +34,7 @@ export default function TestScenarioPicker({ value, onChange }: Props) {
         <SegmentedControl<string>
           label={label}
           wrap
-          options={[{ value: NONE, label: 'Padrão' }, ...catalog.map(({ value: v, label: l }) => ({ value: v, label: l }))]}
+          options={[{ value: NONE, label: 'Default' }, ...catalog.map(({ value: v, label: l }) => ({ value: v, label: l }))]}
           value={current?.scenario ?? NONE}
           onChange={(scenario) => {
             const first = catalog.find((item) => item.value === scenario)?.codes[0]
@@ -43,7 +43,7 @@ export default function TestScenarioPicker({ value, onChange }: Props) {
         />
         {codes.length > 0 && current && (
           <SegmentedControl<string>
-            label="Código"
+            label="Code"
             wrap
             options={codes.map((code) => ({ value: code, label: code }))}
             value={current.code ?? codes[0]!}
@@ -55,13 +55,13 @@ export default function TestScenarioPicker({ value, onChange }: Props) {
   }
 
   return (
-    <View style={styles.box} accessibilityLabel="Modo de teste">
-      <Text style={styles.tag}>MODO DE TESTE</Text>
+    <View style={styles.box} accessibilityLabel="Test mode">
+      <Text style={styles.tag}>TEST MODE</Text>
       <Text style={styles.help}>
-        Escolha o resultado que as lambdas simuladas devem devolver nesta tentativa. Só para validação.
+        Choose the result the simulated lambdas should return for this attempt. For validation only.
       </Text>
-      {renderPhase('read', 'Leitura')}
-      {renderPhase('interpret', 'Interpretação')}
+      {renderPhase('read', 'Reading')}
+      {renderPhase('interpret', 'Interpretation')}
     </View>
   )
 }

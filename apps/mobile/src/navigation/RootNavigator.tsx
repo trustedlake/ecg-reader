@@ -14,7 +14,7 @@ import type { AppStackParamList, AuthStackParamList } from './types'
 const AuthStack = createNativeStackNavigator<AuthStackParamList>()
 const AppStack = createNativeStackNavigator<AppStackParamList>()
 
-/** Pilha de login × pilha do app, decidida pelo token salvo (logout ou 401 → volta ao login). */
+/** Login stack vs. app stack, decided by the saved token (logout or 401 → back to login). */
 export default function RootNavigator() {
   const { isHydrated, isAuthenticated } = useAuth()
 
@@ -23,24 +23,24 @@ export default function RootNavigator() {
   if (!isAuthenticated) {
     return (
       <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-        <AuthStack.Screen name="Login" component={LoginScreen} options={{ title: 'Entrar · Leitor ECG' }} />
+        <AuthStack.Screen name="Login" component={LoginScreen} options={{ title: 'Sign in · ECG Reader' }} />
       </AuthStack.Navigator>
     )
   }
 
   return (
     <AppStack.Navigator screenOptions={{ headerShown: false }}>
-      <AppStack.Screen name="Exams" component={ExamsScreen} options={{ title: 'Exames · Leitor ECG' }} />
-      <AppStack.Screen name="NewExam" component={NewExamScreen} options={{ title: 'Novo exame · Leitor ECG' }} />
-      <AppStack.Screen name="ExamDetail" component={ExamDetailScreen} options={{ title: 'Exame · Leitor ECG' }} />
-      <AppStack.Screen name="Capture" component={CaptureScreen} options={{ title: 'Foto do ECG · Leitor ECG' }} />
-      <AppStack.Screen name="Layout" component={LayoutScreen} options={{ title: 'Layout · Leitor ECG' }} />
+      <AppStack.Screen name="Exams" component={ExamsScreen} options={{ title: 'Exams · ECG Reader' }} />
+      <AppStack.Screen name="NewExam" component={NewExamScreen} options={{ title: 'New exam · ECG Reader' }} />
+      <AppStack.Screen name="ExamDetail" component={ExamDetailScreen} options={{ title: 'Exam · ECG Reader' }} />
+      <AppStack.Screen name="Capture" component={CaptureScreen} options={{ title: 'ECG photo · ECG Reader' }} />
+      <AppStack.Screen name="Layout" component={LayoutScreen} options={{ title: 'Layout · ECG Reader' }} />
       <AppStack.Screen
         name="Processing"
         component={ProcessingScreen}
-        options={{ title: 'Processando · Leitor ECG', gestureEnabled: false }}
+        options={{ title: 'Processing · ECG Reader', gestureEnabled: false }}
       />
-      <AppStack.Screen name="AttemptState" component={AttemptStateScreen} options={{ title: 'Resultado · Leitor ECG' }} />
+      <AppStack.Screen name="AttemptState" component={AttemptStateScreen} options={{ title: 'Result · ECG Reader' }} />
     </AppStack.Navigator>
   )
 }

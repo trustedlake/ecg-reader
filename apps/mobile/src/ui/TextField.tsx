@@ -8,7 +8,7 @@ interface TextFieldProps extends Omit<TextInputProps, 'style'> {
   error?: string | null
 }
 
-/** Campo com rótulo visível e erro inline (lido pelo leitor de tela junto com o rótulo). */
+/** Field with a visible label and inline error (read by the screen reader together with the label). */
 const TextField = forwardRef<TextInput, TextFieldProps>(function TextField({ label, error, ...props }, ref) {
   return (
     <View style={styles.field}>

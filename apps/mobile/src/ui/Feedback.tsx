@@ -10,30 +10,30 @@ export function ErrorBanner({ message, onRetry }: { message: string; onRetry?: (
       <Text style={styles.bannerText}>{message}</Text>
       {onRetry && (
         <Button variant="outline" onPress={onRetry}>
-          Tentar de novo
+          Try again
         </Button>
       )}
     </View>
   )
 }
 
-/** Fora do horário (D8): o backend está desligado; tentar de novo agora não adianta, então não há botão. */
+/** Off hours (D8): the backend is shut down; retrying now won't help, so there is no button. */
 export function OffHoursNotice() {
   return (
     <View style={styles.offHours} accessibilityRole="alert" testID="off-hours">
-      <Text style={styles.offHoursTitle}>🕗 Fora do horário de atendimento</Text>
+      <Text style={styles.offHoursTitle}>🕗 Outside service hours</Text>
       <Text style={styles.offHoursText}>{API_MESSAGES.offHours}</Text>
     </View>
   )
 }
 
-/** Erro de qualquer origem: aviso de horário quando o serviço está desligado, senão o banner com "Tentar de novo". */
+/** Error from any source: an hours notice when the service is shut down, otherwise the banner with "Try again". */
 export function ErrorNotice({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   if (isOffHours(error)) return <OffHoursNotice />
   return <ErrorBanner message={errorMessage(error)} onRetry={onRetry} />
 }
 
-export function LoadingView({ message = 'Carregando…' }: { message?: string }) {
+export function LoadingView({ message = 'Loading…' }: { message?: string }) {
   return (
     <View style={styles.center} accessibilityLiveRegion="polite">
       <ActivityIndicator size="large" color={colors.primary} />
@@ -59,7 +59,7 @@ export function StatusBadge({ status }: { status: AttemptStatus }) {
   )
 }
 
-/** Rótulo colorido; sempre com texto (e ícone, se houver), para a cor não ser o único indicador. */
+/** Colored label; always with text (and icon, if any), so color is not the only indicator. */
 export function Tag({ label, icon, tone }: { label: string; icon?: string; tone: StatusTone }) {
   const colorsFor = TONE_COLORS[tone]
   return (
@@ -69,7 +69,7 @@ export function Tag({ label, icon, tone }: { label: string; icon?: string; tone:
   )
 }
 
-/** Avisos da lambda em destaque (ex.: "V2: Traçado extraído parcialmente…"). */
+/** Lambda warnings highlighted (e.g. "V2: Trace partially extracted…"). */
 export function WarningList({ title, warnings }: { title: string; warnings: ContractWarning[] }) {
   if (!warnings.length) return null
   return (
@@ -85,7 +85,7 @@ export function WarningList({ title, warnings }: { title: string; warnings: Cont
   )
 }
 
-/** Caixa neutra de explicação ou dica. */
+/** Neutral box for an explanation or tip. */
 export function InfoBox({ title, children }: { title?: string; children: string }) {
   return (
     <View style={styles.info}>

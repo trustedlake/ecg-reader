@@ -20,24 +20,24 @@ export type ApiErrorKind =
   | 'server'
   | 'timeout'
 
-// Mensagens prontas para a UI (pt-BR). A UI decide o fluxo por `kind`, nunca pelo texto.
+// UI-ready messages. The UI decides the flow by `kind`, never by the text.
 export const API_MESSAGES = {
-  network: 'Sem conexão com o servidor. Verifique a internet e tente de novo.',
-  unauthorized: 'Sua sessão expirou. Entre novamente.',
-  validation: 'Confira os dados informados.',
-  not_found: 'Não encontramos este exame.',
-  conflict: 'Este exame mudou de estado. Atualize e tente de novo.',
-  server: 'O servidor não conseguiu responder. Tente de novo em instantes.',
-  offHours: 'Serviço disponível de segunda a sexta, das 8h às 20h.',
-  timeout: 'O processamento está demorando mais que o esperado. Tente de novo em instantes.',
-  upload: 'Não foi possível enviar a foto. Tente de novo.',
+  network: 'Could not reach the server. Check your internet connection and try again.',
+  unauthorized: 'Your session has expired. Please sign in again.',
+  validation: 'Please check the information provided.',
+  not_found: 'We could not find this exam.',
+  conflict: 'This exam changed state. Refresh and try again.',
+  server: 'The server could not respond. Try again in a moment.',
+  offHours: 'Service available Monday to Friday, 8 am to 8 pm.',
+  timeout: 'Processing is taking longer than expected. Try again in a moment.',
+  upload: 'Could not upload the photo. Try again.',
 } as const
 
 export class ApiError extends Error {
   kind: ApiErrorKind
   status: number
   fieldErrors?: Record<string, string[]>
-  /** 503 que não veio do Django: o API Gateway está sem tasks (fora do horário, D8). */
+  /** 503 that did not come from Django: the API Gateway has no tasks (off hours, D8). */
   offHours?: boolean
 
   constructor(
@@ -54,7 +54,7 @@ export class ApiError extends Error {
   }
 }
 
-/** 503 sem corpo do Django = API Gateway sem tasks rodando (fora do horário, D8). */
+/** 503 without a Django body = API Gateway with no running tasks (off hours, D8). */
 export function isOffHours(error: unknown): boolean {
   return error instanceof ApiError && error.offHours === true
 }
@@ -75,7 +75,7 @@ function collectFieldErrors(body: Record<string, unknown>): Record<string, strin
     } else if (typeof value === 'string') {
       fields[key] = [value]
     } else if (value && typeof value === 'object') {
-      // Serializer aninhado (ex.: test_scenario.read.scenario): achata o primeiro nível.
+      // Nested serializer (e.g. test_scenario.read.scenario): flatten the first level.
       const nested = collectFieldErrors(value as Record<string, unknown>)
       if (nested) fields[key] = Object.values(nested).flat()
     }
@@ -83,13 +83,13 @@ function collectFieldErrors(body: Record<string, unknown>): Record<string, strin
   return Object.keys(fields).length ? fields : undefined
 }
 
-/** Converte uma resposta HTTP de erro do backend em ApiError. */
+/** Converts an HTTP error response from the backend into an ApiError. */
 export async function toApiError(response: Response): Promise<ApiError> {
   let body: unknown = null
   try {
     body = await response.json()
   } catch {
-    // corpo vazio ou não-JSON (ex.: 503 do API Gateway)
+    // empty or non-JSON body (e.g. API Gateway 503)
   }
   const obj = body && typeof body === 'object' && !Array.isArray(body) ? (body as Record<string, unknown>) : {}
   const detail = firstString(obj.detail)
@@ -99,7 +99,7 @@ export async function toApiError(response: Response): Promise<ApiError> {
   if (status === 404) return new ApiError('not_found', status, detail ?? API_MESSAGES.not_found)
   if (status === 409) return new ApiError('conflict', status, detail ?? API_MESSAGES.conflict)
   if (status === 503) {
-    // Todo erro do Django tem `detail`; o 503 do API Gateway vem vazio ou com {"message": "Service Unavailable"}.
+    // Every Django error has `detail`; the API Gateway 503 comes empty or with {"message": "Service Unavailable"}.
     if (detail) return new ApiError('server', status, detail)
     return Object.assign(new ApiError('server', status, API_MESSAGES.offHours), { offHours: true })
   }
@@ -117,7 +117,7 @@ interface ApiFetchOptions extends RequestInit {
 }
 
 export interface ApiClientConfig {
-  /** Vazio = mesma origem (web servido pelo Django). No native: EXPO_PUBLIC_API_BASE_URL. */
+  /** Empty = same origin (web served by Django). On native: EXPO_PUBLIC_API_BASE_URL. */
   baseUrl: string
   getToken: () => string | null | Promise<string | null>
 }
@@ -151,7 +151,7 @@ export interface ApiClient {
 
 function abortError(signal: AbortSignal): unknown {
   if (signal.reason !== undefined) return signal.reason
-  const error = new Error('Operação cancelada')
+  const error = new Error('Operation cancelled')
   error.name = 'AbortError'
   return error
 }
@@ -173,12 +173,12 @@ function wait(ms: number, signal?: AbortSignal): Promise<void> {
 
 async function toBlob(file: UploadSource): Promise<Blob> {
   if (typeof file !== 'string') return file
-  // Native: URI local (file://, content://) vinda do image picker. Web: blob:/data: URL.
+  // Native: local URI (file://, content://) from the image picker. Web: blob:/data: URL.
   try {
     const response = await fetch(file)
     return await response.blob()
   } catch {
-    throw new ApiError('validation', 0, 'Não foi possível ler a foto selecionada.')
+    throw new ApiError('validation', 0, 'Could not read the selected photo.')
   }
 }
 
@@ -227,19 +227,19 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     const body = await toBlob(file)
     let response: Response
     try {
-      // PUT direto no S3: o Content-Type precisa ser o mesmo assinado na URL (upload_headers).
+      // PUT straight to S3: the Content-Type must be the same one signed in the URL (upload_headers).
       response = await fetch(uploadUrl, { method: 'PUT', headers, body })
     } catch {
       throw new ApiError('network', 0, API_MESSAGES.network)
     }
     if (!response.ok) {
-      // 403 do S3 = URL expirada/assinatura inválida, não sessão: nunca 'unauthorized'.
+      // S3 403 = expired URL/invalid signature, not a session: never 'unauthorized'.
       throw new ApiError('server', response.status, API_MESSAGES.upload)
     }
   }
 
   async function pollAttempt(examId: string, attemptId: string, options: PollOptions = {}) {
-    // 20 min: a leitura real leva 50–190 s (até 15 min); o backend marca TASK_TIMEOUT antes disso.
+    // 20 min: the real reading takes 50–190 s (up to 15 min); the backend flags TASK_TIMEOUT before that.
     const { intervalMs = 2000, timeoutMs = 1200000, signal, onUpdate } = options
     const deadline = Date.now() + timeoutMs
     for (;;) {
@@ -249,8 +249,8 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
         onUpdate?.(attempt)
         if (!isProcessing(attempt.status)) return attempt
       } catch (error) {
-        // Falha transitória (rede, 5xx, fora do ar por instantes): continua tentando até o prazo.
-        // Fora do horário não é transitório: para na hora, sem consultar em loop.
+        // Transient failure (network, 5xx, down for a moment): keep trying until the deadline.
+        // Off hours is not transient: stop right away, without polling in a loop.
         const transient =
           error instanceof ApiError && (error.kind === 'network' || error.kind === 'server') && !isOffHours(error)
         if (!transient) throw error

@@ -46,16 +46,16 @@ export default function LoginScreen() {
             </Svg>
           </View>
           <Text style={styles.title} accessibilityRole="header">
-            Leitor ECG
+            ECG Reader
           </Text>
-          <Text style={styles.subtitle}>Leitura e interpretação de ECG em papel</Text>
+          <Text style={styles.subtitle}>Reading and interpretation of paper ECGs</Text>
 
           <View style={styles.form}>
             {API_BASE_URL_MISSING && (
-              <ErrorBanner message="App sem servidor configurado (EXPO_PUBLIC_API_BASE_URL)." />
+              <ErrorBanner message="App has no server configured (EXPO_PUBLIC_API_BASE_URL)." />
             )}
             <TextField
-              label="Usuário"
+              label="Username"
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
@@ -68,7 +68,7 @@ export default function LoginScreen() {
             />
             <TextField
               ref={passwordRef}
-              label="Senha"
+              label="Password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -80,7 +80,7 @@ export default function LoginScreen() {
             />
             {error != null && <ErrorNotice error={error} />}
             <Button fullWidth disabled={!canSubmit} loading={loading} onPress={() => void handleSubmit()} testID="login-submit">
-              Entrar
+              Sign in
             </Button>
           </View>
         </ScrollView>

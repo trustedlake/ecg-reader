@@ -36,7 +36,7 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
     [api],
   )
 
-  // Recarrega ao voltar para a lista (um exame pode ter mudado de estado).
+  // Reload when returning to the list (an exam may have changed state).
   useFocusEffect(
     useCallback(() => {
       void load(loadedOnce.current ? 'refresh' : 'initial')
@@ -59,24 +59,24 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
   }
 
   const logoutButton = (
-    <Button variant="text" onPress={logout} accessibilityLabel="Sair da conta">
-      Sair
+    <Button variant="text" onPress={logout} accessibilityLabel="Log out">
+      Log out
     </Button>
   )
 
   return (
     <Screen
-      title="Exames"
+      title="Exams"
       right={logoutButton}
       scroll={false}
       footer={
         <Button fullWidth onPress={() => navigation.navigate('NewExam')} testID="new-exam">
-          Novo exame
+          New exam
         </Button>
       }
     >
       {exams === null && !error ? (
-        <LoadingView message="Carregando exames…" />
+        <LoadingView message="Loading exams…" />
       ) : (
         <FlatList
           data={exams ?? []}
@@ -87,24 +87,24 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
           onEndReachedThreshold={0.3}
           ListHeaderComponent={
             <View style={styles.header}>
-              {user?.name ? <Text style={styles.greeting}>Olá, {user.name}</Text> : null}
+              {user?.name ? <Text style={styles.greeting}>Hello, {user.name}</Text> : null}
               {error != null && <ErrorNotice error={error} onRetry={() => void load('refresh')} />}
             </View>
           }
           ListEmptyComponent={
             error ? null : (
               <View style={styles.empty}>
-                <Text style={styles.emptyTitle}>Nenhum exame ainda</Text>
-                <Text style={styles.emptyText}>Toque em "Novo exame" para fotografar o primeiro ECG.</Text>
+                <Text style={styles.emptyTitle}>No exams yet</Text>
+                <Text style={styles.emptyText}>Tap "New exam" to photograph the first ECG.</Text>
               </View>
             )
           }
-          ListFooterComponent={loadingMore ? <LoadingView message="Carregando mais…" /> : null}
+          ListFooterComponent={loadingMore ? <LoadingView message="Loading more…" /> : null}
           renderItem={({ item }) => (
             <Pressable
               onPress={() => navigation.navigate('ExamDetail', { examId: item.id })}
               accessibilityRole="button"
-              accessibilityLabel={`Exame de ${item.patient.name}, ${item.patient.age} anos`}
+              accessibilityLabel={`Exam for ${item.patient.name}, ${item.patient.age} years old`}
               style={({ pressed }) => [styles.card, pressed && styles.pressed]}
             >
               <View style={styles.cardTop}>
@@ -114,7 +114,7 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
                 <Text style={styles.date}>{formatDateTime(item.created_at)}</Text>
               </View>
               <Text style={styles.meta}>
-                {item.patient.age} anos{item.patient.sex ? ` · ${SEX_LABELS[item.patient.sex]}` : ''}
+                {item.patient.age} years old{item.patient.sex ? ` · ${SEX_LABELS[item.patient.sex]}` : ''}
               </Text>
               <StatusBadge status={item.status} />
             </Pressable>

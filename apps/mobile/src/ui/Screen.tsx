@@ -8,13 +8,13 @@ interface ScreenProps {
   title?: string
   onBack?: () => void
   right?: ReactNode
-  /** false quando a tela tem a própria lista rolável (FlatList). */
+  /** false when the screen has its own scrollable list (FlatList). */
   scroll?: boolean
   footer?: ReactNode
   children: ReactNode
 }
 
-/** Moldura padrão: área segura, cabeçalho, conteúdo com largura máxima de 480 px (web) e rodapé fixo. */
+/** Standard frame: safe area, header, content with a 480 px max width (web) and fixed footer. */
 export default function Screen({ title, onBack, right, scroll = true, footer, children }: ScreenProps) {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>

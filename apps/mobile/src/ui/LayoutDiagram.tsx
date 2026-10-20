@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import { colors } from 'shared'
 import type { Layout } from 'shared'
 
-// Grade de cada layout (CONTRATO_LAMBDAS.md §2.2): linhas da grade + derivações de ritmo (10 s).
+// Grid of each layout (CONTRATO_LAMBDAS.md §2.2): grid rows + rhythm leads (10 s).
 const GRID_3X4 = [
   ['I', 'aVR', 'V1', 'V4'],
   ['II', 'aVL', 'V2', 'V5'],
@@ -33,7 +33,7 @@ export function layoutDescription(layout: Layout): string {
   return rhythm.length ? `Linhas: ${rows}. Ritmo: ${rhythm.join(', ')}.` : `Linhas: ${rows}.`
 }
 
-/** Miniatura da folha de ECG: cada célula é uma derivação; o ritmo ocupa a largura toda. */
+/** Thumbnail of the ECG sheet: each cell is a lead; the rhythm strip spans the full width. */
 export default function LayoutDiagram({ layout, active = false }: { layout: Layout; active?: boolean }) {
   const { grid, rhythm } = LAYOUT_GRIDS[layout]
   const rows = [...grid, ...rhythm.map((lead) => [lead])]

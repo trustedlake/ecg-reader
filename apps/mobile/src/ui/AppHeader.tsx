@@ -16,7 +16,7 @@ export default function AppHeader({ title, onBack, right }: AppHeaderProps) {
           <Pressable
             onPress={onBack}
             accessibilityRole="button"
-            accessibilityLabel="Voltar"
+            accessibilityLabel="Back"
             hitSlop={8}
             style={({ pressed }) => [styles.back, pressed && styles.pressed]}
           >

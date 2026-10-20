@@ -1,8 +1,8 @@
 import { Platform } from 'react-native'
 
 /**
- * URL base da API. No web servido pelo Django, vazio = mesma origem (o app e a API estão no
- * mesmo host). No celular (Expo Go) é obrigatória: EXPO_PUBLIC_API_BASE_URL no .env.
+ * API base URL. On the web served by Django, empty = same origin (the app and the API are on
+ * the same host). On mobile (Expo Go) it is required: EXPO_PUBLIC_API_BASE_URL in .env.
  */
 export const API_BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').trim()
 

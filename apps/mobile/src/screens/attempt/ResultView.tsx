@@ -18,7 +18,7 @@ import FeedbackForm from './FeedbackForm'
 import { AttemptContext, backToExam, viewStyles } from './common'
 import type { AttemptViewProps } from './common'
 
-/** concluido: resumo em destaque, detalhes expansíveis e o disclaimer sempre visível. */
+/** concluido: highlighted summary, expandable details and the always-visible disclaimer. */
 export default function ResultView({ exam, attempt, navigation, banner }: AttemptViewProps) {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const interpretation = attempt.interpretation
@@ -29,16 +29,16 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
 
   return (
     <Screen
-      title="Resultado"
+      title="Result"
       onBack={() => backToExam(navigation, exam.id)}
       footer={
         feedbackOpen ? undefined : (
           <>
             <Button fullWidth variant="outline" onPress={() => setFeedbackOpen(true)} testID="feedback-open">
-              Enviar feedback
+              Send feedback
             </Button>
             <Button fullWidth variant="text" onPress={() => backToExam(navigation, exam.id)}>
-              Voltar ao exame
+              Back to exam
             </Button>
           </>
         )
@@ -47,8 +47,8 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
       {banner}
       <AttemptContext exam={exam} attempt={attempt} />
 
-      {interpretation && <WarningList title="Avisos da interpretação" warnings={interpretation.warnings} />}
-      <WarningList title="Avisos da leitura" warnings={readingWarnings} />
+      {interpretation && <WarningList title="Interpretation warnings" warnings={interpretation.warnings} />}
+      <WarningList title="Reading warnings" warnings={readingWarnings} />
 
       {summary && classification ? (
         <View style={[styles.summary, { backgroundColor: tone.bg, borderColor: tone.fg }]} testID="summary">
@@ -59,8 +59,8 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
             {summary.headline}
           </Text>
           <View style={styles.vitals}>
-            <Vital label="Ritmo" value={summary.rhythm} />
-            <Vital label="Frequência cardíaca" value={formatValue(summary.heart_rate_bpm, 'bpm')} />
+            <Vital label="Rhythm" value={summary.rhythm} />
+            <Vital label="Heart rate" value={formatValue(summary.heart_rate_bpm, 'bpm')} />
           </View>
           {summary.key_findings.length > 0 && (
             <View style={styles.list}>
@@ -74,7 +74,7 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
           {summary.text ? <Text style={viewStyles.text}>{summary.text}</Text> : null}
         </View>
       ) : (
-        <InfoBox>O resumo da interpretação não está disponível.</InfoBox>
+        <InfoBox>The interpretation summary is not available.</InfoBox>
       )}
 
       {interpretation?.details && <Details details={interpretation.details} />}
@@ -106,16 +106,16 @@ function Details({ details }: { details: InterpretationDetails }) {
 
   return (
     <View style={styles.details}>
-      <Text style={viewStyles.section}>Detalhes</Text>
+      <Text style={viewStyles.section}>Details</Text>
 
       {measurementKeys.length > 0 && (
-        <Section title="Medidas" testID="details-measurements">
+        <Section title="Measurements" testID="details-measurements">
           {measurementKeys.map((key) => {
             const measurement = details.measurements[key]
             const notes = [
-              measurement.value === null ? null : `Confiança ${CONFIDENCE_LABELS[measurement.confidence].toLowerCase()}`,
-              measurement.lead ? `derivação ${measurement.lead}` : null,
-              measurement.formula ? `fórmula de ${measurement.formula}` : null,
+              measurement.value === null ? null : `${CONFIDENCE_LABELS[measurement.confidence]} confidence`,
+              measurement.lead ? `lead ${measurement.lead}` : null,
+              measurement.formula ? `${measurement.formula} formula` : null,
             ].filter(Boolean)
             return (
               <Row
@@ -129,8 +129,8 @@ function Details({ details }: { details: InterpretationDetails }) {
         </Section>
       )}
 
-      <Section title={`Achados (${details.findings.length})`} testID="details-findings">
-        {details.findings.length === 0 && <Text style={viewStyles.muted}>Nenhum achado.</Text>}
+      <Section title={`Findings (${details.findings.length})`} testID="details-findings">
+        {details.findings.length === 0 && <Text style={viewStyles.muted}>No findings.</Text>}
         {details.findings.map((finding) => {
           const severity = SEVERITY_LABELS[finding.severity]
           return (
@@ -146,7 +146,7 @@ function Details({ details }: { details: InterpretationDetails }) {
       </Section>
 
       {details.criteria.length > 0 && (
-        <Section title="Critérios avaliados" testID="details-criteria">
+        <Section title="Criteria evaluated" testID="details-criteria">
           {details.criteria.map((criterion) => {
             const status = CRITERION_STATUS_LABELS[criterion.status]
             return (
@@ -156,9 +156,9 @@ function Details({ details }: { details: InterpretationDetails }) {
                   <Tag label={status.label} icon={status.icon} tone={status.tone} />
                 </View>
                 <Text style={viewStyles.text}>
-                  {formatValue(criterion.value, criterion.unit)} · referência {criterion.reference}
+                  {formatValue(criterion.value, criterion.unit)} · reference {criterion.reference}
                 </Text>
-                {criterion.sex_specific && <Tag label="Depende do sexo" icon="⚥" tone="progress" />}
+                {criterion.sex_specific && <Tag label="Depends on sex" icon="⚥" tone="progress" />}
               </View>
             )
           })}
@@ -166,7 +166,7 @@ function Details({ details }: { details: InterpretationDetails }) {
       )}
 
       {details.per_lead.length > 0 && (
-        <Section title="Por derivação" testID="details-per-lead">
+        <Section title="Per lead" testID="details-per-lead">
           {details.per_lead.map((lead) => {
             const quality = lead.quality ? LEAD_QUALITY_LABELS[lead.quality] : null
             return (
@@ -203,7 +203,7 @@ function Section({ title, testID, children }: { title: string; testID?: string; 
         testID={testID}
       >
         <Text style={styles.sectionTitle}>{title}</Text>
-        <Text style={styles.sectionToggle}>{open ? '▲ Ocultar' : '▼ Ver'}</Text>
+        <Text style={styles.sectionToggle}>{open ? '▲ Hide' : '▼ Show'}</Text>
       </Pressable>
       {open && <View style={styles.sectionBody}>{children}</View>}
     </View>

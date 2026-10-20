@@ -6,7 +6,7 @@ export type ImageContentType = 'image/jpeg' | 'image/png' | 'image/webp'
 
 export interface PickedImage {
   uri: string
-  /** Web: o File do <input>; no celular o upload lê a `uri`. */
+  /** Web: the File from the <input>; on mobile the upload reads the `uri`. */
   file?: Blob
   filename: string
   contentType: ImageContentType
@@ -15,8 +15,8 @@ export interface PickedImage {
 }
 
 /**
- * Rascunho da nova tentativa (foto → calibração → layout), guardado em memória entre as telas.
- * A foto não vai nos params da navegação (o File do web não é serializável).
+ * Draft of the new attempt (photo → calibration → layout), kept in memory across screens.
+ * The photo is not passed in navigation params (the web File is not serializable).
  */
 export interface AttemptDraft {
   examId: string
@@ -53,6 +53,6 @@ export function AttemptDraftProvider({ children }: { children: ReactNode }) {
 
 export function useAttemptDraft(): AttemptDraftContextValue {
   const ctx = useContext(AttemptDraftContext)
-  if (!ctx) throw new Error('useAttemptDraft deve ser usado dentro de <AttemptDraftProvider>')
+  if (!ctx) throw new Error('useAttemptDraft must be used inside <AttemptDraftProvider>')
   return ctx
 }

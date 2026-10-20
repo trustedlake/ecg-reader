@@ -7,14 +7,14 @@ import { errorMessage } from '../../ui/labels'
 import TextField from '../../ui/TextField'
 
 const ISSUES = [
-  { value: 'not-recognized', label: 'Parte do ECG não foi reconhecida.' },
-  { value: 'wrong-trace', label: 'O traçado extraído não acompanha o do papel.' },
-  { value: 'wrong-measurement', label: 'Alguma medida parece errada.' },
-  { value: 'wrong-interpretation', label: 'A interpretação não condiz com o ECG.' },
-  { value: 'other', label: 'Outro.' },
+  { value: 'not-recognized', label: 'Part of the ECG was not recognized.' },
+  { value: 'wrong-trace', label: 'The extracted trace does not match the one on the paper.' },
+  { value: 'wrong-measurement', label: 'A measurement looks wrong.' },
+  { value: 'wrong-interpretation', label: 'The interpretation does not match the ECG.' },
+  { value: 'other', label: 'Other.' },
 ]
 
-/** Feedback do usuário sobre a tentativa (POST /api/attempts/<id>/feedback/). */
+/** User feedback about the attempt (POST /api/attempts/<id>/feedback/). */
 export default function FeedbackForm({ attemptId, onClose }: { attemptId: string; onClose: () => void }) {
   const { api } = useApi()
   const [issues, setIssues] = useState<string[]>([])
@@ -41,9 +41,9 @@ export default function FeedbackForm({ attemptId, onClose }: { attemptId: string
   if (sent) {
     return (
       <View style={styles.box} testID="feedback-sent">
-        <InfoBox title="✓ Feedback enviado">Obrigado! Ele ajuda a melhorar a leitura e a interpretação.</InfoBox>
+        <InfoBox title="✓ Feedback sent">Thank you! It helps improve the reading and the interpretation.</InfoBox>
         <Button fullWidth variant="outline" onPress={onClose}>
-          Fechar
+          Close
         </Button>
       </View>
     )
@@ -51,10 +51,10 @@ export default function FeedbackForm({ attemptId, onClose }: { attemptId: string
 
   return (
     <View style={styles.box} testID="feedback-form">
-      <Text style={styles.title}>O que não ficou certo?</Text>
+      <Text style={styles.title}>What was not right?</Text>
       <CheckboxGroup options={ISSUES} values={issues} onChange={setIssues} />
       <TextField
-        label="Comentário (opcional)"
+        label="Comment (optional)"
         value={description}
         onChangeText={setDescription}
         multiline
@@ -63,10 +63,10 @@ export default function FeedbackForm({ attemptId, onClose }: { attemptId: string
       />
       {error && <ErrorBanner message={error} />}
       <Button fullWidth disabled={!canSend} loading={sending} onPress={() => void send()} testID="feedback-send">
-        Enviar
+        Send
       </Button>
       <Button fullWidth variant="text" disabled={sending} onPress={onClose}>
-        Cancelar
+        Cancel
       </Button>
     </View>
   )

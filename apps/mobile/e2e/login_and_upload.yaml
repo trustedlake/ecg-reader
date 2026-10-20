@@ -4,11 +4,11 @@ appId: com.ecg.leitorecg
     clearState: true
 - assertVisible: "Leitor ECG"
 - takeScreenshot: 01_login_screen
-- tapOn: "Usuário ou e-mail"
+- tapOn: "Username"
 - inputText: "qa-mobile@ecg.local"
-- tapOn: "Senha"
+- tapOn: "Password"
 - inputText: ${MAESTRO_QA_PASSWORD}
-- tapOn: "Entrar"
+- tapOn: "Sign in"
 - assertVisible: "Upload de ECG"
 - takeScreenshot: 02_upload_screen
 - tapOn: "Escolher da galeria"

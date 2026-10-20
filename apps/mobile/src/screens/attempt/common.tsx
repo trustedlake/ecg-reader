@@ -9,18 +9,18 @@ import { LAYOUT_LABELS, SEX_LABELS, errorMessage, formatDateTime } from '../../u
 
 export type AttemptNavigation = AppScreenProps<'AttemptState'>['navigation']
 
-/** O que cada tela de desfecho recebe do AttemptStateScreen. */
+/** What each outcome screen receives from AttemptStateScreen. */
 export interface AttemptViewProps {
   exam: Exam
   attempt: Attempt
   navigation: AttemptNavigation
-  /** Reconsulta a tentativa (ex.: depois de um 409 ou de uma falha de rede). */
+  /** Refetches the attempt (e.g. after a 409 or a network failure). */
   reload: () => void
-  /** Falha ao reconsultar (rede, fora do horário): aparece no topo sem perder a tela atual. */
+  /** Refetch failure (network, outside business hours): shown at the top without losing the current screen. */
   banner?: ReactNode
 }
 
-/** Nova tentativa no mesmo exame, já com a calibração da tentativa atual. */
+/** New attempt on the same exam, already using the current attempt's calibration. */
 export function useNewPhoto(exam: Exam, attempt: Attempt, navigation: AttemptNavigation) {
   const { start } = useAttemptDraft()
   return useCallback(() => {
@@ -30,8 +30,8 @@ export function useNewPhoto(exam: Exam, attempt: Attempt, navigation: AttemptNav
 }
 
 /**
- * Executa uma ação da tentativa (aceitar, recusar, tentar de novo). Um 409 significa que o estado mudou
- * por fora (outra aba, resposta perdida): em vez de erro, reconsulta e mostra a tela do estado atual.
+ * Runs an attempt action (accept, refuse, retry). A 409 means the state changed
+ * externally (another tab, lost response): instead of an error, it refetches and shows the screen for the current state.
  */
 export function useAttemptAction(reload: () => void) {
   const [busy, setBusy] = useState(false)
@@ -54,7 +54,7 @@ export function useAttemptAction(reload: () => void) {
   return { busy, error, run }
 }
 
-/** Volta ao histórico do exame (ou o abre, se a tela veio de outro caminho). */
+/** Goes back to the exam history (or opens it, if the screen was reached another way). */
 export function backToExam(navigation: AttemptNavigation, examId: string) {
   navigation.popTo('ExamDetail', { examId })
 }
@@ -65,10 +65,10 @@ export function AttemptContext({ exam, attempt }: { exam: Exam; attempt: Attempt
     <View style={styles.context}>
       <Text style={styles.patient}>{patient.name}</Text>
       <Text style={styles.meta}>
-        {patient.age} anos{patient.sex ? ` · ${SEX_LABELS[patient.sex]}` : ''} · {LAYOUT_LABELS[attempt.layout]} ·{' '}
-        {String(attempt.calibration.speed_mm_s).replace('.', ',')} mm/s · {attempt.calibration.gain_mm_mv} mm/mV
+        {patient.age} years old{patient.sex ? ` · ${SEX_LABELS[patient.sex]}` : ''} · {LAYOUT_LABELS[attempt.layout]} ·{' '}
+        {String(attempt.calibration.speed_mm_s)} mm/s · {attempt.calibration.gain_mm_mv} mm/mV
       </Text>
-      <Text style={styles.meta}>Foto enviada em {formatDateTime(attempt.created_at)}</Text>
+      <Text style={styles.meta}>Photo submitted on {formatDateTime(attempt.created_at)}</Text>
     </View>
   )
 }

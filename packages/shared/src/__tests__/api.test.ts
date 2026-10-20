@@ -37,8 +37,8 @@ afterEach(() => {
 
 const client = createApiClient({ baseUrl: 'https://api.test/', getToken: () => 'tok' })
 
-describe('requisições', () => {
-  it('usa baseUrl sem barra dupla e manda o token', async () => {
+describe('requests', () => {
+  it('uses baseUrl without a double slash and sends the token', async () => {
     fetchMock.mockResolvedValueOnce(json(200, attempt('criado')))
     await client.getAttempt('e1', 'a1')
     const [url, init] = fetchMock.mock.calls[0]!
@@ -46,7 +46,7 @@ describe('requisições', () => {
     expect(new Headers(init!.headers).get('Authorization')).toBe('Token tok')
   })
 
-  it('baseUrl vazio = mesma origem', async () => {
+  it('empty baseUrl = same origin', async () => {
     const sameOrigin = createApiClient({ baseUrl: '', getToken: () => null })
     fetchMock.mockResolvedValueOnce(json(200, attempt('criado')))
     await sameOrigin.startRead('e1', 'a1')
@@ -56,7 +56,7 @@ describe('requisições', () => {
     expect(new Headers(init!.headers).has('Authorization')).toBe(false)
   })
 
-  it('createAttempt envia o corpo do contrato', async () => {
+  it('createAttempt sends the contract body', async () => {
     fetchMock.mockResolvedValueOnce(json(201, { attempt_id: 'a1', upload_url: 'u', upload_headers: {} }))
     await client.createAttempt('e1', { filename: 'f.jpg', content_type: 'image/jpeg', layout: '6x2' })
     const [url, init] = fetchMock.mock.calls[0]!
@@ -65,7 +65,7 @@ describe('requisições', () => {
   })
 })
 
-describe('normalização de erros', () => {
+describe('error normalization', () => {
   async function errorFor(response: Response | Error): Promise<ApiError> {
     if (response instanceof Error) fetchMock.mockRejectedValueOnce(response)
     else fetchMock.mockResolvedValueOnce(response)
@@ -75,60 +75,60 @@ describe('normalização de erros', () => {
       expect(error).toBeInstanceOf(ApiError)
       return error as ApiError
     }
-    throw new Error('esperava erro')
+    throw new Error('expected an error')
   }
 
-  it('falha de rede', async () => {
+  it('network failure', async () => {
     const error = await errorFor(new TypeError('Failed to fetch'))
     expect(error).toMatchObject({ kind: 'network', status: 0, message: API_MESSAGES.network })
   })
 
   it('401 → unauthorized', async () => {
-    const error = await errorFor(json(401, { detail: 'Token inválido.' }))
+    const error = await errorFor(json(401, { detail: 'Invalid token.' }))
     expect(error).toMatchObject({ kind: 'unauthorized', status: 401, message: API_MESSAGES.unauthorized })
   })
 
-  it('400 com erros de campo', async () => {
-    const error = await errorFor(json(400, { layout: ['"4x3" não é um escolha válido.'], sex: ['Obrigatório.'] }))
+  it('400 with field errors', async () => {
+    const error = await errorFor(json(400, { layout: ['"4x3" is not a valid choice.'], sex: ['Required.'] }))
     expect(error.kind).toBe('validation')
-    expect(error.message).toBe('"4x3" não é um escolha válido.')
-    expect(error.fieldErrors).toEqual({ layout: ['"4x3" não é um escolha válido.'], sex: ['Obrigatório.'] })
+    expect(error.message).toBe('"4x3" is not a valid choice.')
+    expect(error.fieldErrors).toEqual({ layout: ['"4x3" is not a valid choice.'], sex: ['Required.'] })
   })
 
-  it('400 aninhado (test_scenario) e non_field_errors', async () => {
-    let error = await errorFor(json(400, { test_scenario: { read: { scenario: ['Cenário inválido.'] } } }))
-    expect(error.fieldErrors).toEqual({ test_scenario: ['Cenário inválido.'] })
-    error = await errorFor(json(400, { non_field_errors: ['Informe patient_id OU os dados.'] }))
-    expect(error.message).toBe('Informe patient_id OU os dados.')
+  it('nested 400 (test_scenario) and non_field_errors', async () => {
+    let error = await errorFor(json(400, { test_scenario: { read: { scenario: ['Invalid scenario.'] } } }))
+    expect(error.fieldErrors).toEqual({ test_scenario: ['Invalid scenario.'] })
+    error = await errorFor(json(400, { non_field_errors: ['Provide patient_id OR the data.'] }))
+    expect(error.message).toBe('Provide patient_id OR the data.')
   })
 
-  it('404 e 409 usam o detail', async () => {
-    expect(await errorFor(json(404, { detail: 'Não encontrado.' }))).toMatchObject({ kind: 'not_found', message: 'Não encontrado.' })
-    expect(await errorFor(json(409, { detail: 'Estado inválido.', code: 'invalid_state' }))).toMatchObject({
+  it('404 and 409 use the detail', async () => {
+    expect(await errorFor(json(404, { detail: 'Not found.' }))).toMatchObject({ kind: 'not_found', message: 'Not found.' })
+    expect(await errorFor(json(409, { detail: 'Invalid state.', code: 'invalid_state' }))).toMatchObject({
       kind: 'conflict',
-      message: 'Estado inválido.',
+      message: 'Invalid state.',
     })
   })
 
-  it('503 sem corpo = fora do horário', async () => {
+  it('503 without a body = off hours', async () => {
     const error = await errorFor(new Response('', { status: 503 }))
     expect(error).toMatchObject({ kind: 'server', status: 503, message: API_MESSAGES.offHours })
     expect(isOffHours(error)).toBe(true)
   })
 
-  it('503 do API Gateway com message também é fora do horário', async () => {
+  it('API Gateway 503 with a message is also off hours', async () => {
     const error = await errorFor(json(503, { message: 'Service Unavailable' }))
     expect(error).toMatchObject({ kind: 'server', status: 503, message: API_MESSAGES.offHours })
     expect(isOffHours(error)).toBe(true)
   })
 
-  it('503 com detail do Django não é fora do horário', async () => {
-    const error = await errorFor(json(503, { detail: 'Banco indisponível.' }))
-    expect(error).toMatchObject({ kind: 'server', status: 503, message: 'Banco indisponível.' })
+  it('503 with a Django detail is not off hours', async () => {
+    const error = await errorFor(json(503, { detail: 'Database unavailable.' }))
+    expect(error).toMatchObject({ kind: 'server', status: 503, message: 'Database unavailable.' })
     expect(isOffHours(error)).toBe(false)
   })
 
-  it('500 com HTML vira mensagem genérica', async () => {
+  it('500 with HTML becomes a generic message', async () => {
     const error = await errorFor(new Response('<h1>Server Error</h1>', { status: 500 }))
     expect(error).toMatchObject({ kind: 'server', status: 500, message: API_MESSAGES.server })
     expect(isOffHours(error)).toBe(false)
@@ -136,7 +136,7 @@ describe('normalização de erros', () => {
 })
 
 describe('uploadImage', () => {
-  it('PUT com os headers assinados e o Blob', async () => {
+  it('PUT with the signed headers and the Blob', async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 200 }))
     const blob = new Blob(['x'], { type: 'image/jpeg' })
     await client.uploadImage('https://s3/put', { 'Content-Type': 'image/jpeg' }, blob)
@@ -145,15 +145,15 @@ describe('uploadImage', () => {
     expect(init).toMatchObject({ method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: blob })
   })
 
-  it('URI local é lida como Blob antes do PUT (native)', async () => {
+  it('local URI is read as a Blob before the PUT (native)', async () => {
     const blob = new Blob(['x'])
     fetchMock.mockResolvedValueOnce(new Response(blob)).mockResolvedValueOnce(new Response(null, { status: 200 }))
-    await client.uploadImage('https://s3/put', { 'Content-Type': 'image/png' }, 'file:///tmp/foto.png')
-    expect(fetchMock.mock.calls[0]![0]).toBe('file:///tmp/foto.png')
+    await client.uploadImage('https://s3/put', { 'Content-Type': 'image/png' }, 'file:///tmp/photo.png')
+    expect(fetchMock.mock.calls[0]![0]).toBe('file:///tmp/photo.png')
     expect(fetchMock.mock.calls[1]![1]!.body).toBeInstanceOf(Blob)
   })
 
-  it('403 do S3 não desloga', async () => {
+  it('S3 403 does not log out', async () => {
     fetchMock.mockResolvedValueOnce(new Response('<Error/>', { status: 403 }))
     await expect(client.uploadImage('https://s3/put', {}, new Blob(['x']))).rejects.toMatchObject({
       kind: 'server',
@@ -166,7 +166,7 @@ describe('uploadImage', () => {
 describe('pollAttempt', () => {
   beforeEach(() => vi.useFakeTimers())
 
-  it('consulta a cada intervalo até sair de *_processando', async () => {
+  it('polls at each interval until leaving *_processando', async () => {
     fetchMock
       .mockResolvedValueOnce(json(200, attempt('leitura_processando')))
       .mockResolvedValueOnce(json(200, attempt('leitura_processando')))
@@ -187,7 +187,7 @@ describe('pollAttempt', () => {
     expect(onUpdate).toHaveBeenCalledTimes(3)
   })
 
-  it('resolve na hora se já não está processando', async () => {
+  it('resolves immediately if it is no longer processing', async () => {
     fetchMock.mockResolvedValueOnce(json(200, attempt('concluido')))
     await expect(client.pollAttempt('e1', 'a1')).resolves.toMatchObject({ status: 'concluido' })
   })
@@ -201,7 +201,7 @@ describe('pollAttempt', () => {
     expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(4)
   })
 
-  it('abort interrompe a espera', async () => {
+  it('abort interrupts the wait', async () => {
     fetchMock.mockImplementation(async () => json(200, attempt('leitura_processando')))
     const controller = new AbortController()
     const promise = client.pollAttempt('e1', 'a1', { signal: controller.signal })
@@ -213,7 +213,7 @@ describe('pollAttempt', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  it('tolera falha transitória e para em erro definitivo', async () => {
+  it('tolerates transient failure and stops on a definitive error', async () => {
     fetchMock
       .mockRejectedValueOnce(new TypeError('offline'))
       .mockResolvedValueOnce(new Response('', { status: 502 }))
@@ -227,7 +227,7 @@ describe('pollAttempt', () => {
     await expect(client.pollAttempt('e1', 'a1')).rejects.toMatchObject({ kind: 'unauthorized' })
   })
 
-  it('fora do horário para o polling na hora', async () => {
+  it('off hours stops polling immediately', async () => {
     fetchMock.mockResolvedValue(new Response('', { status: 503 }))
     const promise = client.pollAttempt('e1', 'a1', { intervalMs: 100 })
     await expect(promise).rejects.toMatchObject({ offHours: true })

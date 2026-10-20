@@ -7,13 +7,13 @@ import { AttemptContext, backToExam, useAttemptAction, useNewPhoto, viewStyles }
 import type { AttemptViewProps } from './common'
 
 const PHASE_TITLES = {
-  erro_leitura: 'Erro na leitura',
-  erro_interpretacao: 'Erro na interpretação',
+  erro_leitura: 'Reading error',
+  erro_interpretacao: 'Interpretation error',
 } as const
 
 /**
- * erro_leitura / erro_interpretacao: "Tentar de novo" reexecuta a fase na mesma tentativa quando o backend
- * permite (`can_retry`); senão a foto não serve e o caminho é uma nova tentativa.
+ * erro_leitura / erro_interpretacao: "Try again" reruns the phase on the same attempt when the backend
+ * allows it (`can_retry`); otherwise the photo is unusable and the way forward is a new attempt.
  */
 export default function ErrorView({ exam, attempt, navigation, reload, banner }: AttemptViewProps) {
   const { api } = useApi()
@@ -36,15 +36,15 @@ export default function ErrorView({ exam, attempt, navigation, reload, banner }:
         <>
           {attempt.can_retry ? (
             <Button fullWidth loading={busy} onPress={() => void retry()} testID="retry">
-              Tentar de novo
+              Try again
             </Button>
           ) : (
             <Button fullWidth onPress={newPhoto} testID="new-photo">
-              Tirar nova foto
+              Take a new photo
             </Button>
           )}
           <Button fullWidth variant="outline" disabled={busy} onPress={() => backToExam(navigation, exam.id)}>
-            Voltar ao exame
+            Back to exam
           </Button>
         </>
       }
@@ -52,17 +52,17 @@ export default function ErrorView({ exam, attempt, navigation, reload, banner }:
       {banner}
       <AttemptContext exam={exam} attempt={attempt} />
       <Text style={viewStyles.title} accessibilityRole="header">
-        ✕ {phase === 'erro_interpretacao' ? 'Não foi possível interpretar o ECG' : 'Não foi possível ler o ECG'}
+        ✕ {phase === 'erro_interpretacao' ? 'Could not interpret the ECG' : 'Could not read the ECG'}
       </Text>
       <Text style={viewStyles.text} testID="error-message">
-        {contractError?.message ?? 'Ocorreu um erro inesperado no processamento.'}
+        {contractError?.message ?? 'An unexpected error occurred during processing.'}
       </Text>
       <InfoBox>
         {attempt.can_retry
-          ? 'Foi uma falha temporária. A mesma foto pode ser processada de novo, sem precisar fotografar outra vez.'
-          : 'Esta foto não pode ser processada. Tire uma nova foto do mesmo ECG: ela vira uma nova tentativa neste exame.'}
+          ? 'This was a temporary failure. The same photo can be processed again without taking another one.'
+          : 'This photo cannot be processed. Take a new photo of the same ECG: it becomes a new attempt on this exam.'}
       </InfoBox>
-      {contractError && <Text style={viewStyles.code}>Código: {contractError.code}</Text>}
+      {contractError && <Text style={viewStyles.code}>Code: {contractError.code}</Text>}
       {error && <ErrorBanner message={error} />}
     </Screen>
   )
