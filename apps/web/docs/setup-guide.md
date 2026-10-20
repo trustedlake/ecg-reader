@@ -9,8 +9,8 @@
 ## Clone & Install
 
 ```bash
-git clone https://github.com/tl-gmiler/leitor-ecg.git
-cd leitor-ecg
+git clone https://github.com/trustedlake/ecg-reader.git
+cd ecg-reader
 
 # Install dependencies
 npm install

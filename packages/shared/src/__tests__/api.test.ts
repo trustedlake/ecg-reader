@@ -193,11 +193,6 @@ describe('pollAttempt', () => {
     await expect(client.pollAttempt('e1', 'a1')).resolves.toMatchObject({ status: 'completed' })
   })
 
-  it('renames legacy wire keys to English field names', async () => {
-    fetchMock.mockResolvedValueOnce(json(200, { fidelidade: 'high', ritmo: { fc_bpm: 72 } }))
-    await expect(client.apiFetch('/x/')).resolves.toEqual({ fidelity: 'high', rhythm: { hr_bpm: 72 } })
-  })
-
   it('resolves immediately if it is no longer processing', async () => {
     fetchMock.mockResolvedValueOnce(json(200, attempt('completed')))
     await expect(client.pollAttempt('e1', 'a1')).resolves.toMatchObject({ status: 'completed' })

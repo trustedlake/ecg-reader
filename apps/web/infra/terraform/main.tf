@@ -10,11 +10,11 @@ terraform {
     }
   }
 
-  # Reuses the ecg-lambdas state bucket, under its own key; does not touch that state.
+  # Dedicated state bucket (versioned, private).
   backend "s3" {
-    bucket = "ecg-lambdas-terraform-state"
-    key    = "leitor-ecg/terraform.tfstate"
-    region = "sa-east-1"
+    bucket = "ecg-reader-terraform-state-785236377332"
+    key    = "ecg-reader/terraform.tfstate"
+    region = "us-east-1"
   }
 }
 
@@ -24,7 +24,8 @@ provider "aws" {
 }
 
 locals {
-  app_name = "leitor-ecg"
+  app_name = "ecg-reader"
+  app_host = "app.${var.domain}"
 }
 
 # Unique bucket suffix (8 hex chars). Fixed keeper: stops random_id from
@@ -38,7 +39,7 @@ resource "random_id" "bucket_suffix" {
 
 # Private bucket: nothing public. Access only through CloudFront + OAC.
 resource "aws_s3_bucket" "spa" {
-  bucket = "leitor-ecg-spa-${random_id.bucket_suffix.hex}"
+  bucket = "${local.app_name}-spa-${random_id.bucket_suffix.hex}"
   tags = {
     Name = "${local.app_name}-spa"
   }
@@ -85,23 +86,17 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
-# Zones that already exist in Route53 (not created by this state).
-data "aws_route53_zone" "leitorecg_com_br" {
-  name         = "leitorecg.com.br."
+# Zone that already exists in Route53 (not created by this state).
+data "aws_route53_zone" "main" {
+  name         = "${var.domain}."
   private_zone = false
 }
 
-data "aws_route53_zone" "leitorecg_com" {
-  name         = "leitorecg.com."
-  private_zone = false
-}
-
-# Single certificate covering both domains. Must be in us-east-1
+# Certificate for the app host. Must be in us-east-1
 # (the provider already is) for CloudFront to accept it.
 resource "aws_acm_certificate" "spa" {
-  domain_name               = "app.leitorecg.com.br"
-  subject_alternative_names = ["app.leitorecg.com"]
-  validation_method          = "DNS"
+  domain_name       = local.app_host
+  validation_method = "DNS"
 
   lifecycle {
     create_before_destroy = true
@@ -114,7 +109,7 @@ resource "aws_route53_record" "spa_cert_validation" {
       name    = dvo.resource_record_name
       record  = dvo.resource_record_value
       type    = dvo.resource_record_type
-      zone_id = dvo.domain_name == "app.leitorecg.com" ? data.aws_route53_zone.leitorecg_com.zone_id : data.aws_route53_zone.leitorecg_com_br.zone_id
+      zone_id = data.aws_route53_zone.main.zone_id
     }
   }
 
@@ -133,10 +128,10 @@ resource "aws_acm_certificate_validation" "spa" {
 
 resource "aws_cloudfront_distribution" "spa" {
   enabled             = true
-  comment             = "SPA ${local.app_name} (React) servida do S3"
+  comment             = "SPA ${local.app_name} (React) served from S3"
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
-  aliases             = ["app.leitorecg.com.br", "app.leitorecg.com"]
+  aliases             = [local.app_host]
 
   origin {
     domain_name              = aws_s3_bucket.spa.bucket_regional_domain_name
@@ -182,20 +177,8 @@ resource "aws_cloudfront_distribution" "spa" {
 }
 
 resource "aws_route53_record" "spa_app" {
-  zone_id = data.aws_route53_zone.leitorecg_com_br.zone_id
-  name    = "app.leitorecg.com.br"
-  type    = "A"
-
-  alias {
-    name                   = aws_cloudfront_distribution.spa.domain_name
-    zone_id                = aws_cloudfront_distribution.spa.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
-resource "aws_route53_record" "spa_app_com" {
-  zone_id = data.aws_route53_zone.leitorecg_com.zone_id
-  name    = "app.leitorecg.com"
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = local.app_host
   type    = "A"
 
   alias {

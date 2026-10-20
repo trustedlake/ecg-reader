@@ -1,4 +1,4 @@
-appId: com.ecg.leitorecg
+appId: com.ecgreader.app
 ---
 - launchApp:
     clearState: true

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import AppBrandHeader from '../../components/nav/AppBrandHeader'
-import { Button, ParamCard, useAuth, useExamDraft, formatNumber, WIRE_PATHS } from 'shared'
+import { Button, ParamCard, useAuth, useExamDraft, formatNumber } from 'shared'
 import { apiFetch } from '../../platform/api'
 import styles from './Report.module.css'
 
@@ -77,7 +77,7 @@ export default function Report() {
     setError(null)
     try {
       const data = await apiFetch<ReportResponse>(
-        `/api/exams/${examId}/attempts/${attemptId}/${WIRE_PATHS.approve}/`,
+        `/api/exams/${examId}/attempts/${attemptId}/accept/`,
         { method: 'POST', token },
       )
       setResult(data)

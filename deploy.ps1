@@ -14,4 +14,4 @@ aws s3 sync apps\web\dist\ "s3://$bucket/" --delete --profile trustedlake
 
 aws cloudfront create-invalidation --distribution-id $distId --paths "/*" --profile trustedlake
 
-Write-Host "Deploy done. Wait 1-2 min for the invalidation to propagate, then test at https://app.leitorecg.com.br/upload"
+Write-Host "Deploy done. Wait 1-2 min for the invalidation to propagate, then test at https://app.ecgreader.app/upload"

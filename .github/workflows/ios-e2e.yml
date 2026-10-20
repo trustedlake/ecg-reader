@@ -112,10 +112,10 @@ jobs:
           xcrun simctl install booted "$APP_PATH"
 
       - name: Pre-grant photo library permission
-        run: xcrun simctl privacy booted grant photos com.ecg.leitorecg
+        run: xcrun simctl privacy booted grant photos com.ecgreader.app
 
       - name: Launch app on Simulator
-        run: xcrun simctl launch booted com.ecg.leitorecg
+        run: xcrun simctl launch booted com.ecgreader.app
 
       - name: Run Maestro flow (login + upload)
         run: maestro test apps/mobile/e2e/login_and_upload.yaml -e MAESTRO_QA_PASSWORD="${{ secrets.QA_MOBILE_PASSWORD }}"

@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ecg.leitorecg"
+      "bundleIdentifier": "com.ecgreader.app"
     },
     "plugins": [
       [
@@ -20,7 +20,7 @@
       ]
     ],
     "android": {
-      "package": "com.ecg.leitorecg",
+      "package": "com.ecgreader.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
