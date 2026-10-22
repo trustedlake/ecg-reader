@@ -1,5 +1,7 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { Button, colors } from 'shared'
+import { Pressable, StyleSheet, View } from 'react-native'
+import { Text } from '../ui/Text'
+import { colors } from 'shared'
+import Button from '../ui/Button'
 import type { Layout } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
@@ -18,6 +20,7 @@ export default function LayoutScreen({ navigation, route }: AppScreenProps<'Layo
   if (!draft?.image || draft.examId !== examId) return <MissingDraft examId={examId} navigation={navigation} />
 
   const layouts: Layout[] = config?.layouts ?? LAYOUTS
+  const upcoming = (Object.keys(LAYOUT_LABELS) as Layout[]).filter((layout) => !layouts.includes(layout))
 
   return (
     <Screen
@@ -54,6 +57,25 @@ export default function LayoutScreen({ navigation, route }: AppScreenProps<'Layo
           )
         })}
       </View>
+      {upcoming.length > 0 && (
+        <>
+          <Text style={styles.upcomingTitle}>Upcoming</Text>
+          <View style={styles.grid} testID="layouts-upcoming">
+            {upcoming.map((layout) => (
+              <View
+                key={layout}
+                style={[styles.card, styles.disabled]}
+                accessibilityState={{ disabled: true }}
+                accessibilityLabel={`Layout ${LAYOUT_LABELS[layout]}. Upcoming, not available yet.`}
+                testID={`layout-upcoming-${layout}`}
+              >
+                <LayoutDiagram layout={layout} active={false} />
+                <Text style={styles.label}>{LAYOUT_LABELS[layout]}</Text>
+              </View>
+            ))}
+          </View>
+        </>
+      )}
     </Screen>
   )
 }
@@ -73,6 +95,8 @@ const styles = StyleSheet.create({
   },
   selected: { borderColor: colors.secondary, backgroundColor: '#eef2ec' },
   pressed: { opacity: 0.8 },
+  disabled: { opacity: 0.4 },
+  upcomingTitle: { fontSize: 13, fontWeight: '600', color: colors.textMuted, textTransform: 'uppercase', marginTop: 8 },
   label: { fontSize: 15, fontWeight: '600', color: colors.dark, textAlign: 'center' },
   labelSelected: { color: colors.secondary },
 })

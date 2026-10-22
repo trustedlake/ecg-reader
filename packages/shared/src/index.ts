@@ -1,6 +1,7 @@
 export { formatNumber } from './format'
 export { colors } from './theme'
 export { ExamDraftProvider, useExamDraft } from './context/ExamDraftContext'
+export { CONTRACT_MESSAGES, translateContractMessages } from './contractMessages'
 export { createApiClient, ApiError, API_MESSAGES, isOffHours, toApiError } from './api'
 export type { ApiClient, ApiClientConfig, ApiErrorKind, PollOptions, UploadSource } from './api'
 export { PROCESSING_STATUSES, isProcessing } from './types'

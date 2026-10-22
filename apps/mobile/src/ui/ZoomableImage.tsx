@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, Animated, Image, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Animated, Image, Modal, PanResponder, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native'
+import { Text } from './Text'
 import type { GestureResponderEvent, LayoutChangeEvent } from 'react-native'
 import { colors } from 'shared'
 
@@ -13,11 +14,23 @@ interface ZoomableImageProps {
   highlightLabel?: string
   /** Maximum height of the image area. */
   maxHeight?: number
+  /** Several images of the same ECG: a horizontal swipe moves between them, inline and full screen. */
+  pageCount?: number
+  page?: number
+  onPageChange?: (page: number) => void
   testID?: string
 }
 
+const SWIPE_DISTANCE = 40
+
 const MAX_SCALE = 4
-const STEPS = [1, 1.5, 2, 3, 4]
+
+/** Tells the phone-frame demo page (when the app runs inside its iframe) to turn the phone sideways. */
+function setFrameOrientation(value: 'landscape' | 'portrait') {
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.parent !== window) {
+    window.parent.postMessage({ type: 'ecg-reader:orientation', value }, '*')
+  }
+}
 
 interface View2D {
   scale: number
@@ -37,7 +50,7 @@ function distance(event: GestureResponderEvent): number | null {
 
 /**
  * Image with up to 4× zoom and panning, the same on iOS, Android and web (PanResponder, no native libs):
- * two-finger pinch, one-finger or mouse drag when zoomed in, and −/+/Fit buttons.
+ * two-finger pinch and one-finger drag when zoomed in. A tap opens the image full screen, sideways.
  */
 export default function ZoomableImage({
   uri,
@@ -45,16 +58,39 @@ export default function ZoomableImage({
   highlight,
   highlightLabel = 'Problem region',
   maxHeight = 560,
+  pageCount = 1,
+  page = 0,
+  onPageChange,
   testID,
 }: ZoomableImageProps) {
+  const paging = useRef({ pageCount, page, onPageChange })
+  paging.current = { pageCount, page, onPageChange }
+  const swipe = (direction: 1 | -1) => {
+    const { pageCount: count, page: current, onPageChange: change } = paging.current
+    const next = current + direction
+    if (change && next >= 0 && next < count) change(next)
+  }
   const [natural, setNatural] = useState<{ width: number; height: number } | null>(null)
   const [failed, setFailed] = useState(false)
   const [frameWidth, setFrameWidth] = useState(0)
-  const [level, setLevel] = useState(1)
+  const [fullScreen, setFullScreen] = useState(false)
+
+  const lastSwipe = useRef(0)
+  const openFullScreen = () => {
+    // The mouse release that ends a swipe also fires a press on web.
+    if (Date.now() - lastSwipe.current < 500) return
+    setFullScreen(true)
+  }
+  const closeFullScreen = () => setFullScreen(false)
+  // The phone stays sideways for as long as full screen is open (also across a reload of the code).
+  useEffect(() => {
+    setFrameOrientation(fullScreen ? 'landscape' : 'portrait')
+    return () => setFrameOrientation('portrait')
+  }, [fullScreen])
 
   useEffect(() => {
     let cancelled = false
-    setNatural(null)
+    // Keeps the previous size while the next image loads, so changing image never closes full screen or flickers.
     setFailed(false)
     Image.getSize(
       uri,
@@ -94,21 +130,12 @@ export default function ZoomableImage({
     return clamped
   }
 
-  function zoomTo(scale: number) {
-    const current = view.current
-    const factor = scale / current.scale
-    setLevel(apply({ scale, x: current.x * factor, y: current.y * factor }).scale)
-  }
-
-  const zoomIn = () => zoomTo(STEPS.find((step) => step > view.current.scale + 0.01) ?? MAX_SCALE)
-  const zoomOut = () => zoomTo([...STEPS].reverse().find((step) => step < view.current.scale - 0.01) ?? 1)
-
   // Fits again when the frame changes size (rotating the phone, resizing the window).
   useEffect(() => {
     apply(view.current)
   }, [frameWidth, frameHeight]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const gesture = useRef({ start: view.current, dx: 0, dy: 0, pinchStart: null as number | null, touches: 0 })
+  const gesture = useRef({ start: view.current, dx: 0, dy: 0, pinchStart: null as number | null, touches: 0, swiping: false })
 
   const responder = useMemo(
     () =>
@@ -116,16 +143,33 @@ export default function ZoomableImage({
         // With the image at normal size, one finger only scrolls the screen; two fingers always zoom.
         onStartShouldSetPanResponder: (event) => touchesOf(event).length >= 2 || view.current.scale > 1,
         onMoveShouldSetPanResponder: (event, state) =>
-          touchesOf(event).length >= 2 || (view.current.scale > 1 && Math.abs(state.dx) + Math.abs(state.dy) > 2),
+          touchesOf(event).length >= 2 ||
+          (view.current.scale > 1 && Math.abs(state.dx) + Math.abs(state.dy) > 2) ||
+          // At normal size, a horizontal swipe changes image when there are several.
+          (paging.current.pageCount > 1 && Math.abs(state.dx) > 12 && Math.abs(state.dx) > Math.abs(state.dy) * 1.5),
         onPanResponderTerminationRequest: () => false,
+        onPanResponderRelease: (_event, state) => {
+          if (gesture.current.swiping && Math.abs(state.dx) > 12) lastSwipe.current = Date.now()
+          if (gesture.current.swiping && Math.abs(state.dx) > SWIPE_DISTANCE) swipe(state.dx < 0 ? 1 : -1)
+        },
         onPanResponderGrant: (event) => {
-          gesture.current = { start: view.current, dx: 0, dy: 0, pinchStart: distance(event), touches: touchesOf(event).length }
+          const touches = touchesOf(event).length
+          gesture.current = {
+            start: view.current,
+            dx: 0,
+            dy: 0,
+            pinchStart: distance(event),
+            touches,
+            swiping: view.current.scale <= 1 && touches < 2 && paging.current.pageCount > 1,
+          }
         },
         onPanResponderMove: (event, state) => {
           const count = Math.max(1, touchesOf(event).length)
+          if (gesture.current.swiping && count < 2) return
+          gesture.current.swiping = false
           // The number of fingers changed: restart the gesture from the current position, without a jump.
           if (count !== gesture.current.touches) {
-            gesture.current = { start: view.current, dx: state.dx, dy: state.dy, pinchStart: distance(event), touches: count }
+            gesture.current = { start: view.current, dx: state.dx, dy: state.dy, pinchStart: distance(event), touches: count, swiping: false }
           }
           const { start, dx, dy, pinchStart } = gesture.current
           const current = distance(event)
@@ -133,8 +177,6 @@ export default function ZoomableImage({
           const factor = scale / start.scale
           apply({ scale, x: start.x * factor + state.dx - dx, y: start.y * factor + state.dy - dy })
         },
-        onPanResponderRelease: () => setLevel(view.current.scale),
-        onPanResponderTerminate: () => setLevel(view.current.scale),
       }),
     [], // eslint-disable-line react-hooks/exhaustive-deps
   )
@@ -167,6 +209,7 @@ export default function ZoomableImage({
         {!natural || !frameWidth ? (
           <ActivityIndicator color={colors.primary} />
         ) : (
+          <Pressable onPress={openFullScreen} accessibilityRole="imagebutton" accessibilityHint="Opens the image full screen" testID="zoom-open">
           <Animated.View
             style={{
               width: fitWidth,
@@ -192,53 +235,137 @@ export default function ZoomableImage({
               </View>
             )}
           </Animated.View>
+          </Pressable>
         )}
       </View>
 
-      <View style={styles.controls}>
-        <ZoomButton label="−" accessibilityLabel="Zoom out" onPress={zoomOut} disabled={level <= 1} testID="zoom-out" />
-        <Text style={styles.level} accessibilityLiveRegion="polite" testID="zoom-level">
-          {`${String(Math.round(level * 10) / 10)}×`}
-        </Text>
-        <ZoomButton label="+" accessibilityLabel="Zoom in" onPress={zoomIn} disabled={level >= MAX_SCALE} testID="zoom-in" />
-        <ZoomButton label="Fit" accessibilityLabel="Fit to screen" onPress={() => zoomTo(1)} disabled={level <= 1} wide />
-      </View>
-      <Text style={styles.hint}>
-        {Platform.OS === 'web'
-          ? 'Use + and − to zoom and drag the image to see the details.'
-          : 'Spread two fingers to zoom and drag to see the details.'}
-      </Text>
+      {pageCount > 1 && <PageDots count={pageCount} page={page} />}
+      <Text style={styles.hint}>Tap the image to view it full screen.</Text>
+      {fullScreen && natural && (
+        <FullScreenImage uri={uri} natural={natural} accessibilityLabel={accessibilityLabel} highlight={highlight} highlightLabel={highlightLabel} onClose={closeFullScreen} pageCount={pageCount} page={page} onSwipe={swipe} />
+      )}
     </View>
   )
 }
 
-function ZoomButton({
-  label,
+/** Full-screen view in landscape: turned 90° when the screen itself is still portrait. */
+function FullScreenImage({
+  uri,
+  natural,
   accessibilityLabel,
-  onPress,
-  disabled,
-  wide,
-  testID,
+  highlight,
+  highlightLabel,
+  onClose,
+  pageCount,
+  page,
+  onSwipe,
 }: {
-  label: string
+  uri: string
+  natural: { width: number; height: number }
   accessibilityLabel: string
-  onPress: () => void
-  disabled: boolean
-  wide?: boolean
-  testID?: string
+  highlight?: RegionPx | null
+  highlightLabel: string
+  onClose: () => void
+  pageCount: number
+  page: number
+  onSwipe: (direction: 1 | -1) => void
 }) {
+  const [size, setSize] = useState(natural)
+  useEffect(() => {
+    let cancelled = false
+    Image.getSize(uri, (width, height) => !cancelled && setSize({ width, height }), () => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [uri])
+  const screen = useWindowDimensions()
+  const rotate = screen.height > screen.width
+  const areaWidth = rotate ? screen.height : screen.width
+  const areaHeight = rotate ? screen.width : screen.height
+  const scale = Math.min(areaWidth / size.width, areaHeight / size.height)
+  const width = size.width * scale
+  const height = size.height * scale
+  const latest = useRef({ rotate, onSwipe, onClose })
+  latest.current = { rotate, onSwipe, onClose }
+  // A tap closes; a swipe along the long side of the image changes image.
+  const responder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderRelease: (_event, state) => {
+          const { rotate: turned, onSwipe: change, onClose: close } = latest.current
+          const along = turned ? state.dy : state.dx
+          if (Math.abs(state.dx) < 8 && Math.abs(state.dy) < 8) close()
+          else if (Math.abs(along) > SWIPE_DISTANCE) change(along < 0 ? 1 : -1)
+        },
+      }),
+    [],
+  )
+  const box = highlight
+    ? {
+        left: highlight[0] * scale,
+        top: highlight[1] * scale,
+        width: (highlight[2] - highlight[0]) * scale,
+        height: (highlight[3] - highlight[1]) * scale,
+      }
+    : null
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      accessibilityState={{ disabled }}
-      testID={testID}
-      style={({ pressed }) => [styles.zoomButton, wide && styles.zoomWide, disabled && styles.disabled, pressed && styles.pressed]}
-    >
-      <Text style={[styles.zoomText, wide && styles.zoomWideText]}>{label}</Text>
-    </Pressable>
+    <Modal visible transparent animationType="fade" onRequestClose={onClose} supportedOrientations={['portrait', 'landscape']}>
+      <View style={styles.fullScreen} {...responder.panHandlers} accessibilityLabel="Close full screen" testID="zoom-close">
+        <View style={{ width, height, transform: rotate ? [{ rotate: '90deg' }] : [] }}>
+          <Image source={{ uri }} style={styles.image} resizeMode="contain" accessibilityLabel={accessibilityLabel} />
+          {box && (
+            <View pointerEvents="none" style={[styles.highlight, box]} accessibilityLabel={highlightLabel}>
+              <Text style={styles.highlightLabel}>{highlightLabel}</Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.close}>✕</Text>
+        {pageCount > 1 && (
+          <>
+            <Pressable
+              onPress={() => onSwipe(-1)}
+              disabled={page === 0}
+              style={[styles.arrow, rotate ? styles.arrowTop : styles.arrowLeft, page === 0 && styles.arrowDisabled]}
+              accessibilityRole="button"
+              accessibilityLabel="Previous image"
+              testID="full-prev"
+            >
+              <Text style={[styles.arrowText, rotate && styles.arrowTurned]}>‹</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => onSwipe(1)}
+              disabled={page === pageCount - 1}
+              style={[styles.arrow, rotate ? styles.arrowBottom : styles.arrowRight, page === pageCount - 1 && styles.arrowDisabled]}
+              accessibilityRole="button"
+              accessibilityLabel="Next image"
+              testID="full-next"
+            >
+              <Text style={[styles.arrowText, rotate && styles.arrowTurned]}>›</Text>
+            </Pressable>
+          </>
+        )}
+        {pageCount > 1 && (
+          <View style={rotate ? styles.fullDotsTurned : styles.fullDots} pointerEvents="none">
+            <PageDots count={pageCount} page={page} light vertical={rotate} />
+          </View>
+        )}
+      </View>
+    </Modal>
+  )
+}
+
+function PageDots({ count, page, light, vertical }: { count: number; page: number; light?: boolean; vertical?: boolean }) {
+  return (
+    <View style={[styles.dots, vertical && styles.dotsVertical]} accessibilityLabel={`Image ${page + 1} of ${count}`} testID="page-dots">
+      {Array.from({ length: count }, (_, index) => (
+        <View
+          key={index}
+          style={[styles.dot, light && styles.dotLight, index === page && (light ? styles.dotActiveLight : styles.dotActive)]}
+        />
+      ))}
+    </View>
   )
 }
 
@@ -265,24 +392,34 @@ const styles = StyleSheet.create({
     color: colors.white,
     backgroundColor: '#e53935',
   },
-  controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
-  zoomButton: {
-    minWidth: 44,
-    height: 44,
+  hint: { fontSize: 13, color: colors.textMuted, textAlign: 'center' },
+  fullScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' },
+  dots: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  dotsVertical: { flexDirection: 'column' },
+  dot: { width: 7, height: 7, borderRadius: 5, backgroundColor: colors.gridBorder },
+  dotActive: { width: 10, height: 10, backgroundColor: colors.primary },
+  dotLight: { backgroundColor: 'rgba(255,255,255,0.35)' },
+  dotActiveLight: { width: 10, height: 10, backgroundColor: colors.white },
+  fullDots: { position: 'absolute', bottom: 16, alignSelf: 'center', padding: 8, borderRadius: 999, backgroundColor: 'rgba(0,0,0,0.55)' },
+  fullDotsTurned: { position: 'absolute', left: 16, padding: 8, borderRadius: 999, backgroundColor: 'rgba(0,0,0,0.55)' },
+  close: { position: 'absolute', top: 16, right: 20, fontSize: 24, color: colors.white },
+  arrow: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: colors.white,
+    backgroundColor: 'rgba(255,255,255,0.18)',
   },
-  zoomWide: { paddingHorizontal: 16 },
-  zoomText: { fontSize: 22, fontWeight: '700', color: colors.primary },
-  zoomWideText: { fontSize: 15 },
-  level: { minWidth: 44, textAlign: 'center', fontSize: 15, fontWeight: '700', color: colors.dark },
-  hint: { fontSize: 13, color: colors.textMuted, textAlign: 'center' },
-  disabled: { opacity: 0.4 },
-  pressed: { opacity: 0.7 },
+  // Clear of the phone's camera island on the left in landscape.
+  arrowLeft: { left: 60, top: '50%', marginTop: -28 },
+  arrowRight: { right: 60, top: '50%', marginTop: -28 },
+  arrowTop: { top: 12, left: '50%', marginLeft: -28 },
+  arrowBottom: { bottom: 12, left: '50%', marginLeft: -28 },
+  arrowDisabled: { opacity: 0.3 },
+  arrowText: { fontSize: 44, lineHeight: 48, color: colors.white, fontWeight: '700' },
+  arrowTurned: { transform: [{ rotate: '90deg' }] },
   failed: { padding: 16, borderRadius: 10, backgroundColor: colors.background },
   failedText: { fontSize: 14, color: colors.textMuted, textAlign: 'center' },
 })

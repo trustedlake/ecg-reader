@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { Button, colors } from 'shared'
+import { Pressable, StyleSheet, View } from 'react-native'
+import { Text } from '../../ui/Text'
+import { colors } from 'shared'
+import Button from '../../ui/Button'
 import type { InterpretationDetails } from 'shared'
 import { InfoBox, TONE_COLORS, Tag, WarningList } from '../../ui/Feedback'
 import {

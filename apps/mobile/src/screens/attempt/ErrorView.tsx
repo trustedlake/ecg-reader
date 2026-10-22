@@ -1,5 +1,5 @@
-import { Text } from 'react-native'
-import { Button } from 'shared'
+import { Text } from '../../ui/Text'
+import Button from '../../ui/Button'
 import { useApi } from '../../api/ApiProvider'
 import { ErrorBanner, InfoBox } from '../../ui/Feedback'
 import Screen from '../../ui/Screen'

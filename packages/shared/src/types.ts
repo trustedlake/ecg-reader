@@ -55,6 +55,13 @@ export interface ReadingLead {
   coverage: number
 }
 
+/** One of the extractor's alternative readings of the same photo. */
+export interface ReadingVariant {
+  id: string
+  overlay_url: string
+  score: number
+}
+
 export interface ReadingBlock {
   status: 'OK' | 'OK_WITH_WARNINGS' | 'REFUSED' | 'ERROR'
   warnings: ContractWarning[]
@@ -63,6 +70,8 @@ export interface ReadingBlock {
   refusal_preview_url: string | null
   refusal_region_px: [number, number, number, number] | null
   leads: ReadingLead[]
+  /** Alternative readings; the app shows them best score first (the score itself is never shown). */
+  variants?: ReadingVariant[]
 }
 
 export type Classification = 'normal' | 'borderline' | 'abnormal'

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
-import { Button, isProcessing } from 'shared'
+import { isProcessing } from 'shared'
+import Button from '../ui/Button'
 import type { Attempt, Exam } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import type { AppScreenProps } from '../navigation/types'

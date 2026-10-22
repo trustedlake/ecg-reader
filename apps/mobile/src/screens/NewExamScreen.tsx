@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from 'shared'
+import Button from '../ui/Button'
 import type { Sex } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'

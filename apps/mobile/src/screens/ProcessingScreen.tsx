@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
-import { ApiError, Button, colors, isProcessing } from 'shared'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { Text } from '../ui/Text'
+import { ApiError, colors, isProcessing } from 'shared'
+import Button from '../ui/Button'
 import type { Attempt, AttemptStatus, CreateAttemptInput, GainMmMv, SpeedMmS } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
@@ -21,9 +23,12 @@ const STEP_LABELS: Record<Step, string> = {
 
 const POLL_MESSAGES: Partial<Record<AttemptStatus, string>> = {
   reading:
-    'Reading the ECG: detecting the grid and extracting the trace of each lead. This usually takes 1 to 3 minutes…',
+    'Reading the ECG: detecting the grid and extracting the trace of each lead…',
   interpreting: 'Interpreting the signal: rhythm, rate and measurements…',
 }
+
+// Production average from upload to reading done is ~20 s; the countdown adds a 10 s margin.
+const EXPECTED_SECONDS = 30
 
 function isAbort(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError'
@@ -45,6 +50,19 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
   const [status, setStatus] = useState<AttemptStatus | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
+  const [startedAt, setStartedAt] = useState<number | null>(null)
+  const [now, setNow] = useState(() => Date.now())
+
+  // The countdown starts once the photo is uploaded (or when only following an existing attempt).
+  const timing = (step === 'start' || step === 'poll') && running && !error
+  useEffect(() => {
+    if (!timing) return
+    setStartedAt((current) => current ?? Date.now())
+    setNow(Date.now())
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [timing])
+  const remaining = startedAt == null ? EXPECTED_SECONDS : EXPECTED_SECONDS - Math.floor((now - startedAt) / 1000)
 
   const goTo = (next: Step) => {
     stepRef.current = next
@@ -158,6 +176,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
   return (
     <Screen
       title="Processing"
+      onBack={cancel}
       footer={
         <>
           {error && (
@@ -174,9 +193,19 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
       <View style={styles.center} accessibilityLiveRegion="polite">
         {running && <ActivityIndicator size="large" color={colors.primary} />}
         <Text style={styles.message}>{message}</Text>
+        {timing && (
+          <View style={styles.timer} testID="processing-timer">
+            <Text style={[styles.timerValue, remaining < 0 && styles.late]}>
+              {remaining < 0 ? `-${-remaining}s` : `${remaining}s`}
+            </Text>
+            <Text style={[styles.timerLabel, remaining < 0 && styles.late]}>
+              {remaining < 0 ? 'Taking longer than usual' : 'Usually left to process your ECG'}
+            </Text>
+          </View>
+        )}
         {polling && running && (
           <Text style={styles.note}>
-            This may take a few minutes. If you leave, processing continues and the result appears in the exam list.
+            If you leave, processing continues and the result appears in the exam list.
           </Text>
         )}
       </View>
@@ -209,6 +238,10 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
 const styles = StyleSheet.create({
   center: { alignItems: 'center', gap: 14, paddingVertical: 32 },
   message: { fontSize: 18, fontWeight: '600', color: colors.dark, textAlign: 'center' },
+  timer: { alignItems: 'center', gap: 2 },
+  timerValue: { fontSize: 40, fontWeight: '700', color: colors.dark, fontVariant: ['tabular-nums'] },
+  timerLabel: { fontSize: 14, color: colors.textMuted, textAlign: 'center' },
+  late: { color: colors.error },
   note: { fontSize: 14, color: colors.textMuted, textAlign: 'center' },
   steps: { gap: 10, paddingHorizontal: 8 },
   stepRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
