@@ -5,7 +5,7 @@ import { Text } from '../../ui/Text'
 import { colors } from 'shared'
 import Button from '../../ui/Button'
 import type { InterpretationDetails } from 'shared'
-import { InfoBox, TONE_COLORS, Tag, WarningList } from '../../ui/Feedback'
+import { InfoBox, TONE_COLORS, Tag } from '../../ui/Feedback'
 import {
   CLASSIFICATION_LABELS,
   CONFIDENCE_LABELS,
@@ -16,6 +16,7 @@ import {
   formatValue,
 } from '../../ui/labels'
 import Screen from '../../ui/Screen'
+import ZoomableImage from '../../ui/ZoomableImage'
 import FeedbackForm from './FeedbackForm'
 import { AttemptContext, backToExam, viewStyles } from './common'
 import type { AttemptViewProps } from './common'
@@ -25,7 +26,6 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const interpretation = attempt.interpretation
   const summary = interpretation?.summary
-  const readingWarnings = attempt.reading?.warnings ?? []
   const classification = summary ? CLASSIFICATION_LABELS[summary.classification] : null
   const tone = classification ? TONE_COLORS[classification.tone] : TONE_COLORS.neutral
 
@@ -48,9 +48,6 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
     >
       {banner}
       <AttemptContext exam={exam} attempt={attempt} />
-
-      {interpretation && <WarningList title="Interpretation warnings" warnings={interpretation.warnings} />}
-      <WarningList title="Reading warnings" warnings={readingWarnings} />
 
       {summary && classification ? (
         <View style={[styles.summary, { backgroundColor: tone.bg, borderColor: tone.fg }]} testID="summary">
@@ -79,6 +76,8 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
         <InfoBox>The interpretation summary is not available.</InfoBox>
       )}
 
+      <ExamImages originalUrl={attempt.original_image_url} extractedUrl={attempt.reading?.overlay_url} />
+
       {interpretation?.details && <Details details={interpretation.details} />}
 
       {interpretation?.disclaimer && (
@@ -89,6 +88,27 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
 
       {feedbackOpen && <FeedbackForm attemptId={attempt.id} onClose={() => setFeedbackOpen(false)} />}
     </Screen>
+  )
+}
+
+/** The photo that was sent and the same photo with the extracted signal drawn on it. */
+function ExamImages({ originalUrl, extractedUrl }: { originalUrl?: string | null; extractedUrl?: string | null }) {
+  if (!originalUrl && !extractedUrl) return null
+  return (
+    <Section title="Photo and extracted signal" testID="details-images">
+      {originalUrl ? (
+        <View style={styles.item}>
+          <Text style={styles.itemTitle}>Original photo</Text>
+          <ZoomableImage uri={originalUrl} accessibilityLabel="Original ECG photo" />
+        </View>
+      ) : null}
+      {extractedUrl ? (
+        <View style={styles.item}>
+          <Text style={styles.itemTitle}>Extracted signal</Text>
+          <ZoomableImage uri={extractedUrl} accessibilityLabel="ECG photo with the extracted signal" />
+        </View>
+      ) : null}
+    </Section>
   )
 }
 
