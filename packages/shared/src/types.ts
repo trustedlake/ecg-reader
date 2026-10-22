@@ -62,6 +62,14 @@ export interface ReadingVariant {
   score: number
 }
 
+export interface ReadingMethod {
+  method: string
+  status: string
+  selector_score: number | null
+  chosen: boolean
+  image_url: string | null
+}
+
 export interface ReadingBlock {
   status: 'OK' | 'OK_WITH_WARNINGS' | 'REFUSED' | 'ERROR'
   warnings: ContractWarning[]
@@ -72,6 +80,8 @@ export interface ReadingBlock {
   leads: ReadingLead[]
   /** Alternative readings; the app shows them best score first (the score itself is never shown). */
   variants?: ReadingVariant[]
+  /** All six extraction methods in registry order, each with its own preview (rejection preview when it had no signal). */
+  methods?: ReadingMethod[]
 }
 
 export type Classification = 'normal' | 'borderline' | 'abnormal'

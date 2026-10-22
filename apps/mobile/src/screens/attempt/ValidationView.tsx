@@ -21,6 +21,7 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
     () => [...(reading?.variants ?? [])].sort((a, b) => b.score - a.score),
     [reading?.variants],
   )
+  const methods = reading?.methods ?? []
   const [page, setPage] = useState(0)
   const variant = variants[page]
   const strip = useRef<ScrollView>(null)
@@ -117,6 +118,28 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
         </View>
       )}
 
+      {methods.length > 0 && (
+        <View style={styles.methods} testID="all-methods">
+          <Text style={viewStyles.section}>All extraction methods</Text>
+          <Text style={viewStyles.text}>
+            Every method the system tried. Methods without a signal show why they were set aside and cannot be accepted.
+          </Text>
+          {methods.map((item) => (
+            <View key={item.method} style={styles.method} testID={`method-${item.method}`}>
+              <Text style={styles.methodName}>
+                {item.method.replace(/_/g, ' ')} · {item.status === 'OK' ? 'signal extracted' : 'no signal'}
+                {item.chosen ? ' · chosen' : ''}
+              </Text>
+              {item.image_url ? (
+                <ZoomableImage uri={item.image_url} accessibilityLabel={`Preview of the ${item.method} method`} />
+              ) : (
+                <InfoBox>No image available for this method.</InfoBox>
+              )}
+            </View>
+          ))}
+        </View>
+      )}
+
       {error && <ErrorBanner message={error} />}
     </Screen>
   )
@@ -124,6 +147,9 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
 
 const styles = StyleSheet.create({
   variants: { gap: 8 },
+  methods: { gap: 12 },
+  method: { gap: 6 },
+  methodName: { fontSize: 14, fontWeight: '700', color: colors.dark, textTransform: 'capitalize' },
   strip: { gap: 8, paddingVertical: 2 },
   thumb: {
     width: 104,
