@@ -1,7 +1,9 @@
-import { useCallback, useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { useCallback, useEffect, useState } from 'react'
+import { Pressable, StyleSheet, View } from 'react-native'
+import { Text } from '../ui/Text'
 import { useFocusEffect } from '@react-navigation/native'
-import { Button, colors } from 'shared'
+import { colors } from 'shared'
+import Button from '../ui/Button'
 import type { Attempt, Exam } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
@@ -26,7 +28,7 @@ function outcomeLine(attempt: Attempt): string | null {
 export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'ExamDetail'>) {
   const { examId } = route.params
   const { api, config } = useApi()
-  const { start } = useAttemptDraft()
+  const { draft, start } = useAttemptDraft()
   const [exam, setExam] = useState<Exam | null>(null)
   const [error, setError] = useState<unknown>(null)
 
@@ -39,6 +41,15 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
     }
   }, [api, examId])
 
+  // A photo picked for this exam but not yet sent: reopen the flow where the user left it.
+  useEffect(() => {
+    if (draft?.examId !== examId || !draft.image) return
+    navigation.replace('Capture', { examId })
+    if (draft.layout) navigation.navigate('Layout', { examId })
+    // Only on arrival; later draft changes must not navigate.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   useFocusEffect(
     useCallback(() => {
       void load()
@@ -47,6 +58,7 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
 
   function newAttempt() {
     if (!exam) return
+    if (draft?.examId === exam.id) return navigation.navigate('Capture', { examId: exam.id })
     start(exam.id, exam.patient, config?.calibration.default ?? DEFAULT_CALIBRATION)
     navigation.navigate('Capture', { examId: exam.id })
   }

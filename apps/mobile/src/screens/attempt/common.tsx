@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { ReactNode } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+import { Text } from '../../ui/Text'
 import { ApiError, colors } from 'shared'
 import type { Attempt, Exam } from 'shared'
 import { useAttemptDraft } from '../../flow/AttemptDraft'

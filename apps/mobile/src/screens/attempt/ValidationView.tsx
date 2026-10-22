@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-import { Button, colors } from 'shared'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { Text } from '../../ui/Text'
+import { colors } from 'shared'
+import Button from '../../ui/Button'
 import { useApi } from '../../api/ApiProvider'
-import { ErrorBanner, InfoBox, Tag, WarningList } from '../../ui/Feedback'
-import { LEAD_QUALITY_LABELS } from '../../ui/labels'
+import { ErrorBanner, InfoBox } from '../../ui/Feedback'
 import Screen from '../../ui/Screen'
 import ZoomableImage from '../../ui/ZoomableImage'
 import { AttemptContext, backToExam, useAttemptAction, viewStyles } from './common'
@@ -15,11 +16,23 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
   const { busy, error, run } = useAttemptAction(reload)
   const [confirmingReject, setConfirmingReject] = useState(false)
   const reading = attempt.reading
-  const image = reading?.overlay_url ?? attempt.original_image_url
+  // The extractor's variants, best score first; the score is never shown.
+  const variants = useMemo(
+    () => [...(reading?.variants ?? [])].sort((a, b) => b.score - a.score),
+    [reading?.variants],
+  )
+  const [page, setPage] = useState(0)
+  const variant = variants[page]
+  const strip = useRef<ScrollView>(null)
+  // Keeps the selected thumbnail in view when the reading changes by swipe or arrows.
+  useEffect(() => {
+    strip.current?.scrollTo({ x: Math.max(0, page * 112 - 112), animated: false })
+  }, [page])
+  const image = variant?.overlay_url ?? reading?.overlay_url ?? attempt.original_image_url
 
   const accept = () =>
     run(async () => {
-      await api.accept(exam.id, attempt.id)
+      await api.accept(exam.id, attempt.id, variant?.id)
       navigation.replace('Processing', { examId: exam.id, attemptId: attempt.id })
     })
 
@@ -32,7 +45,7 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
 
   return (
     <Screen
-      title="Check the reading"
+      title=""
       onBack={() => backToExam(navigation, exam.id)}
       footer={
         confirmingReject ? (
@@ -48,7 +61,7 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
         ) : (
           <>
             <Button fullWidth loading={busy} onPress={() => void accept()} testID="accept">
-              Accept reading
+              {variants.length > 1 ? `Accept reading ${page + 1} of ${variants.length}` : 'Accept reading'}
             </Button>
             <Button fullWidth variant="outline" disabled={busy} onPress={() => setConfirmingReject(true)} testID="reject">
               Refuse
@@ -60,33 +73,47 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
       {banner}
       <AttemptContext exam={exam} attempt={attempt} />
       <Text style={viewStyles.text}>
-        The lines drawn over the photo show the grid and the trace the system extracted. Zoom in and check that the
+        The lines drawn over the photo show the grid and the trace the system extracted. Open it full screen and check that the
         trace matches the one on the paper in every lead before accepting.
       </Text>
 
       {image ? (
-        <ZoomableImage uri={image} accessibilityLabel="ECG photo with the grid and the extracted trace" testID="overlay" />
+        <ZoomableImage
+          uri={image}
+          accessibilityLabel="ECG photo with the grid and the extracted trace"
+          pageCount={variants.length}
+          page={page}
+          onPageChange={setPage}
+          testID="overlay"
+        />
       ) : (
         <InfoBox>The reading image is not available right now. Refresh the screen to try again.</InfoBox>
       )}
 
-      {reading && <WarningList title="Reading warnings" warnings={reading.warnings} />}
-
-      {reading && reading.leads.length > 0 && (
-        <View style={styles.leads}>
-          <Text style={viewStyles.section}>Quality per lead</Text>
-          <View style={styles.chips}>
-            {reading.leads.map((lead) => {
-              const quality = LEAD_QUALITY_LABELS[lead.quality]
-              const name = lead.kind === 'rhythm' ? `${lead.name} (rhythm)` : lead.name
-              return (
-                <View key={`${lead.name}-${lead.kind}`} style={styles.chip} accessibilityLabel={`${name}: ${quality.label} quality`}>
-                  <Text style={styles.chipName}>{name}</Text>
-                  <Tag label={quality.label} icon={quality.icon} tone={quality.tone} />
-                </View>
-              )
-            })}
-          </View>
+      {variants.length > 1 && (
+        <View style={styles.variants}>
+          <ScrollView ref={strip} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.strip} testID="variants-strip">
+            {variants.map((item, index) => (
+              <Pressable
+                key={item.id}
+                onPress={() => setPage(index)}
+                style={[styles.thumb, index === page && styles.thumbActive]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: index === page }}
+                accessibilityLabel={`Reading ${index + 1} of ${variants.length}`}
+                testID={`variant-thumb-${index}`}
+              >
+                <Image source={{ uri: item.overlay_url }} style={styles.thumbImage} resizeMode="cover" />
+                <Text style={[styles.thumbLabel, index === page && styles.thumbLabelActive]}>
+                  {index === page ? '✓ Selected' : index === 0 ? 'Best' : `#${index + 1}`}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+          <Text style={viewStyles.text} testID="variants-note">
+            We sorted the readings from best to worst for you. Swipe the image, use the arrows in full screen or tap a
+            thumbnail to compare them. The selected one is used when you accept.
+          </Text>
         </View>
       )}
 
@@ -96,20 +123,20 @@ export default function ValidationView({ exam, attempt, navigation, reload, bann
 }
 
 const styles = StyleSheet.create({
-  leads: { gap: 8 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingLeft: 10,
-    paddingRight: 4,
-    paddingVertical: 4,
-    borderRadius: 999,
-    borderWidth: 1,
+  variants: { gap: 8 },
+  strip: { gap: 8, paddingVertical: 2 },
+  thumb: {
+    width: 104,
+    borderRadius: 8,
+    borderWidth: 2,
     borderColor: colors.gridBorder,
+    overflow: 'hidden',
+    backgroundColor: colors.white,
   },
-  chipName: { fontSize: 14, fontWeight: '700', color: colors.dark },
+  thumbActive: { borderColor: colors.primary },
+  thumbImage: { width: '100%', height: 64, backgroundColor: '#1d2a21' },
+  thumbLabel: { fontSize: 12, fontWeight: '600', color: colors.textMuted, textAlign: 'center', paddingVertical: 4 },
+  thumbLabelActive: { color: colors.white, backgroundColor: colors.primary },
   confirm: { gap: 8 },
   confirmText: { fontSize: 15, fontWeight: '600', color: colors.dark, textAlign: 'center' },
 })

@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Image, Platform, StyleSheet, Text, View } from 'react-native'
+import { Image, Platform, StyleSheet, View } from 'react-native'
+import { Text } from '../ui/Text'
 import * as ImagePicker from 'expo-image-picker'
-import { Button, colors } from 'shared'
+import { colors } from 'shared'
+import Button from '../ui/Button'
 import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
 import type { ImageContentType, PickedImage } from '../flow/AttemptDraft'
@@ -13,6 +15,8 @@ import { SEX_LABELS } from '../ui/labels'
 import Screen from '../ui/Screen'
 import SegmentedControl from '../ui/SegmentedControl'
 import TestScenarioPicker from '../ui/TestScenarioPicker'
+import WebCamera from '../ui/WebCamera'
+import type { WebPhoto } from '../ui/WebCamera'
 
 const EXTENSION_TYPES: Record<string, ImageContentType> = {
   jpg: 'image/jpeg',
@@ -53,11 +57,17 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
   const { config } = useApi()
   const { draft, update } = useAttemptDraft()
   const [error, setError] = useState<string | null>(null)
+  const [webCamera, setWebCamera] = useState(false)
 
   if (!draft || draft.examId !== examId) return <MissingDraft examId={examId} navigation={navigation} />
 
   async function pick(source: 'camera' | 'library') {
     setError(null)
+    // On web, the camera opens as a live webcam preview instead of a file dialog.
+    if (Platform.OS === 'web' && source === 'camera') {
+      setWebCamera(true)
+      return
+    }
     // On web, the picker must open directly on tap (no await before it) and there is no permission to request.
     if (Platform.OS !== 'web') {
       const permission =
@@ -86,6 +96,13 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
     } catch {
       setError('Could not open the camera or the gallery. Try again.')
     }
+  }
+
+  function onWebPhoto({ uri, file, width, height }: WebPhoto) {
+    setWebCamera(false)
+    const picked = toPickedImage({ uri, file: file as File, width, height, mimeType: 'image/jpeg', fileName: `ecg-${Date.now()}.jpg` } as ImagePicker.ImagePickerAsset)
+    if (typeof picked === 'string') setError(picked)
+    else update({ image: picked })
   }
 
   const speeds = config?.calibration.speed_mm_s ?? SPEEDS_MM_S
@@ -124,7 +141,7 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
       )}
 
       <View style={styles.row}>
-        <Button variant={image ? 'outline' : 'primary'} style={styles.half} onPress={() => void pick('camera')}>
+        <Button variant={image ? 'outline' : 'primary'} style={styles.half} onPress={() => void pick('camera')} testID="take-photo">
           {image ? 'Retake' : 'Take photo'}
         </Button>
         <Button variant="outline" style={styles.half} onPress={() => void pick('library')} testID="pick-library">
@@ -132,6 +149,9 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
         </Button>
       </View>
       {error && <ErrorBanner message={error} />}
+      {Platform.OS === 'web' && (
+        <WebCamera visible={webCamera} onClose={() => setWebCamera(false)} onCapture={onWebPhoto} />
+      )}
 
       <SegmentedControl<number>
         label="Paper speed"

@@ -10,6 +10,7 @@ import type {
   Paginated,
 } from './types'
 import { isProcessing } from './types'
+import { translateContractMessages } from './contractMessages'
 
 export type ApiErrorKind =
   | 'network'
@@ -142,7 +143,7 @@ export interface ApiClient {
   uploadImage(uploadUrl: string, headers: Record<string, string>, file: UploadSource): Promise<void>
   startRead(examId: string, attemptId: string): Promise<Attempt>
   getAttempt(examId: string, attemptId: string): Promise<Attempt>
-  accept(examId: string, attemptId: string): Promise<Attempt>
+  accept(examId: string, attemptId: string, variantId?: string): Promise<Attempt>
   reject(examId: string, attemptId: string): Promise<Attempt>
   retry(examId: string, attemptId: string): Promise<Attempt>
   sendFeedback(attemptId: string, input: FeedbackInput): Promise<unknown>
@@ -211,7 +212,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     if (response.status === 204) {
       return undefined as T
     }
-    return (await response.json()) as T
+    return translateContractMessages(await response.json()) as T
   }
 
   const post = <T>(path: string, body?: unknown) =>
@@ -273,7 +274,8 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     uploadImage,
     startRead: (examId, attemptId) => post<Attempt>(`${attemptPath(examId, attemptId)}read/`),
     getAttempt,
-    accept: (examId, attemptId) => post<Attempt>(`${attemptPath(examId, attemptId)}accept/`),
+    accept: (examId, attemptId, variantId) =>
+      post<Attempt>(`${attemptPath(examId, attemptId)}accept/`, variantId ? { variant_id: variantId } : undefined),
     reject: (examId, attemptId) => post<Attempt>(`${attemptPath(examId, attemptId)}reject/`),
     retry: (examId, attemptId) => post<Attempt>(`${attemptPath(examId, attemptId)}retry/`),
     sendFeedback: (attemptId, input) => post(`/api/attempts/${attemptId}/feedback/`, input),

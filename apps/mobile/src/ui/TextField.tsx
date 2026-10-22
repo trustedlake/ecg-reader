@@ -1,6 +1,7 @@
 import { forwardRef } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
-import type { TextInputProps } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+import { Text, TextInput } from './Text'
+import type { TextInput as RNTextInput, TextInputProps } from 'react-native'
 import { colors } from 'shared'
 
 interface TextFieldProps extends Omit<TextInputProps, 'style'> {
@@ -9,7 +10,7 @@ interface TextFieldProps extends Omit<TextInputProps, 'style'> {
 }
 
 /** Field with a visible label and inline error (read by the screen reader together with the label). */
-const TextField = forwardRef<TextInput, TextFieldProps>(function TextField({ label, error, ...props }, ref) {
+const TextField = forwardRef<RNTextInput, TextFieldProps>(function TextField({ label, error, ...props }, ref) {
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>

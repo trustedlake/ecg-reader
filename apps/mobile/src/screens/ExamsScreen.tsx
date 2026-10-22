@@ -1,7 +1,9 @@
 import { useCallback, useRef, useState } from 'react'
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native'
+import { Text } from '../ui/Text'
 import { useFocusEffect } from '@react-navigation/native'
-import { Button, colors, useAuth } from 'shared'
+import { colors } from 'shared'
+import Button from '../ui/Button'
 import type { Exam } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import type { AppScreenProps } from '../navigation/types'
@@ -11,7 +13,6 @@ import Screen from '../ui/Screen'
 
 export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
   const { api } = useApi()
-  const { logout, user } = useAuth()
   const [exams, setExams] = useState<Exam[] | null>(null)
   const [nextPage, setNextPage] = useState<number | null>(null)
   const [error, setError] = useState<unknown>(null)
@@ -58,16 +59,10 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
     }
   }
 
-  const logoutButton = (
-    <Button variant="text" onPress={logout} accessibilityLabel="Log out">
-      Log out
-    </Button>
-  )
-
   return (
     <Screen
       title="Exams"
-      right={logoutButton}
+      onBack={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
       scroll={false}
       footer={
         <Button fullWidth onPress={() => navigation.navigate('NewExam')} testID="new-exam">
@@ -79,6 +74,7 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
         <LoadingView message="Loading exams…" />
       ) : (
         <FlatList
+          showsVerticalScrollIndicator={false}
           data={exams ?? []}
           keyExtractor={(exam) => exam.id}
           contentContainerStyle={styles.list}
@@ -87,7 +83,6 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
           onEndReachedThreshold={0.3}
           ListHeaderComponent={
             <View style={styles.header}>
-              {user?.name ? <Text style={styles.greeting}>Hello, {user.name}</Text> : null}
               {error != null && <ErrorNotice error={error} onRetry={() => void load('refresh')} />}
             </View>
           }
@@ -128,7 +123,6 @@ export default function ExamsScreen({ navigation }: AppScreenProps<'Exams'>) {
 const styles = StyleSheet.create({
   list: { padding: 16, gap: 12, flexGrow: 1 },
   header: { gap: 12 },
-  greeting: { fontSize: 16, color: colors.textMuted },
   card: {
     gap: 6,
     padding: 16,

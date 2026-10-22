@@ -1,4 +1,4 @@
-import { Button } from 'shared'
+import Button from '../../ui/Button'
 import { InfoBox } from '../../ui/Feedback'
 import Screen from '../../ui/Screen'
 import { AttemptContext, backToExam, useNewPhoto } from './common'
@@ -6,9 +6,9 @@ import type { AttemptViewProps } from './common'
 
 const TEXTS = {
   user_rejected: {
-    title: 'Reading refused',
-    box: 'You refused this reading',
-    body: 'Take a new photo of the same ECG. It becomes a new attempt on this exam.',
+    title: 'New photo',
+    box: "No problem, let's try again",
+    body: 'A sharp, well-lit photo of the same ECG usually reads better. It will be saved to this exam.',
   },
   created: {
     title: 'Upload not completed',

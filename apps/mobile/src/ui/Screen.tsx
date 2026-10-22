@@ -11,23 +11,29 @@ interface ScreenProps {
   /** false when the screen has its own scrollable list (FlatList). */
   scroll?: boolean
   footer?: ReactNode
+  /** Footer without padding (e.g. a tab bar). */
+  footerBare?: boolean
   children: ReactNode
 }
 
 /** Standard frame: safe area, header, content with a 480 px max width (web) and fixed footer. */
-export default function Screen({ title, onBack, right, scroll = true, footer, children }: ScreenProps) {
+export default function Screen({ title, onBack, right, scroll = true, footer, footerBare, children }: ScreenProps) {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>
       <View style={styles.column}>
         {title !== undefined && <AppHeader title={title} onBack={onBack} right={right} />}
         {scroll ? (
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
             {children}
           </ScrollView>
         ) : (
           <View style={styles.fill}>{children}</View>
         )}
-        {footer && <View style={styles.footer}>{footer}</View>}
+        {footer && <View style={[styles.footer, footerBare && styles.footerBare]}>{footer}</View>}
       </View>
     </SafeAreaView>
   )
@@ -44,6 +50,7 @@ const styles = StyleSheet.create({
   },
   content: { padding: 20, gap: 16, flexGrow: 1 },
   fill: { flex: 1 },
+  footerBare: { padding: 0, gap: 0 },
   footer: {
     padding: 16,
     gap: 8,

@@ -1,5 +1,5 @@
-import { Text } from 'react-native'
-import { Button } from 'shared'
+import { Text } from '../../ui/Text'
+import Button from '../../ui/Button'
 import { InfoBox } from '../../ui/Feedback'
 import { REFUSAL_TIPS, REFUSAL_TIP_FALLBACK } from '../../ui/labels'
 import Screen from '../../ui/Screen'
