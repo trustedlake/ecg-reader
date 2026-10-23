@@ -46,13 +46,15 @@ export interface ContractWarning {
   lead?: string
 }
 
-export type LeadQuality = 'good' | 'partial' | 'saturated' | 'low'
+/** `uncertain`: the reader sent its traced line for a lead it could not validate (signal_source traced_unvalidated). */
+export type LeadQuality = 'good' | 'partial' | 'saturated' | 'low' | 'uncertain'
 
 export interface ReadingLead {
   name: string
   kind: 'panel' | 'rhythm'
   quality: LeadQuality
   coverage: number
+  signal_source?: 'analysis' | 'traced_unvalidated' | null
 }
 
 /** One of the extractor's alternative readings of the same photo. */
@@ -94,6 +96,10 @@ export interface InterpretationSummary {
   heart_rate_bpm: number | null
   key_findings: string[]
   text: string
+  /** ok = nothing found; review = a person should look; urgent = clear abnormality. */
+  alert_level?: AlertLevel
+  alert_text?: string
+  alert_reasons?: string[]
 }
 
 export interface Measurement {

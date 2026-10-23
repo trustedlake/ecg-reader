@@ -7,6 +7,7 @@ import Button from '../../ui/Button'
 import type { InterpretationDetails } from 'shared'
 import { InfoBox, TONE_COLORS, Tag } from '../../ui/Feedback'
 import {
+  ALERT_LABELS,
   CLASSIFICATION_LABELS,
   CONFIDENCE_LABELS,
   CRITERION_STATUS_LABELS,
@@ -28,7 +29,9 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
   const interpretation = attempt.interpretation
   const summary = interpretation?.summary
   const classification = summary ? CLASSIFICATION_LABELS[summary.classification] : null
-  const tone = classification ? TONE_COLORS[classification.tone] : TONE_COLORS.neutral
+  const alert = summary?.alert_level ? ALERT_LABELS[summary.alert_level] : null
+  // The alert level is the diagnoser's own verdict; it sets the colour when present.
+  const tone = alert ? TONE_COLORS[alert.tone] : classification ? TONE_COLORS[classification.tone] : TONE_COLORS.neutral
 
   return (
     <Screen
@@ -52,9 +55,23 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
 
       {summary && classification ? (
         <View style={[styles.summary, { backgroundColor: tone.bg, borderColor: tone.fg }]} testID="summary">
-          <Text style={[styles.classification, { color: tone.fg }]}>
-            {classification.icon} {classification.label}
-          </Text>
+          {alert ? (
+            <View style={styles.list} testID="alert">
+              <Text style={[styles.classification, { color: tone.fg }]}>
+                {alert.icon} {alert.label}
+              </Text>
+              {summary.alert_text ? <Text style={viewStyles.text}>{summary.alert_text}</Text> : null}
+              {(summary.alert_reasons ?? []).map((reason) => (
+                <Text key={reason} style={viewStyles.muted}>
+                  • {reason}
+                </Text>
+              ))}
+            </View>
+          ) : (
+            <Text style={[styles.classification, { color: tone.fg }]}>
+              {classification.icon} {classification.label}
+            </Text>
+          )}
           <Text style={styles.headline} accessibilityRole="header">
             {summary.headline}
           </Text>
