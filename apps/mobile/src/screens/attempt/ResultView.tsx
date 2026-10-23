@@ -17,6 +17,7 @@ import {
 } from '../../ui/labels'
 import Screen from '../../ui/Screen'
 import ZoomableImage from '../../ui/ZoomableImage'
+import Checklist from './Checklist'
 import FeedbackForm from './FeedbackForm'
 import { AttemptContext, backToExam, viewStyles } from './common'
 import type { AttemptViewProps } from './common'
@@ -151,21 +152,28 @@ function Details({ details }: { details: InterpretationDetails }) {
         </Section>
       )}
 
-      <Section title={`Findings (${details.findings.length})`} testID="details-findings">
-        {details.findings.length === 0 && <Text style={viewStyles.muted}>No findings.</Text>}
-        {details.findings.map((finding) => {
-          const severity = SEVERITY_LABELS[finding.severity]
-          return (
-            <View key={finding.code} style={styles.item}>
-              <View style={styles.itemHead}>
-                <Text style={styles.itemTitle}>{finding.label}</Text>
-                <Tag label={severity.label} tone={severity.tone} />
+      {details.checks && details.checks.length > 0 ? (
+        <View style={styles.details} testID="details-checklist">
+          <Text style={styles.sectionTitle}>Checklist ({details.checks.filter((c) => c.status === 'done').length} of {details.checks.length} checked)</Text>
+          <Checklist checks={details.checks} findings={details.findings} />
+        </View>
+      ) : (
+        <Section title={`Findings (${details.findings.length})`} testID="details-findings">
+          {details.findings.length === 0 && <Text style={viewStyles.muted}>No findings.</Text>}
+          {details.findings.map((finding) => {
+            const severity = SEVERITY_LABELS[finding.severity]
+            return (
+              <View key={finding.code} style={styles.item}>
+                <View style={styles.itemHead}>
+                  <Text style={styles.itemTitle}>{finding.label}</Text>
+                  <Tag label={severity.label} tone={severity.tone} />
+                </View>
+                {finding.evidence ? <Text style={viewStyles.muted}>{finding.evidence}</Text> : null}
               </View>
-              {finding.evidence ? <Text style={viewStyles.muted}>{finding.evidence}</Text> : null}
-            </View>
-          )
-        })}
-      </Section>
+            )
+          })}
+        </Section>
+      )}
 
       {details.criteria.length > 0 && (
         <Section title="Criteria evaluated" testID="details-criteria">

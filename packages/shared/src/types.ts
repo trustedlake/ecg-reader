@@ -104,11 +104,25 @@ export interface Measurement {
   formula?: string
 }
 
+export type AlertLevel = 'ok' | 'review' | 'urgent'
+
 export interface Finding {
   code: string
   label: string
   severity: 'info' | 'warning' | 'critical'
+  alert_level?: AlertLevel
   evidence?: string
+}
+
+/** One entry of the diagnosis checklist: every check is listed, whether it could be done or not. */
+export interface DiagnosisCheck {
+  code: string
+  name: string
+  status: 'done' | 'not_possible' | 'not_implemented'
+  alert_level: AlertLevel
+  finding_codes: string[]
+  value?: string
+  reason?: string
 }
 
 export interface Criterion {
@@ -132,6 +146,7 @@ export interface InterpretationDetails {
   findings: Finding[]
   criteria: Criterion[]
   per_lead: PerLeadMeasurement[]
+  checks?: DiagnosisCheck[]
 }
 
 export interface InterpretationBlock {
