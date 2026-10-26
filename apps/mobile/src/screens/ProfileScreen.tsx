@@ -4,17 +4,22 @@ import { colors, useAuth } from 'shared'
 import type { AppScreenProps } from '../navigation/types'
 import Screen from '../ui/Screen'
 import { Row, Section } from '../ui/Section'
+import TextField from '../ui/TextField'
+import { useProfileOverrides } from '../flow/profileOverrides'
 
 export default function ProfileScreen({ navigation }: AppScreenProps<'Profile'>) {
   const { logout, user } = useAuth()
-  const name = typeof user?.name === 'string' && user.name ? user.name : user?.username ?? 'Doctor'
+  const [overrides, change] = useProfileOverrides(user?.username ?? '')
+  const accountName = typeof user?.name === 'string' && user.name ? user.name : user?.username ?? 'Doctor'
+  const name = overrides.name.trim() || accountName
   const initials = name
     .split(/\s+/)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('')
-  const role = user?.is_staff ? 'Administrator' : 'Clinician'
+  const role = overrides.role.trim() || (user?.is_staff ? 'Administrator' : 'Clinician')
   const soon = () => navigation.navigate('ComingSoon')
+  const roleDefault = user?.is_staff ? 'Administrator' : 'Clinician'
 
   return (
     <Screen title="Profile" onBack={() => navigation.goBack()}>
@@ -30,9 +35,11 @@ export default function ProfileScreen({ navigation }: AppScreenProps<'Profile'>)
       </View>
 
       <Section title="Account">
-        <Row icon="user" label="Name" value={name} />
-        <Row icon="user" label="Username" value={user?.username ?? ''} />
-        <Row icon="info" label="Role" value={role} last />
+        <View style={styles.editor}>
+          <TextField label="Name" value={overrides.name} placeholder={accountName} onChangeText={(v) => change({ name: v })} testID="profile-name" />
+          <TextField label="Role" value={overrides.role} placeholder={roleDefault} onChangeText={(v) => change({ role: v })} testID="profile-role" />
+        </View>
+        <Row icon="user" label="Username" value={user?.username ?? ''} last />
       </Section>
 
       <Section title="Activity">
@@ -41,7 +48,6 @@ export default function ProfileScreen({ navigation }: AppScreenProps<'Profile'>)
       </Section>
 
       <Section title="Security">
-        <Row icon="settings" label="Edit profile" onPress={soon} testID="profile-edit" />
         <Row icon="settings" label="Change password" onPress={soon} testID="profile-password" last />
       </Section>
 
@@ -53,6 +59,7 @@ export default function ProfileScreen({ navigation }: AppScreenProps<'Profile'>)
 }
 
 const styles = StyleSheet.create({
+  editor: { gap: 14, padding: 14 },
   hero: { alignItems: 'center', gap: 6, paddingVertical: 8 },
   avatar: {
     width: 88,

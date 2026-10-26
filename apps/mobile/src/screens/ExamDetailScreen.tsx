@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { Text } from '../ui/Text'
 import { useFocusEffect } from '@react-navigation/native'
-import { colors } from 'shared'
+import { colors, isProcessing } from 'shared'
 import Button from '../ui/Button'
 import type { Attempt, Exam } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
 import { DEFAULT_CALIBRATION } from '../flow/defaults'
+import { useReadingDefaults } from '../flow/readingDefaults'
 import type { AppScreenProps } from '../navigation/types'
 import { ErrorNotice, LoadingView, StatusBadge } from '../ui/Feedback'
 import { CLASSIFICATION_LABELS, LAYOUT_LABELS, SEX_LABELS, STATUS_LABELS, formatDateTime } from '../ui/labels'
@@ -29,17 +30,26 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
   const { examId } = route.params
   const { api, config } = useApi()
   const { draft, start } = useAttemptDraft()
+  const [saved] = useReadingDefaults()
   const [exam, setExam] = useState<Exam | null>(null)
   const [error, setError] = useState<unknown>(null)
+  const checkedProcessing = useRef(false)
 
   const load = useCallback(async () => {
     setError(null)
     try {
-      setExam(await api.getExam(examId))
+      const loaded = await api.getExam(examId)
+      setExam(loaded)
+      // Reopening an exam whose attempt is still processing returns to its loading screen (only on arrival).
+      if (!checkedProcessing.current) {
+        checkedProcessing.current = true
+        const running = (loaded.attempts ?? []).find((attempt) => isProcessing(attempt.status))
+        if (running) navigation.navigate('Processing', { examId, attemptId: running.id })
+      }
     } catch (err) {
       setError(err)
     }
-  }, [api, examId])
+  }, [api, examId, navigation])
 
   // A photo picked for this exam but not yet sent: reopen the flow where the user left it.
   useEffect(() => {
@@ -59,7 +69,7 @@ export default function ExamDetailScreen({ navigation, route }: AppScreenProps<'
   function newAttempt() {
     if (!exam) return
     if (draft?.examId === exam.id) return navigation.navigate('Capture', { examId: exam.id })
-    start(exam.id, exam.patient, config?.calibration.default ?? DEFAULT_CALIBRATION)
+    start(exam.id, exam.patient, saved.calibration ?? config?.calibration.default ?? DEFAULT_CALIBRATION, saved.layout)
     navigation.navigate('Capture', { examId: exam.id })
   }
 

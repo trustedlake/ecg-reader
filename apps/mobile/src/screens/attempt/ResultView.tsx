@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import type { ReactNode } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { Text } from '../../ui/Text'
@@ -18,6 +19,10 @@ import {
 } from '../../ui/labels'
 import Screen from '../../ui/Screen'
 import ZoomableImage from '../../ui/ZoomableImage'
+import type { ImageMarker } from '../../ui/ZoomableImage'
+import EvidenceCrop, { MARKER_COLORS } from './EvidenceCrop'
+import PhotoCrop from './PhotoCrop'
+import { useOriginalPhoto } from '../../flow/originalPhotos'
 import Checklist from './Checklist'
 import FeedbackForm from './FeedbackForm'
 import { AttemptContext, backToExam, viewStyles } from './common'
@@ -26,6 +31,18 @@ import type { AttemptViewProps } from './common'
 /** completed: highlighted summary, expandable details and the always-visible disclaimer. */
 export default function ResultView({ exam, attempt, navigation, banner }: AttemptViewProps) {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [feedbackSent, setFeedbackSent] = useState(false)
+  const feedbackKey = `feedback-sent:${attempt.id}`
+  const localOriginal = useOriginalPhoto(attempt.id)
+  useEffect(() => {
+    AsyncStorage.getItem(feedbackKey)
+      .then((value) => setFeedbackSent(value === '1'))
+      .catch(() => undefined)
+  }, [feedbackKey])
+  const markFeedbackSent = () => {
+    setFeedbackSent(true)
+    AsyncStorage.setItem(feedbackKey, '1').catch(() => undefined)
+  }
   const interpretation = attempt.interpretation
   const summary = interpretation?.summary
   const classification = summary ? CLASSIFICATION_LABELS[summary.classification] : null
@@ -40,12 +57,18 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
       footer={
         feedbackOpen ? undefined : (
           <>
-            <Button fullWidth variant="outline" onPress={() => setFeedbackOpen(true)} testID="feedback-open">
-              Send feedback
+            <Button fullWidth onPress={() => navigation.popTo('Home')} testID="back-home">
+              Back to home
             </Button>
-            <Button fullWidth variant="text" onPress={() => backToExam(navigation, exam.id)}>
-              Back to exam
-            </Button>
+            {feedbackSent ? (
+              <Text style={styles.feedbackSent} testID="feedback-saved">
+                ✓ Feedback sent and saved. Thank you!
+              </Text>
+            ) : (
+              <Button fullWidth variant="text" onPress={() => setFeedbackOpen(true)} testID="feedback-open">
+                Something wrong? Report a problem
+              </Button>
+            )}
           </>
         )
       }
@@ -94,9 +117,13 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
         <InfoBox>The interpretation summary is not available.</InfoBox>
       )}
 
-      <ExamImages originalUrl={attempt.original_image_url} extractedUrl={attempt.reading?.overlay_url} />
+      <ExamImages
+        originalUrl={localOriginal ?? attempt.original_image_url}
+        extractedUrl={attempt.reading?.overlay_url}
+        findings={interpretation?.details?.findings}
+      />
 
-      {interpretation?.details && <Details details={interpretation.details} />}
+      {interpretation?.details && <Details details={interpretation.details} photoUri={attempt.reading?.overlay_url} />}
 
       {interpretation?.disclaimer && (
         <Text style={styles.disclaimer} testID="disclaimer">
@@ -104,16 +131,36 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
         </Text>
       )}
 
-      {feedbackOpen && <FeedbackForm attemptId={attempt.id} onClose={() => setFeedbackOpen(false)} />}
+      {feedbackOpen && <FeedbackForm attemptId={attempt.id} onSent={markFeedbackSent} onClose={() => setFeedbackOpen(false)} />}
     </Screen>
   )
 }
 
 /** The photo that was sent and the same photo with the extracted signal drawn on it. */
-function ExamImages({ originalUrl, extractedUrl }: { originalUrl?: string | null; extractedUrl?: string | null }) {
+function ExamImages({
+  originalUrl,
+  extractedUrl,
+  findings,
+}: {
+  originalUrl?: string | null
+  extractedUrl?: string | null
+  findings?: InterpretationDetails['findings']
+}) {
   if (!originalUrl && !extractedUrl) return null
+  const markers: ImageMarker[] = []
+  ;(findings ?? []).forEach((finding, index) => {
+    const mark = finding.mark
+    const box = mark?.photo_box_focus ?? mark?.photo_box
+    if (!mark || !box) return
+    const [ox, oy] = mark.overlay_offset_px ?? [0, 0]
+    markers.push({
+      box: [box[0] + ox, box[1] + oy, box[2] + ox, box[3] + oy],
+      label: String(index + 1),
+      color: MARKER_COLORS[index % MARKER_COLORS.length],
+    })
+  })
   return (
-    <Section title="Photo and extracted signal" testID="details-images">
+    <Section title="Photo and extracted signal" testID="details-images" defaultOpen>
       {originalUrl ? (
         <View style={styles.item}>
           <Text style={styles.itemTitle}>Original photo</Text>
@@ -123,7 +170,7 @@ function ExamImages({ originalUrl, extractedUrl }: { originalUrl?: string | null
       {extractedUrl ? (
         <View style={styles.item}>
           <Text style={styles.itemTitle}>Extracted signal</Text>
-          <ZoomableImage uri={extractedUrl} accessibilityLabel="ECG photo with the extracted signal" />
+          <ZoomableImage uri={extractedUrl} accessibilityLabel="ECG photo with the extracted signal" markers={markers} />
         </View>
       ) : null}
     </Section>
@@ -139,17 +186,21 @@ function Vital({ label, value }: { label: string; value: string }) {
   )
 }
 
-function Details({ details }: { details: InterpretationDetails }) {
+function Details({ details, photoUri }: { details: InterpretationDetails; photoUri?: string | null }) {
   const known = Object.keys(MEASUREMENT_LABELS).filter((key) => key in details.measurements)
   const extra = Object.keys(details.measurements).filter((key) => !(key in MEASUREMENT_LABELS))
   const measurementKeys = [...known, ...extra]
+  // Keep the position in the full list so the numbers match the markers on the photo.
+  const indexed = details.findings.map((finding, index) => ({ finding, index }))
+  const irregularities = indexed.filter(({ finding }) => finding.severity !== 'info')
+  const informational = indexed.filter(({ finding }) => finding.severity === 'info')
 
   return (
     <View style={styles.details}>
       <Text style={viewStyles.section}>Details</Text>
 
-      {measurementKeys.length > 0 && (
-        <Section title="Measurements" testID="details-measurements">
+      {(measurementKeys.length > 0 || details.per_lead.length > 0) && (
+        <Section title="Measurements" testID="details-measurements" defaultOpen>
           {measurementKeys.map((key) => {
             const measurement = details.measurements[key]
             const notes = [
@@ -166,30 +217,51 @@ function Details({ details }: { details: InterpretationDetails }) {
               />
             )
           })}
+          {details.per_lead.length > 0 && <LeadTable perLead={details.per_lead} />}
         </Section>
       )}
 
       {details.checks && details.checks.length > 0 ? (
         <View style={styles.details} testID="details-checklist">
           <Text style={styles.sectionTitle}>Checklist ({details.checks.filter((c) => c.status === 'done').length} of {details.checks.length} checked)</Text>
-          <Checklist checks={details.checks} findings={details.findings} />
+          <Checklist
+            checks={details.checks}
+            findings={details.findings}
+            renderEvidence={(finding) => {
+              const index = details.findings.indexOf(finding)
+              return <FindingEvidence finding={finding} index={index < 0 ? 0 : index} photoUri={photoUri} />
+            }}
+          />
         </View>
       ) : (
-        <Section title={`Findings (${details.findings.length})`} testID="details-findings">
-          {details.findings.length === 0 && <Text style={viewStyles.muted}>No findings.</Text>}
-          {details.findings.map((finding) => {
-            const severity = SEVERITY_LABELS[finding.severity]
-            return (
-              <View key={finding.code} style={styles.item}>
-                <View style={styles.itemHead}>
-                  <Text style={styles.itemTitle}>{finding.label}</Text>
-                  <Tag label={severity.label} tone={severity.tone} />
-                </View>
-                {finding.evidence ? <Text style={viewStyles.muted}>{finding.evidence}</Text> : null}
-              </View>
-            )
-          })}
-        </Section>
+        <>
+        {details.findings.length === 0 && (
+          <Section title="Findings (0)" testID="details-findings">
+            <Text style={viewStyles.muted}>No findings.</Text>
+          </Section>
+        )}
+
+        {irregularities.length > 0 && (
+          <Section
+            title={`Irregularities (${irregularities.length})`}
+            testID="details-irregularities"
+            tone="danger"
+            defaultOpen
+          >
+            {irregularities.map(({ finding, index }) => (
+              <FindingItem key={finding.code} finding={finding} index={index} photoUri={photoUri} />
+            ))}
+          </Section>
+        )}
+
+        {informational.length > 0 && (
+          <Section title={`Evidence and information (${informational.length})`} testID="details-findings" tone="progress">
+            {informational.map(({ finding, index }) => (
+              <FindingItem key={finding.code} finding={finding} index={index} photoUri={photoUri} />
+            ))}
+          </Section>
+        )}
+        </>
       )}
 
       {details.criteria.length > 0 && (
@@ -211,26 +283,83 @@ function Details({ details }: { details: InterpretationDetails }) {
           })}
         </Section>
       )}
-
-      {details.per_lead.length > 0 && (
-        <Section title="Per lead" testID="details-per-lead">
-          {details.per_lead.map((lead) => {
-            const quality = lead.quality ? LEAD_QUALITY_LABELS[lead.quality] : null
-            return (
-              <View key={lead.name} style={styles.item}>
-                <View style={styles.itemHead}>
-                  <Text style={styles.itemTitle}>{lead.name}</Text>
-                  {quality && <Tag label={quality.label} icon={quality.icon} tone={quality.tone} />}
-                </View>
-                <Text style={viewStyles.text}>
-                  R {formatValue(roundMv(lead.r_amplitude_mv), 'mV')} · S {formatValue(roundMv(lead.s_amplitude_mv), 'mV')}
-                </Text>
-              </View>
-            )
-          })}
-        </Section>
-      )}
     </View>
+  )
+}
+
+function LeadTable({ perLead }: { perLead: InterpretationDetails['per_lead'] }) {
+  return (
+    <View style={styles.table} testID="details-per-lead">
+      <View style={styles.tableRow}>
+        <Text style={[styles.cell, styles.cellLead, styles.cellHead]}>Lead</Text>
+        <Text style={[styles.cell, styles.cellHead]}>R (mV)</Text>
+        <Text style={[styles.cell, styles.cellHead]}>S (mV)</Text>
+        <Text style={[styles.cell, styles.cellQuality, styles.cellHead]}>Quality</Text>
+      </View>
+      {perLead.map((lead) => {
+        const quality = lead.quality ? LEAD_QUALITY_LABELS[lead.quality] : null
+        return (
+          <View key={lead.name} style={styles.tableRow}>
+            <Text style={[styles.cell, styles.cellLead, styles.cellHead]}>{lead.name}</Text>
+            <Text style={styles.cell}>{formatValue(roundMv(lead.r_amplitude_mv))}</Text>
+            <Text style={styles.cell}>{formatValue(roundMv(lead.s_amplitude_mv))}</Text>
+            <Text style={[styles.cell, styles.cellQuality]}>
+              {quality ? `${quality.icon} ${quality.label}` : ''}
+              {lead.estimated ? ' ≈' : ''}
+            </Text>
+          </View>
+        )
+      })}
+      <Text style={viewStyles.muted}>≈ Estimated</Text>
+    </View>
+  )
+}
+
+function FindingItem({
+  finding,
+  index,
+  photoUri,
+}: {
+  finding: InterpretationDetails['findings'][number]
+  index: number
+  photoUri?: string | null
+}) {
+  const severity = SEVERITY_LABELS[finding.severity]
+  const color = MARKER_COLORS[index % MARKER_COLORS.length]
+  return (
+    <View style={styles.item}>
+      <View style={styles.itemHead}>
+        <Text style={[styles.itemTitle, { color }]}>
+          {index + 1}. {finding.label}
+        </Text>
+        <Tag label={severity.label} tone={finding.severity === 'info' ? 'progress' : severity.tone} />
+      </View>
+      {finding.evidence ? <Text style={viewStyles.muted}>{finding.evidence}</Text> : null}
+      <FindingEvidence finding={finding} index={index} photoUri={photoUri} />
+    </View>
+  )
+}
+
+/** Photo crop and signal windows behind a finding (also plugged into the checklist rows). */
+function FindingEvidence({
+  finding,
+  index,
+  photoUri,
+}: {
+  finding: InterpretationDetails['findings'][number]
+  index: number
+  photoUri?: string | null
+}) {
+  const color = MARKER_COLORS[index % MARKER_COLORS.length]
+  const marks = finding.marks?.length ? finding.marks : finding.mark ? [finding.mark] : []
+  if (!marks.length) return null
+  return (
+    <>
+      {finding.mark && photoUri ? <PhotoCrop mark={finding.mark} uri={photoUri} color={color} /> : null}
+      {marks.map((mark, k) => (
+        <EvidenceCrop key={`${mark.lead}-${k}`} mark={mark} index={index} />
+      ))}
+    </>
   )
 }
 
@@ -238,19 +367,32 @@ function roundMv(value: number | null | undefined): number | null {
   return value === null || value === undefined ? null : Math.round(value * 100) / 100
 }
 
-function Section({ title, testID, children }: { title: string; testID?: string; children: ReactNode }) {
-  const [open, setOpen] = useState(false)
+function Section({
+  title,
+  testID,
+  defaultOpen = false,
+  tone,
+  children,
+}: {
+  title: string
+  testID?: string
+  defaultOpen?: boolean
+  tone?: 'progress' | 'danger'
+  children: ReactNode
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  const toned = tone ? TONE_COLORS[tone] : null
   return (
-    <View style={styles.section}>
+    <View style={[styles.section, toned && { borderColor: toned.fg }]}>
       <Pressable
         onPress={() => setOpen((value) => !value)}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        style={styles.sectionHead}
+        style={[styles.sectionHead, toned && { backgroundColor: toned.bg }]}
         testID={testID}
       >
-        <Text style={styles.sectionTitle}>{title}</Text>
-        <Text style={styles.sectionToggle}>{open ? '▲ Hide' : '▼ Show'}</Text>
+        <Text style={[styles.sectionTitle, toned && { color: toned.fg }]}>{title}</Text>
+        <Text style={[styles.sectionToggle, toned && { color: toned.fg }]}>{open ? '▲ Hide' : '▼ Show'}</Text>
       </Pressable>
       {open && <View style={styles.sectionBody}>{children}</View>}
     </View>
@@ -270,6 +412,7 @@ function Row({ label, value, note }: { label: string; value: string; note?: stri
 }
 
 const styles = StyleSheet.create({
+  feedbackSent: { textAlign: 'center', fontSize: 14, fontWeight: '600', color: colors.primary },
   summary: { gap: 10, padding: 16, borderRadius: 12, borderWidth: 1 },
   classification: { fontSize: 15, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
   headline: { fontSize: 20, fontWeight: '700', color: colors.dark },
@@ -284,6 +427,12 @@ const styles = StyleSheet.create({
   sectionToggle: { fontSize: 13, fontWeight: '600', color: colors.primary },
   sectionBody: { gap: 12, paddingHorizontal: 14, paddingBottom: 14 },
   item: { gap: 4 },
+  table: { gap: 6, marginTop: 8 },
+  tableRow: { flexDirection: 'row', alignItems: 'center' },
+  cell: { flex: 1, fontSize: 14 },
+  cellLead: { flex: 0.8 },
+  cellQuality: { flex: 1.6 },
+  cellHead: { fontWeight: '700' },
   itemHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   itemTitle: { fontSize: 14, fontWeight: '700', color: colors.dark, flexShrink: 1 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 },

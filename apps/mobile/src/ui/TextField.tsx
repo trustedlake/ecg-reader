@@ -18,7 +18,7 @@ const TextField = forwardRef<RNTextInput, TextFieldProps>(function TextField({ l
         ref={ref}
         accessibilityLabel={error ? `${label}. ${error}` : label}
         placeholderTextColor={colors.textMuted}
-        style={[styles.input, error ? styles.inputError : null]}
+        style={[styles.input, props.multiline ? styles.inputMultiline : null, error ? styles.inputError : null]}
         {...props}
       />
       {error ? (
@@ -45,6 +45,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
   },
+  // Multi-line text starts at the top with even padding, so it does not jump when the first line is typed.
+  inputMultiline: { minHeight: 96, paddingVertical: 12, textAlignVertical: 'top' },
   inputError: { borderColor: colors.error },
   error: { fontSize: 13, color: '#c62828' },
 })

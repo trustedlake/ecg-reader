@@ -110,6 +110,24 @@ export interface Measurement {
   formula?: string
 }
 
+/** One window of a lead showing where a finding was measured (gaps are null; bridged ranges are estimated). */
+export interface EvidenceMark {
+  lead: string
+  label: string
+  sampling_rate_hz: number
+  from_index: number
+  to_index: number
+  samples: (number | null)[]
+  bridged: [number, number][]
+  /** Window and focus area on the analysed photo, [x0, y0, x1, y1] in photo pixels. */
+  photo_box?: [number, number, number, number] | null
+  photo_box_focus?: [number, number, number, number] | null
+  image_size_px?: [number, number]
+  /** Where the photo starts inside the overlay image, and the overlay size (the overlay adds a header and padding). */
+  overlay_offset_px?: [number, number]
+  overlay_size_px?: [number, number]
+}
+
 export type AlertLevel = 'ok' | 'review' | 'urgent'
 
 export interface Finding {
@@ -118,6 +136,9 @@ export interface Finding {
   severity: 'info' | 'warning' | 'critical'
   alert_level?: AlertLevel
   evidence?: string
+  mark?: EvidenceMark
+  /** Every window behind the finding (e.g. leads I and aVF for the axis); `mark` is the first one. */
+  marks?: EvidenceMark[]
 }
 
 /** One entry of the diagnosis checklist: every check is listed, whether it could be done or not. */
@@ -145,6 +166,8 @@ export interface PerLeadMeasurement {
   r_amplitude_mv?: number | null
   s_amplitude_mv?: number | null
   quality?: LeadQuality
+  estimated?: boolean
+  quality_reason?: string | null
 }
 
 export interface InterpretationDetails {

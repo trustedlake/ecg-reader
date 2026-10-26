@@ -6,12 +6,21 @@ import { colors } from 'shared'
 
 export type RegionPx = [number, number, number, number]
 
+/** Numbered mark drawn over the image; the box is in pixels of the original image. */
+export interface ImageMarker {
+  box: RegionPx
+  label: string
+  color: string
+}
+
 interface ZoomableImageProps {
   uri: string
   accessibilityLabel: string
   /** Region to highlight, in pixels of the original image ([x0, y0, x1, y1]). */
   highlight?: RegionPx | null
   highlightLabel?: string
+  /** Numbered marks over the image (for example one per finding). */
+  markers?: ImageMarker[]
   /** Maximum height of the image area. */
   maxHeight?: number
   /** Several images of the same ECG: a horizontal swipe moves between them, inline and full screen. */
@@ -26,7 +35,7 @@ const SWIPE_DISTANCE = 40
 const MAX_SCALE = 4
 
 /** Tells the phone-frame demo page (when the app runs inside its iframe) to turn the phone sideways. */
-function setFrameOrientation(value: 'landscape' | 'portrait') {
+export function setFrameOrientation(value: 'landscape' | 'portrait') {
   if (Platform.OS === 'web' && typeof window !== 'undefined' && window.parent !== window) {
     window.parent.postMessage({ type: 'ecg-reader:orientation', value }, '*')
   }
@@ -57,6 +66,7 @@ export default function ZoomableImage({
   accessibilityLabel,
   highlight,
   highlightLabel = 'Problem region',
+  markers,
   maxHeight = 560,
   pageCount = 1,
   page = 0,
@@ -234,6 +244,26 @@ export default function ZoomableImage({
                 <Text style={styles.highlightLabel}>{highlightLabel}</Text>
               </View>
             )}
+            {natural && markers?.map((marker) => (
+              <View
+                key={marker.label}
+                pointerEvents="none"
+                style={[
+                  styles.markerBox,
+                  {
+                    borderColor: marker.color,
+                    left: (marker.box[0] / natural.width) * fitWidth,
+                    top: (marker.box[1] / natural.height) * fitHeight,
+                    width: ((marker.box[2] - marker.box[0]) / natural.width) * fitWidth,
+                    height: ((marker.box[3] - marker.box[1]) / natural.height) * fitHeight,
+                  },
+                ]}
+              >
+                <View style={[styles.markerBadge, { backgroundColor: marker.color }]}>
+                  <Text style={styles.markerText}>{marker.label}</Text>
+                </View>
+              </View>
+            ))}
           </Animated.View>
           </Pressable>
         )}
@@ -382,6 +412,9 @@ const styles = StyleSheet.create({
   },
   image: { width: '100%', height: '100%' },
   highlight: { position: 'absolute', borderWidth: 3, borderColor: '#e53935', backgroundColor: 'rgba(229,57,53,0.12)' },
+  markerBox: { position: 'absolute', borderWidth: 2 },
+  markerBadge: { position: 'absolute', top: -11, left: -11, width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  markerText: { fontSize: 12, fontWeight: '800', color: colors.white },
   highlightLabel: {
     position: 'absolute',
     top: 0,

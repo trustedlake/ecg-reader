@@ -13,6 +13,7 @@ import ExamsScreen from '../screens/ExamsScreen'
 import NewExamScreen from '../screens/NewExamScreen'
 import ExamDetailScreen from '../screens/ExamDetailScreen'
 import CaptureScreen from '../screens/CaptureScreen'
+import CropScreen from '../screens/CropScreen'
 import LayoutScreen from '../screens/LayoutScreen'
 import ProcessingScreen from '../screens/ProcessingScreen'
 import AttemptStateScreen from '../screens/AttemptStateScreen'
@@ -50,6 +51,7 @@ export default function RootNavigator() {
       <AppStack.Screen name="ExamDetail" component={ExamDetailScreen} options={{ title: 'Exam · ECG Reader' }} />
       <AppStack.Screen name="Capture" component={CaptureScreen} options={{ title: 'ECG photo · ECG Reader' }} />
       <AppStack.Screen name="Layout" component={LayoutScreen} options={{ title: 'Layout · ECG Reader' }} />
+      <AppStack.Screen name="Crop" component={CropScreen} options={{ title: 'Crop · ECG Reader' }} />
       <AppStack.Screen
         name="Processing"
         component={ProcessingScreen}

@@ -92,7 +92,7 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
       if (result.canceled || !result.assets?.[0]) return
       const picked = toPickedImage(result.assets[0])
       if (typeof picked === 'string') setError(picked)
-      else update({ image: picked })
+      else update({ image: picked, cropSource: null })
     } catch {
       setError('Could not open the camera or the gallery. Try again.')
     }
@@ -102,7 +102,7 @@ export default function CaptureScreen({ navigation, route }: AppScreenProps<'Cap
     setWebCamera(false)
     const picked = toPickedImage({ uri, file: file as File, width, height, mimeType: 'image/jpeg', fileName: `ecg-${Date.now()}.jpg` } as ImagePicker.ImagePickerAsset)
     if (typeof picked === 'string') setError(picked)
-    else update({ image: picked })
+    else update({ image: picked, cropSource: null })
   }
 
   const speeds = config?.calibration.speed_mm_s ?? SPEEDS_MM_S

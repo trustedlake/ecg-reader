@@ -1,4 +1,4 @@
-import { ImageBackground, Platform, Pressable, StyleSheet, View } from 'react-native'
+import { ImageBackground, Pressable, StyleSheet, View } from 'react-native'
 import { Text } from '../ui/Text'
 import { colors } from 'shared'
 import type { AppScreenProps } from '../navigation/types'
@@ -11,39 +11,13 @@ export default function HomeScreen({ navigation }: AppScreenProps<'Home'>) {
   const exams = () => navigation.navigate('Exams')
 
   const shortcuts: { icon: IconName; label: string; onPress: () => void; testID: string }[] = [
-    { icon: 'user', label: 'Profile', onPress: () => navigation.navigate('Profile'), testID: 'home-profile' },
     { icon: 'settings', label: 'Settings', onPress: () => navigation.navigate('Settings'), testID: 'home-settings' },
     { icon: 'help', label: 'Help', onPress: () => navigation.navigate('Help'), testID: 'home-help' },
     { icon: 'info', label: 'About', onPress: () => navigation.navigate('About'), testID: 'home-about' },
   ]
 
-  const tabs: { icon: IconName; label: string; onPress: () => void; active?: boolean; testID: string }[] = [
-    { icon: 'home', label: 'Home', onPress: () => {}, active: true, testID: 'tab-home' },
-    { icon: 'list', label: 'My exams', onPress: exams, testID: 'tab-exams' },
-    { icon: 'newExam', label: 'New exam', onPress: newExam, testID: 'tab-new-exam' },
-    { icon: 'user', label: 'Profile', onPress: () => navigation.navigate('Profile'), testID: 'tab-profile' },
-  ]
-
-  const tabBar = (
-    <View style={styles.tabBar}>
-      {tabs.map((tab) => (
-        <Pressable
-          key={tab.label}
-          onPress={tab.onPress}
-          accessibilityRole="button"
-          accessibilityLabel={tab.label}
-          testID={tab.testID}
-          style={({ pressed }) => [styles.tab, tab.active && styles.tabActive, pressed && styles.pressed]}
-        >
-          <Icon name={tab.icon} color={tab.active ? colors.secondary : colors.textMuted} size={24} />
-          <Text style={[styles.tabLabel, tab.active && styles.tabLabelActive]}>{tab.label}</Text>
-        </Pressable>
-      ))}
-    </View>
-  )
-
   return (
-    <Screen title="ECG Reader" footer={tabBar} footerBare>
+    <Screen title="ECG Reader">
 
       <ImageBackground source={require('../../assets/home-banner.jpg')} style={styles.banner} imageStyle={styles.bannerImage}>
         <View style={styles.bannerContent}>
@@ -151,19 +125,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   shortcutLabel: { fontSize: 13, fontWeight: '600', color: colors.dark },
-  tabBar: { flexDirection: 'row', justifyContent: 'space-around' },
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-    paddingTop: 10,
-    // Web has no safe-area inset, so leave room for the phone's home indicator.
-    paddingBottom: Platform.OS === 'web' ? 30 : 8,
-    borderTopWidth: 3,
-    borderTopColor: 'transparent',
-  },
-  tabActive: { borderTopColor: colors.secondary },
-  tabLabel: { fontSize: 12, color: colors.textMuted },
-  tabLabelActive: { color: colors.secondary, fontWeight: '700' },
   pressed: { opacity: 0.6 },
 })

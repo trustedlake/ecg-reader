@@ -30,10 +30,10 @@ export default function LayoutScreen({ navigation, route }: AppScreenProps<'Layo
         <Button
           fullWidth
           disabled={!draft.layout}
-          onPress={() => navigation.navigate('Processing', { examId })}
+          onPress={() => navigation.navigate('Crop', { examId })}
           testID="layout-continue"
         >
-          Send for reading
+          Continue
         </Button>
       }
     >
