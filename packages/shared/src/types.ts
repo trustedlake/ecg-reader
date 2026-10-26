@@ -46,13 +46,15 @@ export interface ContractWarning {
   lead?: string
 }
 
-export type LeadQuality = 'good' | 'partial' | 'saturated' | 'low'
+/** `uncertain`: the reader sent its traced line for a lead it could not validate (signal_source traced_unvalidated). */
+export type LeadQuality = 'good' | 'partial' | 'saturated' | 'low' | 'uncertain'
 
 export interface ReadingLead {
   name: string
   kind: 'panel' | 'rhythm'
   quality: LeadQuality
   coverage: number
+  signal_source?: 'analysis' | 'traced_unvalidated' | null
 }
 
 /** One of the extractor's alternative readings of the same photo. */
@@ -94,6 +96,10 @@ export interface InterpretationSummary {
   heart_rate_bpm: number | null
   key_findings: string[]
   text: string
+  /** ok = nothing found; review = a person should look; urgent = clear abnormality. */
+  alert_level?: AlertLevel
+  alert_text?: string
+  alert_reasons?: string[]
 }
 
 export interface Measurement {
@@ -122,14 +128,28 @@ export interface EvidenceMark {
   overlay_size_px?: [number, number]
 }
 
+export type AlertLevel = 'ok' | 'review' | 'urgent'
+
 export interface Finding {
   code: string
   label: string
   severity: 'info' | 'warning' | 'critical'
+  alert_level?: AlertLevel
   evidence?: string
   mark?: EvidenceMark
   /** Every window behind the finding (e.g. leads I and aVF for the axis); `mark` is the first one. */
   marks?: EvidenceMark[]
+}
+
+/** One entry of the diagnosis checklist: every check is listed, whether it could be done or not. */
+export interface DiagnosisCheck {
+  code: string
+  name: string
+  status: 'done' | 'not_possible' | 'not_implemented'
+  alert_level: AlertLevel
+  finding_codes: string[]
+  value?: string
+  reason?: string
 }
 
 export interface Criterion {
@@ -155,6 +175,7 @@ export interface InterpretationDetails {
   findings: Finding[]
   criteria: Criterion[]
   per_lead: PerLeadMeasurement[]
+  checks?: DiagnosisCheck[]
 }
 
 export interface InterpretationBlock {

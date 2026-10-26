@@ -13,11 +13,11 @@ Guide validated on 2026-10-20 (Windows). Expected result: the "ECG Reader" login
 ## 2. Configuration: `apps/mobile/.env` (gitignored)
 
 ```
-EXPO_PUBLIC_API_BASE_URL=https://d1i155fprtk4at.cloudfront.net
+EXPO_PUBLIC_API_BASE_URL=https://7y0j5a8yte.execute-api.us-east-1.amazonaws.com
 RCT_METRO_PORT=8142
 ```
 
-- `EXPO_PUBLIC_API_BASE_URL` is required on the phone. It points to the **production backend** (CloudFront), not to a local backend.
+- `EXPO_PUBLIC_API_BASE_URL` is required on the phone. It points to the **production backend** (API Gateway, us-east-1), not to a local backend.
 - `RCT_METRO_PORT=8142` avoids the default port 8081 (each project has its own port).
 
 ## 3. Start

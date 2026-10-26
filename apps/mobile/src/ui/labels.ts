@@ -1,5 +1,5 @@
 import { API_MESSAGES, ApiError, isOffHours } from 'shared'
-import type { AttemptStatus, Classification, Confidence, Criterion, Finding, Layout, LeadQuality, Sex } from 'shared'
+import type { AlertLevel, AttemptStatus, Classification, Confidence, Criterion, Finding, Layout, LeadQuality, Sex } from 'shared'
 
 export const STATUS_LABELS: Record<AttemptStatus, string> = {
   created: 'Waiting to upload',
@@ -82,6 +82,13 @@ export const LEAD_QUALITY_LABELS: Record<LeadQuality, { label: string; icon: str
   partial: { label: 'Partial', icon: '◐', tone: 'attention' },
   saturated: { label: 'Saturated', icon: '▲', tone: 'attention' },
   low: { label: 'Low', icon: '!', tone: 'danger' },
+  uncertain: { label: 'Uncertain', icon: '?', tone: 'attention' },
+}
+
+export const ALERT_LABELS: Record<AlertLevel, { label: string; icon: string; tone: StatusTone }> = {
+  ok: { label: 'No problem found', icon: '✓', tone: 'success' },
+  review: { label: 'Review', icon: '!', tone: 'attention' },
+  urgent: { label: 'Urgent', icon: '✖', tone: 'danger' },
 }
 
 export const CLASSIFICATION_LABELS: Record<Classification, { label: string; icon: string; tone: StatusTone }> = {

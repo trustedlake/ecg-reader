@@ -8,6 +8,7 @@ import Button from '../../ui/Button'
 import type { InterpretationDetails } from 'shared'
 import { InfoBox, TONE_COLORS, Tag } from '../../ui/Feedback'
 import {
+  ALERT_LABELS,
   CLASSIFICATION_LABELS,
   CONFIDENCE_LABELS,
   CRITERION_STATUS_LABELS,
@@ -22,6 +23,7 @@ import type { ImageMarker } from '../../ui/ZoomableImage'
 import EvidenceCrop, { MARKER_COLORS } from './EvidenceCrop'
 import PhotoCrop from './PhotoCrop'
 import { useOriginalPhoto } from '../../flow/originalPhotos'
+import Checklist from './Checklist'
 import FeedbackForm from './FeedbackForm'
 import { AttemptContext, backToExam, viewStyles } from './common'
 import type { AttemptViewProps } from './common'
@@ -44,7 +46,9 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
   const interpretation = attempt.interpretation
   const summary = interpretation?.summary
   const classification = summary ? CLASSIFICATION_LABELS[summary.classification] : null
-  const tone = classification ? TONE_COLORS[classification.tone] : TONE_COLORS.neutral
+  const alert = summary?.alert_level ? ALERT_LABELS[summary.alert_level] : null
+  // The alert level is the diagnoser's own verdict; it sets the colour when present.
+  const tone = alert ? TONE_COLORS[alert.tone] : classification ? TONE_COLORS[classification.tone] : TONE_COLORS.neutral
 
   return (
     <Screen
@@ -74,9 +78,23 @@ export default function ResultView({ exam, attempt, navigation, banner }: Attemp
 
       {summary && classification ? (
         <View style={[styles.summary, { backgroundColor: tone.bg, borderColor: tone.fg }]} testID="summary">
-          <Text style={[styles.classification, { color: tone.fg }]}>
-            {classification.icon} {classification.label}
-          </Text>
+          {alert ? (
+            <View style={styles.list} testID="alert">
+              <Text style={[styles.classification, { color: tone.fg }]}>
+                {alert.icon} {alert.label}
+              </Text>
+              {summary.alert_text ? <Text style={viewStyles.text}>{summary.alert_text}</Text> : null}
+              {(summary.alert_reasons ?? []).map((reason) => (
+                <Text key={reason} style={viewStyles.muted}>
+                  • {reason}
+                </Text>
+              ))}
+            </View>
+          ) : (
+            <Text style={[styles.classification, { color: tone.fg }]}>
+              {classification.icon} {classification.label}
+            </Text>
+          )}
           <Text style={styles.headline} accessibilityRole="header">
             {summary.headline}
           </Text>
@@ -203,31 +221,47 @@ function Details({ details, photoUri }: { details: InterpretationDetails; photoU
         </Section>
       )}
 
-      {details.findings.length === 0 && (
-        <Section title="Findings (0)" testID="details-findings">
-          <Text style={viewStyles.muted}>No findings.</Text>
-        </Section>
-      )}
+      {details.checks && details.checks.length > 0 ? (
+        <View style={styles.details} testID="details-checklist">
+          <Text style={styles.sectionTitle}>Checklist ({details.checks.filter((c) => c.status === 'done').length} of {details.checks.length} checked)</Text>
+          <Checklist
+            checks={details.checks}
+            findings={details.findings}
+            renderEvidence={(finding) => {
+              const index = details.findings.indexOf(finding)
+              return <FindingEvidence finding={finding} index={index < 0 ? 0 : index} photoUri={photoUri} />
+            }}
+          />
+        </View>
+      ) : (
+        <>
+        {details.findings.length === 0 && (
+          <Section title="Findings (0)" testID="details-findings">
+            <Text style={viewStyles.muted}>No findings.</Text>
+          </Section>
+        )}
 
-      {irregularities.length > 0 && (
-        <Section
-          title={`Irregularities (${irregularities.length})`}
-          testID="details-irregularities"
-          tone="danger"
-          defaultOpen
-        >
-          {irregularities.map(({ finding, index }) => (
-            <FindingItem key={finding.code} finding={finding} index={index} photoUri={photoUri} />
-          ))}
-        </Section>
-      )}
+        {irregularities.length > 0 && (
+          <Section
+            title={`Irregularities (${irregularities.length})`}
+            testID="details-irregularities"
+            tone="danger"
+            defaultOpen
+          >
+            {irregularities.map(({ finding, index }) => (
+              <FindingItem key={finding.code} finding={finding} index={index} photoUri={photoUri} />
+            ))}
+          </Section>
+        )}
 
-      {informational.length > 0 && (
-        <Section title={`Evidence and information (${informational.length})`} testID="details-findings" tone="progress">
-          {informational.map(({ finding, index }) => (
-            <FindingItem key={finding.code} finding={finding} index={index} photoUri={photoUri} />
-          ))}
-        </Section>
+        {informational.length > 0 && (
+          <Section title={`Evidence and information (${informational.length})`} testID="details-findings" tone="progress">
+            {informational.map(({ finding, index }) => (
+              <FindingItem key={finding.code} finding={finding} index={index} photoUri={photoUri} />
+            ))}
+          </Section>
+        )}
+        </>
       )}
 
       {details.criteria.length > 0 && (
@@ -292,7 +326,6 @@ function FindingItem({
 }) {
   const severity = SEVERITY_LABELS[finding.severity]
   const color = MARKER_COLORS[index % MARKER_COLORS.length]
-  const marks = finding.marks?.length ? finding.marks : finding.mark ? [finding.mark] : []
   return (
     <View style={styles.item}>
       <View style={styles.itemHead}>
@@ -302,11 +335,31 @@ function FindingItem({
         <Tag label={severity.label} tone={finding.severity === 'info' ? 'progress' : severity.tone} />
       </View>
       {finding.evidence ? <Text style={viewStyles.muted}>{finding.evidence}</Text> : null}
+      <FindingEvidence finding={finding} index={index} photoUri={photoUri} />
+    </View>
+  )
+}
+
+/** Photo crop and signal windows behind a finding (also plugged into the checklist rows). */
+function FindingEvidence({
+  finding,
+  index,
+  photoUri,
+}: {
+  finding: InterpretationDetails['findings'][number]
+  index: number
+  photoUri?: string | null
+}) {
+  const color = MARKER_COLORS[index % MARKER_COLORS.length]
+  const marks = finding.marks?.length ? finding.marks : finding.mark ? [finding.mark] : []
+  if (!marks.length) return null
+  return (
+    <>
       {finding.mark && photoUri ? <PhotoCrop mark={finding.mark} uri={photoUri} color={color} /> : null}
       {marks.map((mark, k) => (
         <EvidenceCrop key={`${mark.lead}-${k}`} mark={mark} index={index} />
       ))}
-    </View>
+    </>
   )
 }
 
