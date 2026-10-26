@@ -61,6 +61,17 @@
   </div>
 </div>
 <script>
+  // A transformed iframe works well as a desktop preview, but mobile Safari and
+  // Chrome can lose touch events inside it. On an actual phone, open the app
+  // itself rather than placing it in the decorative frame.
+  (function () {
+    var query = new URLSearchParams(location.search);
+    var app = query.get("app") || "/";
+    if (window.matchMedia("(pointer: coarse), (max-width: 600px)").matches) {
+      location.replace(app);
+    }
+  })();
+
   // Scale the phone to fit short windows.
   function fit() {
     var land = document.body.classList.contains("landscape");
