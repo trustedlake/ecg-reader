@@ -6,6 +6,8 @@ import Button from '../ui/Button'
 import type { Attempt, AttemptStatus, CreateAttemptInput, GainMmMv, SpeedMmS } from 'shared'
 import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
+import { clearActiveReading, getActiveReading, setActiveReading } from '../flow/activeReading'
+import { saveOriginalPhoto } from '../flow/originalPhotos'
 import type { AppScreenProps } from '../navigation/types'
 import { ErrorBanner } from '../ui/Feedback'
 import MissingDraft from '../ui/MissingDraft'
@@ -27,8 +29,10 @@ const POLL_MESSAGES: Partial<Record<AttemptStatus, string>> = {
   interpreting: 'Interpreting the signal: rhythm, rate and measurements…',
 }
 
-// Production average from upload to reading done is ~20 s; the countdown adds a 10 s margin.
-const EXPECTED_SECONDS = 30
+// Production: upload to reading done takes ~20 s (the countdown adds a 10 s margin); the
+// interpretation after accepting a reading takes ~2 s.
+const READING_SECONDS = 60
+const INTERPRETING_SECONDS = 5
 
 function isAbort(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError'
@@ -54,7 +58,10 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
   const [now, setNow] = useState(() => Date.now())
 
   // The countdown starts once the photo is uploaded (or when only following an existing attempt).
-  const timing = (step === 'start' || step === 'poll') && running && !error
+  // When only following an attempt, wait for its first status so the countdown fits the phase.
+  const timing =
+    (step === 'start' || step === 'poll') && running && !error && !(route.params.attemptId && status == null)
+  const expectedSeconds = status === 'interpreting' ? INTERPRETING_SECONDS : READING_SECONDS
   useEffect(() => {
     if (!timing) return
     setStartedAt((current) => current ?? Date.now())
@@ -62,7 +69,22 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
     const timer = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(timer)
   }, [timing])
-  const remaining = startedAt == null ? EXPECTED_SECONDS : EXPECTED_SECONDS - Math.floor((now - startedAt) / 1000)
+  const remaining = startedAt == null ? expectedSeconds : expectedSeconds - Math.floor((now - startedAt) / 1000)
+
+  // Registers the reading as running in the background; coming back keeps the original start time.
+  const markActive = useCallback(
+    (attemptId: string) => {
+      const existing = getActiveReading()
+      if (existing?.attemptId === attemptId) {
+        setStartedAt(existing.startedAt)
+        return
+      }
+      const started = Date.now()
+      setActiveReading({ examId, attemptId, startedAt: started })
+      setStartedAt(started)
+    },
+    [examId],
+  )
 
   const goTo = (next: Step) => {
     stepRef.current = next
@@ -79,6 +101,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
     }
     setError(null)
     setRunning(true)
+    if (route.params.attemptId) markActive(route.params.attemptId)
 
     try {
       const current = draftRef.current
@@ -94,6 +117,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
         }
         const created = await api.createAttempt(examId, input)
         attemptIdRef.current = created.attempt_id
+        if (current.cropSource) void saveOriginalPhoto(created.attempt_id, current.cropSource)
         uploadRef.current = { url: created.upload_url, headers: created.upload_headers }
         checkAborted()
         goTo('upload')
@@ -103,6 +127,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
         const image = current!.image!
         await api.uploadImage(uploadRef.current!.url, uploadRef.current!.headers, image.file ?? image.uri)
         checkAborted()
+        markActive(attemptIdRef.current!)
         goTo('start')
       }
 
@@ -127,6 +152,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
         })
       }
 
+      clearActiveReading()
       if (route.params.attemptId) {
         navigation.replace('AttemptState', { examId, attemptId })
       } else {
@@ -148,7 +174,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
     } finally {
       if (!signal.aborted) setRunning(false)
     }
-  }, [api, clear, examId, navigation, route.params.attemptId])
+  }, [api, clear, examId, markActive, navigation, route.params.attemptId])
 
   // New attempt without a draft (page reloaded or browser "back" after the upload): returns to the exam.
   const draftMissing = !route.params.attemptId && !draftRef.current
@@ -176,6 +202,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
   return (
     <Screen
       title="Processing"
+      hideTabs
       onBack={cancel}
       footer={
         <>
@@ -185,7 +212,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
             </Button>
           )}
           <Button fullWidth variant="outline" onPress={cancel} testID="processing-cancel">
-            {polling ? 'Leave and check back later' : 'Cancel'}
+            {polling ? 'Leave. Keep reading in the background' : 'Cancel'}
           </Button>
         </>
       }
@@ -205,7 +232,7 @@ export default function ProcessingScreen({ navigation, route }: AppScreenProps<'
         )}
         {polling && running && (
           <Text style={styles.note}>
-            If you leave, processing continues and the result appears in the exam list.
+            You can leave this screen. The reading keeps running, and a bar on every screen brings you back here.
           </Text>
         )}
       </View>

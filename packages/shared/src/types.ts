@@ -62,6 +62,14 @@ export interface ReadingVariant {
   score: number
 }
 
+export interface ReadingMethod {
+  method: string
+  status: string
+  selector_score: number | null
+  chosen: boolean
+  image_url: string | null
+}
+
 export interface ReadingBlock {
   status: 'OK' | 'OK_WITH_WARNINGS' | 'REFUSED' | 'ERROR'
   warnings: ContractWarning[]
@@ -72,6 +80,8 @@ export interface ReadingBlock {
   leads: ReadingLead[]
   /** Alternative readings; the app shows them best score first (the score itself is never shown). */
   variants?: ReadingVariant[]
+  /** All six extraction methods in registry order, each with its own preview (rejection preview when it had no signal). */
+  methods?: ReadingMethod[]
 }
 
 export type Classification = 'normal' | 'borderline' | 'abnormal'
@@ -94,11 +104,32 @@ export interface Measurement {
   formula?: string
 }
 
+/** One window of a lead showing where a finding was measured (gaps are null; bridged ranges are estimated). */
+export interface EvidenceMark {
+  lead: string
+  label: string
+  sampling_rate_hz: number
+  from_index: number
+  to_index: number
+  samples: (number | null)[]
+  bridged: [number, number][]
+  /** Window and focus area on the analysed photo, [x0, y0, x1, y1] in photo pixels. */
+  photo_box?: [number, number, number, number] | null
+  photo_box_focus?: [number, number, number, number] | null
+  image_size_px?: [number, number]
+  /** Where the photo starts inside the overlay image, and the overlay size (the overlay adds a header and padding). */
+  overlay_offset_px?: [number, number]
+  overlay_size_px?: [number, number]
+}
+
 export interface Finding {
   code: string
   label: string
   severity: 'info' | 'warning' | 'critical'
   evidence?: string
+  mark?: EvidenceMark
+  /** Every window behind the finding (e.g. leads I and aVF for the axis); `mark` is the first one. */
+  marks?: EvidenceMark[]
 }
 
 export interface Criterion {
@@ -115,6 +146,8 @@ export interface PerLeadMeasurement {
   r_amplitude_mv?: number | null
   s_amplitude_mv?: number | null
   quality?: LeadQuality
+  estimated?: boolean
+  quality_reason?: string | null
 }
 
 export interface InterpretationDetails {

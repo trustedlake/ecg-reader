@@ -22,6 +22,8 @@ export interface AttemptDraft {
   examId: string
   patient: Patient
   image: PickedImage | null
+  /** Original photo kept while `image` is its crop, so the crop can be adjusted again. */
+  cropSource: PickedImage | null
   calibration: Calibration
   layout: Layout | null
   testScenario: TestScenario | null
@@ -29,7 +31,7 @@ export interface AttemptDraft {
 
 interface AttemptDraftContextValue {
   draft: AttemptDraft | null
-  start: (examId: string, patient: Patient, calibration: Calibration) => void
+  start: (examId: string, patient: Patient, calibration: Calibration, layout?: Layout | null) => void
   update: (changes: Partial<AttemptDraft>) => void
   clear: () => void
 }
@@ -39,8 +41,8 @@ const AttemptDraftContext = createContext<AttemptDraftContextValue | undefined>(
 export function AttemptDraftProvider({ children }: { children: ReactNode }) {
   const [draft, setDraft] = useState<AttemptDraft | null>(null)
 
-  const start = useCallback((examId: string, patient: Patient, calibration: Calibration) => {
-    setDraft({ examId, patient, image: null, calibration, layout: null, testScenario: null })
+  const start = useCallback((examId: string, patient: Patient, calibration: Calibration, layout: Layout | null = null) => {
+    setDraft({ examId, patient, image: null, cropSource: null, calibration, layout, testScenario: null })
   }, [])
   const update = useCallback((changes: Partial<AttemptDraft>) => {
     setDraft((current) => (current ? { ...current, ...changes } : current))

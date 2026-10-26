@@ -5,6 +5,7 @@ import { useApi } from '../api/ApiProvider'
 import { useAttemptDraft } from '../flow/AttemptDraft'
 import type { AppScreenProps } from '../navigation/types'
 import { DEFAULT_CALIBRATION } from '../flow/defaults'
+import { useReadingDefaults } from '../flow/readingDefaults'
 import { ErrorNotice } from '../ui/Feedback'
 import Screen from '../ui/Screen'
 import SegmentedControl from '../ui/SegmentedControl'
@@ -29,6 +30,7 @@ function validate(name: string, age: string, sex: Sex | null): FieldErrors {
 export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>) {
   const { api, config } = useApi()
   const { start } = useAttemptDraft()
+  const [saved] = useReadingDefaults()
   const [name, setName] = useState('')
   const [age, setAge] = useState('')
   const [sex, setSex] = useState<Sex | null>(null)
@@ -45,7 +47,7 @@ export default function NewExamScreen({ navigation }: AppScreenProps<'NewExam'>)
     setError(null)
     try {
       const exam = await api.createExam({ name: name.trim(), age: Number(age), sex })
-      start(exam.id, exam.patient, config?.calibration.default ?? DEFAULT_CALIBRATION)
+      start(exam.id, exam.patient, saved.calibration ?? config?.calibration.default ?? DEFAULT_CALIBRATION, saved.layout)
       // replace: going back from the photo leads to the list, without recreating the exam.
       navigation.replace('Capture', { examId: exam.id })
     } catch (err) {

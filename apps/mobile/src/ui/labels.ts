@@ -86,7 +86,7 @@ export const LEAD_QUALITY_LABELS: Record<LeadQuality, { label: string; icon: str
 
 export const CLASSIFICATION_LABELS: Record<Classification, { label: string; icon: string; tone: StatusTone }> = {
   normal: { label: 'Normal', icon: '✓', tone: 'success' },
-  borderline: { label: 'Borderline', icon: '!', tone: 'attention' },
+  borderline: { label: 'Partial reading', icon: '◐', tone: 'neutral' },
   abnormal: { label: 'Abnormal', icon: '✕', tone: 'danger' },
 }
 

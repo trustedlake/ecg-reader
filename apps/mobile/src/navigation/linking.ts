@@ -29,6 +29,7 @@ export const linking: LinkingOptions<RootParamList> | undefined =
             ExamDetail: 'exams/:examId',
             Capture: 'exams/:examId/photo',
             Layout: 'exams/:examId/layout',
+            Crop: 'exams/:examId/crop',
             Processing: 'exams/:examId/processing/:attemptId?',
             AttemptState: 'exams/:examId/attempts/:attemptId',
           },

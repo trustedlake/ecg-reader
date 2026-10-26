@@ -66,8 +66,10 @@ export function AttemptContext({ exam, attempt }: { exam: Exam; attempt: Attempt
     <View style={styles.context}>
       <Text style={styles.patient}>{patient.name}</Text>
       <Text style={styles.meta}>
-        {patient.age} years old{patient.sex ? ` · ${SEX_LABELS[patient.sex]}` : ''} · {LAYOUT_LABELS[attempt.layout]} ·{' '}
-        {String(attempt.calibration.speed_mm_s)} mm/s · {attempt.calibration.gain_mm_mv} mm/mV
+        {patient.age} years old{patient.sex ? ` · ${SEX_LABELS[patient.sex]}` : ''}
+      </Text>
+      <Text style={styles.meta}>
+        {LAYOUT_LABELS[attempt.layout]} · {String(attempt.calibration.speed_mm_s)} mm/s · {attempt.calibration.gain_mm_mv} mm/mV
       </Text>
       <Text style={styles.meta}>Photo submitted on {formatDateTime(attempt.created_at)}</Text>
     </View>

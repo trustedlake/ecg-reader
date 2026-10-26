@@ -2,8 +2,13 @@ import { useState } from 'react'
 import { StyleSheet, Switch, View } from 'react-native'
 import { Text } from '../ui/Text'
 import { colors } from 'shared'
+import type { Layout } from 'shared'
 import type { AppScreenProps } from '../navigation/types'
-import { DEFAULT_CALIBRATION, LAYOUTS } from '../flow/defaults'
+import { DEFAULT_CALIBRATION, GAINS_MM_MV, LAYOUTS, SPEEDS_MM_S } from '../flow/defaults'
+import { useReadingDefaults } from '../flow/readingDefaults'
+import { LAYOUT_LABELS } from '../ui/labels'
+import SegmentedControl from '../ui/SegmentedControl'
+import { useApi } from '../api/ApiProvider'
 import Screen from '../ui/Screen'
 import { Row, Section } from '../ui/Section'
 import appConfig from '../../app.json'
@@ -33,14 +38,39 @@ export default function SettingsScreen({ navigation }: AppScreenProps<'Settings'
   const [notify, setNotify] = useState(true)
   const [keepPhoto, setKeepPhoto] = useState(false)
 
+  const { config } = useApi()
+  const [saved, change] = useReadingDefaults()
+  const calibration = saved.calibration ?? config?.calibration.default ?? DEFAULT_CALIBRATION
+  const speeds = config?.calibration.speed_mm_s ?? SPEEDS_MM_S
+  const gains = config?.calibration.gain_mm_mv ?? GAINS_MM_MV
+  const layouts = config?.layouts ?? LAYOUTS
+
   return (
     <Screen title="Settings" onBack={() => navigation.goBack()}>
       <Section title="Reading defaults">
-        <Row label="Paper speed" value={`${DEFAULT_CALIBRATION.speed_mm_s} mm/s`} />
-        <Row label="Gain" value={`${DEFAULT_CALIBRATION.gain_mm_mv} mm/mV`} />
-        <Row label="Layouts" value={LAYOUTS.join(' · ')} last />
+        <View style={styles.editor}>
+          <SegmentedControl<number>
+            label="Paper speed"
+            options={speeds.map((v) => ({ value: v, label: `${String(v)} mm/s` }))}
+            value={calibration.speed_mm_s}
+            onChange={(speed_mm_s) => change({ calibration: { ...calibration, speed_mm_s } })}
+          />
+          <SegmentedControl<number>
+            label="Gain"
+            options={gains.map((v) => ({ value: v, label: `${v} mm/mV` }))}
+            value={calibration.gain_mm_mv}
+            onChange={(gain_mm_mv) => change({ calibration: { ...calibration, gain_mm_mv } })}
+          />
+          <SegmentedControl<string>
+            label="Layout"
+            wrap
+            options={[{ value: 'ask', label: 'Ask each time' }, ...layouts.map((l) => ({ value: l, label: LAYOUT_LABELS[l] }))]}
+            value={saved.layout ?? 'ask'}
+            onChange={(v) => change({ layout: v === 'ask' ? null : (v as Layout) })}
+          />
+        </View>
       </Section>
-      <Text style={styles.note}>Speed, gain and layout can be changed for each exam when you take the photo.</Text>
+      <Text style={styles.note}>These are the starting values for each new exam. You can still change them per exam.</Text>
 
       <Section title="Preferences">
         <ToggleRow label="Result notifications" hint="Alert me when an ECG reading is ready" value={notify} onChange={setNotify} />
@@ -56,6 +86,7 @@ export default function SettingsScreen({ navigation }: AppScreenProps<'Settings'
 }
 
 const styles = StyleSheet.create({
+  editor: { gap: 14, padding: 14 },
   note: { fontSize: 13, color: colors.textMuted, marginTop: -8, marginHorizontal: 4 },
   toggle: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 16 },
   divider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.gridBorder },

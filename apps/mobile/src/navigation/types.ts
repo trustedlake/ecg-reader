@@ -20,6 +20,7 @@ export type AppStackParamList = {
   ExamDetail: { examId: string }
   Capture: { examId: string }
   Layout: { examId: string }
+  Crop: { examId: string }
   /** Without attemptId: creates the attempt from the draft. With attemptId: only follows it. */
   Processing: { examId: string; attemptId?: string }
   AttemptState: { examId: string; attemptId: string }

@@ -17,7 +17,7 @@ const ISSUES = [
 ]
 
 /** User feedback about the attempt (POST /api/attempts/<id>/feedback/). */
-export default function FeedbackForm({ attemptId, onClose }: { attemptId: string; onClose: () => void }) {
+export default function FeedbackForm({ attemptId, onClose, onSent }: { attemptId: string; onClose: () => void; onSent?: () => void }) {
   const { api } = useApi()
   const [issues, setIssues] = useState<string[]>([])
   const [description, setDescription] = useState('')
@@ -33,6 +33,7 @@ export default function FeedbackForm({ attemptId, onClose }: { attemptId: string
     try {
       await api.sendFeedback(attemptId, { issues, description: description.trim() })
       setSent(true)
+      onSent?.()
     } catch (err) {
       setError(errorMessage(err))
     } finally {
